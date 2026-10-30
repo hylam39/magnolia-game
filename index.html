@@ -5222,7 +5222,37 @@
     }
 
   </style>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+    // 動態多重 CDN 備援載入器 (jsDelivr -> unpkg -> cdnjs)
+    (function loadPeerJSMultiCDN() {
+      if (typeof Peer !== 'undefined') return;
+      var cdns = [
+        'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
+        'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js'
+      ];
+      var idx = 0;
+      function tryNext() {
+        if (typeof Peer !== 'undefined' || idx >= cdns.length) return;
+        var s = document.createElement('script');
+        s.src = cdns[idx++];
+        s.async = true;
+        s.onload = function() {
+          console.log('PeerJS loaded successfully from', s.src);
+          if (window.P2PManager && window.P2PManager._waitingForPeer) {
+            window.P2PManager._waitingForPeer();
+          }
+        };
+        s.onerror = function() {
+          console.warn('Failed to load PeerJS from', s.src, 'trying next CDN...');
+          tryNext();
+        };
+        document.head.appendChild(s);
+      }
+      tryNext();
+    })();
+  </script>
+
 </head>
 <body>
 
@@ -6223,6 +6253,14 @@
     </div>
   </div>
 
+  
+  <!-- P2P Reconnecting Toast Banner -->
+  <div id="p2p-reconnecting-banner" style="display:none; position:fixed; top:46px; left:50%; transform:translateX(-50%); z-index:320; background:linear-gradient(135deg, rgba(69,26,3,0.95), rgba(15,23,42,0.98)); border:1.5px solid #fbbf24; border-radius:24px; padding:6px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.85), 0 0 16px rgba(245,158,11,0.4); color:#fef08a; font-size:11px; font-weight:800; align-items:center; gap:8px; white-space:nowrap;">
+    <span class="p2p-pulse-dot" style="background:#eab308; width:9px; height:9px;"></span>
+    <span id="p2p-reconnect-msg">⚠️ 連線暫時波動，正在嘗試自動恢復 (第 1/5 次)...</span>
+    <button type="button" id="btn-p2p-reconnect-now" class="btn btn-gold" style="padding:2px 8px; font-size:10px; margin-left:4px;">立即重連</button>
+  </div>
+
   <!-- P2P Disconnected Alert Modal -->
   <div id="p2p-disconnect-modal" class="modal-backdrop hidden" style="z-index:260;">
     <div class="modal-box" style="max-width:380px;">
@@ -6235,6 +6273,7 @@
         你可以選擇由電腦 AI 接管對手陣容繼續完成本局，或返回遊戲主頁面。
       </div>
       <div style="padding:8px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:flex-end; gap:8px; background:#0b1120;">
+        <button id="btn-p2p-manual-reconnect" class="btn btn-gold" style="padding:5px 14px; font-size:11px; font-weight:800; background:linear-gradient(135deg, #c084fc, #9333ea); color:#fff; border-color:#e9d5ff;">🔄 嘗試重新連線</button>
         <button id="btn-p2p-ai-takeover" class="btn btn-gold" style="padding:5px 14px; font-size:11px; font-weight:800;">🤖 由 AI 接管繼續</button>
         <button id="btn-p2p-return-home" class="btn btn-slate" style="padding:5px 14px; font-size:11px;">🏰 返回主頁</button>
       </div>
@@ -6336,6 +6375,7 @@
       isP2P: false,
       isHost: false,
       roomCode: '',
+      isSimulated: false,
       localDrawReady: false,
       remoteDrawReady: false,
       localDiscardIndices: [],
@@ -6347,6 +6387,15 @@
       remoteCompensation: 0,
       localPhaseReady: false,
       remotePhaseReady: false,
+      rematchRequested: false,
+
+      // 心跳保活與斷線自動重連機制
+      _heartbeatTimer: null,
+      _lastPong: 0,
+      isReconnecting: false,
+      reconnectAttempts: 0,
+      maxReconnectAttempts: 5,
+      _reconnectBackoffTimer: null,
 
       generateRoomCode() {
         return Math.floor(10000 + Math.random() * 90000).toString();
@@ -6354,6 +6403,23 @@
 
       getPeerId(code) {
         return 'mgla-' + code.toUpperCase();
+      },
+
+      getPeerConfig() {
+        return {
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' },
+              { urls: 'stun:stun.cloudflare.com:3478' }
+            ],
+            iceCandidatePoolSize: 10
+          }
+        };
       },
 
       initHost() {
@@ -6368,14 +6434,82 @@
         if (statusEl) statusEl.textContent = '正在向 WebRTC 註冊房號...';
 
         if (typeof Peer === 'undefined') {
-          if (statusEl) statusEl.textContent = '⚠️ PeerJS 載入中，請檢查網絡連線...';
+          if (statusEl) {
+            statusEl.innerHTML = `
+              <div style="display:flex; align-items:center; gap:6px; color:#fde047;">
+                <span class="p2p-pulse-dot" style="background:#eab308;"></span>
+                <span>正在載入 PeerJS 通訊核心（載入中，請稍候）...</span>
+              </div>
+            `;
+          }
+          if (this._peerPollTimer) clearInterval(this._peerPollTimer);
+          var pollCount = 0;
+          this._peerPollTimer = setInterval(() => {
+            pollCount++;
+            if (typeof Peer !== 'undefined') {
+              clearInterval(this._peerPollTimer);
+              this._peerPollTimer = null;
+              this.initHost();
+            } else if (pollCount > 30) {
+              clearInterval(this._peerPollTimer);
+              this._peerPollTimer = null;
+              if (statusEl) {
+                statusEl.innerHTML = `
+                  <div style="display:flex; flex-direction:column; gap:6px; background:rgba(69,26,3,0.55); border:1px solid rgba(245,158,11,0.6); border-radius:8px; padding:9px 11px; text-align:left;">
+                    <div style="color:#fbbf24; font-weight:800; font-size:11px;">⚠️ 連線核心載入受阻提示</div>
+                    <div style="font-size:9.5px; color:#cbd5e1; line-height:1.45;">
+                      如停留在此畫面超過 10 秒，通常是因為你正使用 <strong>Edge 內建檔案檢視器 (edge://external-file)</strong> 或瀏覽器安全策略阻擋了外部 CDN 腳本。<br><br>
+                      📱 <strong>解決方法：</strong><br>
+                      1. <strong>強烈推薦改用 iPhone 內建「Safari」開啟</strong>（點擊分享 ➔ 選擇 Safari 開啟），Safari 具備完整 WebRTC 與網絡支援！<br>
+                      2. 亦可將檔案上傳至免費網頁（如 GitHub Pages / Vercel）。
+                    </div>
+                    <div style="display:flex; gap:6px; margin-top:2px;">
+                      <button type="button" id="btn-p2p-retry-peer" class="btn btn-gold" style="padding:4px 10px; font-size:10.5px;">🔄 立即重試載入</button>
+                      <button type="button" id="btn-p2p-sim-fallback" class="btn btn-slate" style="padding:4px 10px; font-size:10.5px; color:#c084fc; border-color:#a855f7;">🎮 啟動沙盒模擬</button>
+                    </div>
+                  </div>
+                `;
+                var btnRetry = document.getElementById('btn-p2p-retry-peer');
+                if (btnRetry) btnRetry.onclick = () => { Sound.click(); P2PManager.initHost(); };
+                var btnSim = document.getElementById('btn-p2p-sim-fallback');
+                if (btnSim) btnSim.onclick = () => { Sound.click(); P2PManager.startSimulatedMatch(); };
+              }
+            }
+          }, 250);
           return;
         }
 
+        const handleCanvasOrWsError = (err) => {
+          const errStr = (err && (err.message || err.type || String(err))) || '';
+          if (statusEl) {
+            statusEl.innerHTML = `
+              <div style="display:flex; flex-direction:column; gap:6px; background:rgba(69,26,3,0.45); border:1px solid rgba(245,158,11,0.5); border-radius:8px; padding:8px 10px; margin-top:4px; text-align:left;">
+                <div style="display:flex; align-items:center; gap:5px; font-weight:800; color:#fbbf24; font-size:10.5px;">
+                  <span>ℹ️ 連線環境提示</span>
+                </div>
+                <div style="font-size:9.5px; color:#cbd5e1; line-height:1.45;">
+                  若處於限制 WebSocket 的預覽環境，請將本檔案部署至 GitHub Pages，或直接以 Safari 開啟。<br>
+                  你亦可點擊下方按鈕啟動本機雙人模擬對戰：
+                </div>
+                <button type="button" id="btn-p2p-sim-start" class="btn btn-gold" style="margin-top:2px; padding:6px 10px; font-size:11px; font-weight:800; justify-content:center; background:linear-gradient(135deg, #c084fc, #9333ea); color:#fff; border-color:#e9d5ff;">
+                  🎮 啟動沙盒 P2P 模擬對戰（直接體驗完整流程）
+                </button>
+              </div>
+            `;
+            const simBtn = document.getElementById('btn-p2p-sim-start');
+            if (simBtn) {
+              simBtn.onclick = (e) => {
+                e.stopPropagation();
+                P2PManager.startSimulatedMatch();
+              };
+            }
+          }
+        };
+
         try {
-          this.peer = new Peer(peerId, { debug: 1 });
+          this.peer = new Peer(peerId, this.getPeerConfig());
         } catch (e) {
-          if (statusEl) statusEl.textContent = '❌ 初始化失敗: ' + (e.message || e);
+          handleCanvasOrWsError(e);
           return;
         }
 
@@ -6392,7 +6526,7 @@
           if (err.type === 'unavailable-id') {
             this.initHost();
           } else {
-            if (statusEl) statusEl.textContent = '⚠️ 連線提示: ' + (err.type || err);
+            handleCanvasOrWsError(err);
           }
         });
       },
@@ -6407,12 +6541,26 @@
         if (statusEl) statusEl.innerHTML = '<span style="color:#fde047;">🟡 正在搜尋房間並建立 WebRTC 直連...</span>';
 
         if (typeof Peer === 'undefined') {
-          if (statusEl) statusEl.textContent = '⚠️ PeerJS 載入中，請稍候重試...';
+          if (statusEl) statusEl.innerHTML = '<span style="color:#fde047;"><span class="p2p-pulse-dot" style="background:#eab308;"></span> 正在載入通訊核心 PeerJS...</span>';
+          if (this._peerPollTimer) clearInterval(this._peerPollTimer);
+          var pollCount = 0;
+          this._peerPollTimer = setInterval(() => {
+            pollCount++;
+            if (typeof Peer !== 'undefined') {
+              clearInterval(this._peerPollTimer);
+              this._peerPollTimer = null;
+              this.initJoin(roomCode);
+            } else if (pollCount > 30) {
+              clearInterval(this._peerPollTimer);
+              this._peerPollTimer = null;
+              if (statusEl) statusEl.innerHTML = '<span style="color:#f87171;">⚠️ 載入超時，請使用 Safari 開啟本檔案或檢查網絡</span>';
+            }
+          }, 250);
           return;
         }
 
         try {
-          this.peer = new Peer({ debug: 1 });
+          this.peer = new Peer(this.getPeerConfig());
         } catch (e) {
           if (statusEl) statusEl.textContent = '❌ 初始化失敗: ' + (e.message || e);
           return;
@@ -6434,33 +6582,206 @@
 
         this.conn.on('open', () => {
           this.isP2P = true;
+          this.isReconnecting = false;
+          this.reconnectAttempts = 0;
+          this.hideReconnectBanner();
           this.updateUIP2PStatus(true);
+          this.startHeartbeat();
+
           document.getElementById('p2p-modal').classList.add('hidden');
           document.getElementById('title-screen-modal').classList.add('hidden');
+          const dcModal = document.getElementById('p2p-disconnect-modal');
+          if (dcModal) dcModal.classList.add('hidden');
 
           if (this.isHost) {
-            this.startMatchAsHost();
+            // Check if this is a reconnect of an ongoing game
+            if (game && game.round > 1 && game.phase !== 'END') {
+              this.sendStateSync();
+              floatPillText(document.getElementById('p-vp-num'), '🎉 對手已重新連回戰局！', '#34d399');
+            } else {
+              this.startMatchAsHost();
+            }
+          } else {
+            // Guest tells host it is connected / reconnected
+            this.send({ type: 'GUEST_READY' });
           }
         });
 
         this.conn.on('data', (data) => {
+          this._lastPong = Date.now();
           this.handleMessage(data);
         });
 
         this.conn.on('close', () => {
-          this.handleDisconnect();
+          this.handleDisconnect('連線通道已關閉');
         });
 
-        this.conn.on('error', () => {
-          this.handleDisconnect();
+        this.conn.on('error', (err) => {
+          this.handleDisconnect('傳輸錯誤: ' + (err.message || err));
         });
       },
 
+      // 4 秒雙向輕量心跳保活 (防 4G/5G NAT 超時斷線)
+      startHeartbeat() {
+        this.stopHeartbeat();
+        this._lastPong = Date.now();
+        this._heartbeatTimer = setInterval(() => {
+          if (this.conn && this.conn.open) {
+            this.send({ type: 'PING', ts: Date.now() });
+            // 若超過 18 秒未收到任何訊號或回應，判定連線受阻並嘗試自愈重連
+            if (Date.now() - this._lastPong > 18000 && this.isP2P && !this.isReconnecting) {
+              console.warn('P2P Heartbeat timed out, attempting auto-reconnect...');
+              this.handleDisconnect('心跳超時');
+            }
+          }
+        }, 4000);
+      },
+
+      stopHeartbeat() {
+        if (this._heartbeatTimer) {
+          clearInterval(this._heartbeatTimer);
+          this._heartbeatTimer = null;
+        }
+      },
+
+      // 取得戰局完整快照 (供斷線恢復 100% 無縫接軌)
+      getGameSnapshot() {
+        return {
+          round: game.round,
+          phase: game.phase,
+          playerGold: game.player.gold,
+          playerVp: game.player.vp,
+          playerTech: game.player.techPoints,
+          playerFaith: game.player.faithPoints,
+          playerGrid: game.player.grid.map(c => c ? c.id : null),
+          playerHand: game.player.hand.map(c => c.id),
+          playerFacedownSlots: Array.from(game.player.facedownSlots || []),
+          aiGold: game.ai.gold,
+          aiVp: game.ai.vp,
+          aiTech: game.ai.techPoints,
+          aiFaith: game.ai.faithPoints,
+          aiGrid: game.ai.grid.map(c => c ? c.id : null),
+          aiHand: game.ai.hand.map(c => c.id),
+          aiFacedownSlots: Array.from(game.ai.facedownSlots || []),
+          deck: game.deck.map(c => c.id),
+          discard: game.discardPile.map(c => c.id)
+        };
+      },
+
+      sendStateSync() {
+        this.send({
+          type: 'RECONNECT_SYNC',
+          snapshot: this.getGameSnapshot(),
+          hostDeployCommitted: this.localDeployCommitted,
+          hostPhaseReady: this.localPhaseReady
+        });
+      },
+
+      restoreFromSnapshot(s, isHostPerspective = false) {
+        const makeCard = (id, idx) => {
+          if (!id) return null;
+          const def = CARD_DB.find(c => c.id === id);
+          if (!def) return null;
+          return {
+            ...def,
+            uid: `${def.id}-${idx}-${Math.random()}`,
+            matchStats: { vp:0, gold:0, tech:0, faith:0, warRounds:0, warPowerTotal:0 }
+          };
+        };
+
+        game.round = s.round;
+        game.phase = s.phase;
+        game.deck = (s.deck || []).map((id, i) => makeCard(id, i));
+        game.discardPile = (s.discard || []).map((id, i) => makeCard(id, i));
+
+        if (!isHostPerspective) {
+          // Guest restoring: s.player represents host, s.ai represents guest
+          game.player.gold = s.aiGold;
+          game.player.vp = s.aiVp;
+          game.player.techPoints = s.aiTech;
+          game.player.faithPoints = s.aiFaith;
+          game.player.hand = (s.aiHand || []).map((id, i) => makeCard(id, i));
+          game.player.grid = (s.aiGrid || []).map((id, i) => makeCard(id, i));
+          game.player.facedownSlots = new Set(s.aiFacedownSlots || []);
+
+          game.ai.gold = s.playerGold;
+          game.ai.vp = s.playerVp;
+          game.ai.techPoints = s.playerTech;
+          game.ai.faithPoints = s.playerFaith;
+          game.ai.hand = (s.playerHand || []).map((id, i) => makeCard(id, i));
+          game.ai.grid = (s.playerGrid || []).map((id, i) => makeCard(id, i));
+          game.ai.facedownSlots = new Set(s.playerFacedownSlots || []);
+        }
+
+        this.hideReconnectBanner();
+        floatPillText(document.getElementById('p-vp-num'), '🎉 戰局已無縫同步恢復！', '#34d399');
+        logMessage(`🔄 <strong>【戰局恢復】</strong>連線已重連，第 ${game.round} 輪狀態完整同步恢復！`);
+        updateUI();
+      },
+
       send(msg) {
+        if (this.isSimulated) {
+          this.handleSimulatedOpponentReply(msg);
+          return;
+        }
         if (this.conn && this.conn.open) {
           try {
             this.conn.send(msg);
           } catch (e) {}
+        }
+      },
+
+      async handleSimulatedOpponentReply(msg) {
+        if (!msg || !msg.type) return;
+
+        if (msg.type === 'DRAW_DISCARD') {
+          setTimeout(() => {
+            const oppDiscardCount = Math.floor(Math.random() * 2) + 1;
+            this.handleMessage({
+              type: 'DRAW_DISCARD',
+              discardCount: oppDiscardCount,
+              discardIndices: [0]
+            });
+          }, 600);
+        } else if (msg.type === 'DEPLOY_SLOTS_UPDATE') {
+          setTimeout(() => {
+            const valid = game.getValidSlots(game.ai.grid);
+            const slot1 = valid[0] !== undefined ? valid[0] : 0;
+            const slot2 = valid[1] !== undefined ? valid[1] : 1;
+            game.ai.facedownSlots = new Set([slot1, slot2]);
+            renderGrids();
+          }, 400);
+        } else if (msg.type === 'DEPLOY_COMMIT') {
+          setTimeout(async () => {
+            const valid = game.getValidSlots(game.ai.grid);
+            const slot1 = valid[0] !== undefined ? valid[0] : 0;
+            const card1 = game.ai.hand[0] || CARD_DB[0];
+            const salt1 = 'simsalt_' + Math.random().toString(36).substring(2);
+            const hash1 = await sha256(slot1 + ':' + card1.id + ':' + salt1);
+
+            this._simReveals = [{ slot: slot1, cardId: card1.id, salt: salt1 }];
+
+            this.handleMessage({
+              type: 'DEPLOY_COMMIT',
+              hashes: [{ slot: slot1, hash: hash1 }],
+              compensation: 1
+            });
+          }, 500);
+        } else if (msg.type === 'DEPLOY_REVEAL') {
+          setTimeout(() => {
+            this.handleMessage({
+              type: 'DEPLOY_REVEAL',
+              reveals: this._simReveals || []
+            });
+          }, 350);
+        } else if (msg.type === 'PHASE_READY') {
+          setTimeout(() => {
+            this.handleMessage({
+              type: 'PHASE_READY',
+              phase: msg.phase,
+              round: msg.round
+            });
+          }, 450);
         }
       },
 
@@ -6511,6 +6832,13 @@
       handleMessage(msg) {
         if (!msg || !msg.type) return;
 
+        if (msg.type === 'PING') {
+          this.send({ type: 'PONG', ts: msg.ts });
+          return;
+        } else if (msg.type === 'PONG') {
+          return;
+        }
+
         if (msg.type === 'INIT_SYNC') {
           resetGameInternal(true);
           const makeCard = (id, idx) => {
@@ -6530,6 +6858,18 @@
           this.updateUIP2PStatus(true);
           logMessage(`👥 <strong>【P2P 雙人對戰開始】</strong>已成功連線至房間 <strong>${this.roomCode}</strong>`);
           updateUI();
+        } else if (msg.type === 'GUEST_READY') {
+          if (this.isHost && game && game.round > 1) {
+            this.sendStateSync();
+          }
+        } else if (msg.type === 'RECONNECT_SYNC') {
+          this.restoreFromSnapshot(msg.snapshot, false);
+          if (msg.hostDeployCommitted) {
+            this.remoteDeployCommitted = true;
+          }
+          if (msg.hostPhaseReady) {
+            this.remotePhaseReady = true;
+          }
         } else if (msg.type === 'DRAW_DISCARD') {
           this.remoteDrawReady = true;
           this.remoteDiscardCount = msg.discardCount || 0;
@@ -6673,15 +7013,88 @@
         handleFinishDeployCore();
       },
 
-      handleDisconnect() {
-        if (!this.isP2P) return;
-        this.isP2P = false;
-        this.updateUIP2PStatus(false);
+      showReconnectBanner(msg) {
+        const b = document.getElementById('p2p-reconnecting-banner');
+        const m = document.getElementById('p2p-reconnect-msg');
+        if (b && m) {
+          m.textContent = msg;
+          b.style.display = 'inline-flex';
+        }
+      },
+
+      hideReconnectBanner() {
+        const b = document.getElementById('p2p-reconnecting-banner');
+        if (b) b.style.display = 'none';
+      },
+
+      // 斷線自愈與自動重新連線
+      handleDisconnect(reason = '') {
+        if (!this.isP2P || this.isSimulated) return;
+        this.stopHeartbeat();
+
+        // 若當前戰局正在進行，先嘗試自動背景重連
+        if (game && game.phase !== 'END' && this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.isReconnecting = true;
+          this.reconnectAttempts++;
+          this.showReconnectBanner(`⚠️ 連線中斷 (${reason || '網絡波動'})，正在自動重連 (第 ${this.reconnectAttempts}/${this.maxReconnectAttempts} 次)...`);
+
+          if (this._reconnectBackoffTimer) clearTimeout(this._reconnectBackoffTimer);
+          this._reconnectBackoffTimer = setTimeout(() => {
+            this.attemptAutoReconnect();
+          }, 1600);
+          return;
+        }
+
+        // 超過重試次數，彈出恢復視窗（棋盤依然 100% 完整保留！）
+        this.hideReconnectBanner();
         const modal = document.getElementById('p2p-disconnect-modal');
         if (modal) modal.classList.remove('hidden');
       },
 
+      attemptAutoReconnect() {
+        if (this.isHost) {
+          // 主機端保持 Peer 監聽，刷新信令連線
+          if (!this.peer || this.peer.disconnected) {
+            try { this.peer.reconnect(); } catch(e){}
+          }
+          this.showReconnectBanner(`⚠️ 正在等待對手重新連入 (房間: ${this.roomCode})...`);
+        } else {
+          // 客戶端重新連線至主機
+          const targetId = this.getPeerId(this.roomCode);
+          try {
+            if (!this.peer || this.peer.destroyed) {
+              this.peer = new Peer(this.getPeerConfig());
+              this.peer.on('open', () => {
+                this.conn = this.peer.connect(targetId, { reliable: true });
+                this.setupConnection();
+              });
+            } else {
+              if (this.peer.disconnected) this.peer.reconnect();
+              this.conn = this.peer.connect(targetId, { reliable: true });
+              this.setupConnection();
+            }
+          } catch(e) {
+            this.handleDisconnect('重連遭遇異常');
+          }
+        }
+      },
+
+      checkAndRecover() {
+        if (this.isP2P && !this.isSimulated) {
+          if (!this.conn || !this.conn.open) {
+            this.handleDisconnect('喚醒偵測斷線');
+          } else {
+            this.send({ type: 'PING', ts: Date.now() });
+          }
+        }
+      },
+
       cleanup() {
+        this.stopHeartbeat();
+        if (this._reconnectBackoffTimer) {
+          clearTimeout(this._reconnectBackoffTimer);
+          this._reconnectBackoffTimer = null;
+        }
         if (this.conn) {
           try { this.conn.close(); } catch(e){}
           this.conn = null;
@@ -6691,17 +7104,20 @@
           this.peer = null;
         }
         this.isP2P = false;
+        this.isReconnecting = false;
+        this.reconnectAttempts = 0;
         this.localDrawReady = false;
         this.remoteDrawReady = false;
         this.localDeployCommitted = false;
         this.remoteDeployCommitted = false;
         this.localPhaseReady = false;
         this.remotePhaseReady = false;
+        this.hideReconnectBanner();
         this.updateUIP2PStatus(false);
       }
     };
 
-        const Sound = {
+    const Sound = {
       cardDrop() {
         if (this.muted) return;
         try {
@@ -13234,6 +13650,39 @@
         closeOptionsMenu();
       }
     });
+
+
+    // 監聽 iOS 畫面休眠喚醒與分頁切換自動恢復連線
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && typeof P2PManager !== 'undefined') {
+        P2PManager.checkAndRecover();
+      }
+    });
+    window.addEventListener('pageshow', () => {
+      if (typeof P2PManager !== 'undefined') P2PManager.checkAndRecover();
+    });
+
+    // 立即手動重連按鈕
+    const btnReconnBanner = document.getElementById('btn-p2p-reconnect-now');
+    if (btnReconnBanner) {
+      btnReconnBanner.addEventListener('click', (e) => {
+        e.stopPropagation();
+        Sound.click();
+        P2PManager.reconnectAttempts = 0;
+        P2PManager.attemptAutoReconnect();
+      });
+    }
+
+    const btnManualReconn = document.getElementById('btn-p2p-manual-reconnect');
+    if (btnManualReconn) {
+      btnManualReconn.addEventListener('click', () => {
+        Sound.click();
+        const modal = document.getElementById('p2p-disconnect-modal');
+        if (modal) modal.classList.add('hidden');
+        P2PManager.reconnectAttempts = 0;
+        P2PManager.attemptAutoReconnect();
+      });
+    }
 
     // 點擊會打開彈窗的選單項目時，自動收起右上角選單
     ['btn-title-menu', 'btn-deck-viewer', 'btn-ui-tour', 'btn-rules'].forEach(id => {
