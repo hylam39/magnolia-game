@@ -6166,7 +6166,7 @@
           <span style="font-size:18px;">👥</span>
           <div>
             <h3 style="font-weight:800; color:#f5d0fe; font-size:13.5px; letter-spacing:0.5px;">P2P 雙人免費即時連線對戰</h3>
-            <div style="font-size:9.5px; color:#c084fc;">WebRTC / PeerJS 直連 · 無需後端維護成本</div>
+            <div style="font-size:9.5px; color:#c084fc;">WebRTC / PeerJS 直連 · 雙模 TURN 穿透版 v2.2</div>
           </div>
         </div>
         <button id="btn-close-p2p-modal" style="background:none; border:none; color:#cbd5e1; font-size:18px; cursor:pointer;" title="關閉視窗">✕</button>
@@ -6247,7 +6247,7 @@
 
       <!-- Footer -->
       <div style="padding:8px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:space-between; background:#0b1120;">
-        <span style="font-size:9.5px; color:#64748b;">💡 支持兩部 iPhone / iPad / 電腦同室或遠程直連</span>
+        <span style="font-size:9.5px; color:#cbd5e1;">💡 引擎版本: <strong style="color:#a855f7;">v2.2 (已整合 TURN 穿透)</strong> ｜ 支持 iPhone / iPad 跨網直連</span>
         <button id="btn-close-p2p-bottom" class="btn btn-slate" style="padding:4px 12px; font-size:10.5px;">關閉</button>
       </div>
     </div>
@@ -6527,13 +6527,19 @@
         }
 
         this.peer.on('open', (id) => {
-          if (statusEl) statusEl.innerHTML = '<span style="color:#4ade80;">🟢 房間已就緒！等待對手加入... (請保持此畫面開啟)</span>';
+          if (statusEl) statusEl.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:2px; color:#4ade80; text-align:center;">
+              <span style="font-weight:800; font-size:11px;">🟢 房間已就緒！等待對手加入...</span>
+              <span style="font-size:9px; color:#cbd5e1;">⚠️ 請保持 iPad 此畫面開啟，切勿鎖定或切換 App</span>
+            </div>
+          `;
           if (navigator.wakeLock && navigator.wakeLock.request) {
             try { navigator.wakeLock.request('screen').catch(() => {}); } catch(e){}
           }
         });
 
         this.peer.on('connection', (connection) => {
+          if (statusEl) statusEl.innerHTML = '<span style="color:#fde047;"><span class="p2p-pulse-dot" style="background:#eab308;"></span> 收到對手連線請求！正在建立 P2P 通道...</span>';
           this.conn = connection;
           this.setupConnection();
         });
@@ -6607,10 +6613,28 @@
         }, 13000);
 
         this.peer.on('open', (myId) => {
-          if (statusEl) statusEl.innerHTML = `<span style="color:#fde047;"><span class="p2p-pulse-dot" style="background:#eab308;"></span> 已連上信令伺服器，正在呼叫房間【${roomCode}】(Step 2/2)...</span>`;
+          if (statusEl) statusEl.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:3px; color:#fde047; text-align:center;">
+              <span><span class="p2p-pulse-dot" style="background:#eab308;"></span> [Step 2/3] 信令已接通，正在呼叫房間【${roomCode}】...</span>
+              <span style="font-size:9px; color:#94a3b8;">正在向 iPad 發送連線握手請求</span>
+            </div>
+          `;
           const connection = this.peer.connect(targetPeerId);
           this.conn = connection;
           this.setupConnection();
+          
+          if (statusEl) {
+            setTimeout(() => {
+              if (this.conn && !this.conn.open && statusEl) {
+                statusEl.innerHTML = `
+                  <div style="display:flex; flex-direction:column; gap:3px; color:#38bdf8; text-align:center;">
+                    <span><span class="p2p-pulse-dot" style="background:#38bdf8;"></span> [Step 3/3] 正在進行 WebRTC / TURN 防火牆穿透...</span>
+                    <span style="font-size:9px; color:#cbd5e1;">若超過 10 秒未進入，請確認 iPad 畫面是否顯示綠色「🟢 房間已就緒」</span>
+                  </div>
+                `;
+              }
+            }, 3000);
+          }
         });
 
         this.peer.on('error', (err) => {
@@ -6914,8 +6938,13 @@
           logMessage(`👥 <strong>【P2P 雙人對戰開始】</strong>已成功連線至房間 <strong>${this.roomCode}</strong>`);
           updateUI();
         } else if (msg.type === 'GUEST_READY') {
-          if (this.isHost && game && game.round > 1) {
-            this.sendStateSync();
+          if (this.isHost) {
+            // Host responds to GUEST_READY by sending initial sync or state sync
+            if (game && game.round > 1 && game.phase !== 'END') {
+              this.sendStateSync();
+            } else {
+              this.startMatchAsHost();
+            }
           }
         } else if (msg.type === 'RECONNECT_SYNC') {
           this.restoreFromSnapshot(msg.snapshot, false);
