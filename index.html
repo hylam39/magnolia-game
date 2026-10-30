@@ -6412,10 +6412,23 @@
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
               { urls: 'stun:stun1.l.google.com:19302' },
-              { urls: 'stun:stun2.l.google.com:19302' },
-              { urls: 'stun:stun3.l.google.com:19302' },
-              { urls: 'stun:stun4.l.google.com:19302' },
-              { urls: 'stun:stun.cloudflare.com:3478' }
+              { urls: 'stun:stun.cloudflare.com:3478' },
+              { urls: 'stun:openrelay.metered.ca:80' },
+              {
+                urls: 'turn:openrelay.metered.ca:80',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+              },
+              {
+                urls: 'turn:openrelay.metered.ca:443',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+              },
+              {
+                urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+              }
             ],
             iceCandidatePoolSize: 10
           }
@@ -6514,7 +6527,10 @@
         }
 
         this.peer.on('open', (id) => {
-          if (statusEl) statusEl.innerHTML = '<span style="color:#4ade80;">🟢 房間已就緒！等待對手加入...</span>';
+          if (statusEl) statusEl.innerHTML = '<span style="color:#4ade80;">🟢 房間已就緒！等待對手加入... (請保持此畫面開啟)</span>';
+          if (navigator.wakeLock && navigator.wakeLock.request) {
+            try { navigator.wakeLock.request('screen').catch(() => {}); } catch(e){}
+          }
         });
 
         this.peer.on('connection', (connection) => {
@@ -6559,28 +6575,63 @@
           return;
         }
 
+        const guestId = 'mgla-g-' + Math.floor(10000 + Math.random() * 90000);
+
         try {
-          this.peer = new Peer(this.getPeerConfig());
+          this.peer = new Peer(guestId, this.getPeerConfig());
         } catch (e) {
           if (statusEl) statusEl.textContent = '❌ 初始化失敗: ' + (e.message || e);
           return;
         }
 
-        this.peer.on('open', () => {
-          const connection = this.peer.connect(targetPeerId, { reliable: true });
+        if (this._joinTimeoutTimer) clearTimeout(this._joinTimeoutTimer);
+        this._joinTimeoutTimer = setTimeout(() => {
+          if (!this.conn || !this.conn.open) {
+            if (statusEl) {
+              statusEl.innerHTML = `
+                <div style="background:rgba(127,29,29,0.55); border:1px solid #ef4444; border-radius:8px; padding:8px 10px; color:#fca5a5; line-height:1.45; text-align:left;">
+                  <div style="font-weight:800; color:#fecaca; font-size:11px;">🔴 連線逾時（未能與房間【${roomCode}】建立通道）</div>
+                  <div style="font-size:9.5px; margin-top:3px; color:#cbd5e1;">
+                    <strong>請檢查以下事項：</strong><br>
+                    1. <strong>iPad 螢幕是否變暗或鎖定？</strong> iOS 會在鎖定時中斷連線，請確保 iPad 螢幕常亮並停留在「建立房間」畫面。<br>
+                    2. <strong>確認 iPad 是否已顯示綠色「🟢 房間已就緒」？</strong><br>
+                    3. 點擊下方按鈕可立即再次重試。
+                  </div>
+                  <button type="button" id="btn-rejoin-retry" class="btn btn-gold" style="margin-top:5px; padding:4px 10px; font-size:10.5px;">🔄 立即重試連線</button>
+                </div>
+              `;
+              const retryBtn = document.getElementById('btn-rejoin-retry');
+              if (retryBtn) retryBtn.onclick = () => { Sound.click(); P2PManager.initJoin(roomCode); };
+            }
+          }
+        }, 13000);
+
+        this.peer.on('open', (myId) => {
+          if (statusEl) statusEl.innerHTML = `<span style="color:#fde047;"><span class="p2p-pulse-dot" style="background:#eab308;"></span> 已連上信令伺服器，正在呼叫房間【${roomCode}】(Step 2/2)...</span>`;
+          const connection = this.peer.connect(targetPeerId);
           this.conn = connection;
           this.setupConnection();
         });
 
         this.peer.on('error', (err) => {
-          if (statusEl) statusEl.innerHTML = '<span style="color:#f87171;">🔴 連線失敗：找不到房號【' + roomCode + '】或對手已離線</span>';
+          if (this._joinTimeoutTimer) clearTimeout(this._joinTimeoutTimer);
+          const errType = err && err.type ? err.type : '';
+          let tip = `🔴 連線失敗：找不到房號【${roomCode}】或對手已離線`;
+          if (errType === 'peer-unavailable') {
+            tip = `🔴 找不到房號【${roomCode}】！請確認 iPad 是否已開啟房間並顯示綠色「🟢 房間已就緒」（請勿讓 iPad 鎖定或休眠）。`;
+          }
+          if (statusEl) statusEl.innerHTML = `<span style="color:#f87171;">${tip}</span>`;
         });
       },
 
       setupConnection() {
         if (!this.conn) return;
 
-        this.conn.on('open', () => {
+        const onConnReady = () => {
+          if (this._joinTimeoutTimer) {
+            clearTimeout(this._joinTimeoutTimer);
+            this._joinTimeoutTimer = null;
+          }
           this.isP2P = true;
           this.isReconnecting = false;
           this.reconnectAttempts = 0;
@@ -6594,7 +6645,6 @@
           if (dcModal) dcModal.classList.add('hidden');
 
           if (this.isHost) {
-            // Check if this is a reconnect of an ongoing game
             if (game && game.round > 1 && game.phase !== 'END') {
               this.sendStateSync();
               floatPillText(document.getElementById('p-vp-num'), '🎉 對手已重新連回戰局！', '#34d399');
@@ -6602,10 +6652,15 @@
               this.startMatchAsHost();
             }
           } else {
-            // Guest tells host it is connected / reconnected
             this.send({ type: 'GUEST_READY' });
           }
-        });
+        };
+
+        if (this.conn.open) {
+          onConnReady();
+        } else {
+          this.conn.on('open', onConnReady);
+        }
 
         this.conn.on('data', (data) => {
           this._lastPong = Date.now();
