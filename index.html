@@ -6166,7 +6166,7 @@
           <span style="font-size:18px;">👥</span>
           <div>
             <h3 style="font-weight:800; color:#f5d0fe; font-size:13.5px; letter-spacing:0.5px;">P2P 雙人免費即時連線對戰</h3>
-            <div style="font-size:9.5px; color:#c084fc;">WebRTC / PeerJS 直連 · 雙模 TURN 穿透版 v2.2</div>
+            <div style="font-size:9.5px; color:#c084fc;">WebRTC / PeerJS 直連 · iOS 專用極速穿透版 v2.3</div>
           </div>
         </div>
         <button id="btn-close-p2p-modal" style="background:none; border:none; color:#cbd5e1; font-size:18px; cursor:pointer;" title="關閉視窗">✕</button>
@@ -6247,7 +6247,7 @@
 
       <!-- Footer -->
       <div style="padding:8px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:space-between; background:#0b1120;">
-        <span style="font-size:9.5px; color:#cbd5e1;">💡 引擎版本: <strong style="color:#a855f7;">v2.2 (已整合 TURN 穿透)</strong> ｜ 支持 iPhone / iPad 跨網直連</span>
+        <span style="font-size:9.5px; color:#cbd5e1;">💡 引擎版本: <strong style="color:#34d399;">v2.3 (已修復 iOS Safari 通道判定)</strong> ｜ 支持 iPhone / iPad 跨網直連</span>
         <button id="btn-close-p2p-bottom" class="btn btn-slate" style="padding:4px 12px; font-size:10.5px;">關閉</button>
       </div>
     </div>
@@ -6412,23 +6412,11 @@
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
               { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' },
               { urls: 'stun:stun.cloudflare.com:3478' },
-              { urls: 'stun:openrelay.metered.ca:80' },
-              {
-                urls: 'turn:openrelay.metered.ca:80',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-              },
-              {
-                urls: 'turn:openrelay.metered.ca:443',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-              },
-              {
-                urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-              }
+              { urls: 'stun:stun.relay.metered.ca:80' }
             ],
             iceCandidatePoolSize: 10
           }
@@ -6651,10 +6639,17 @@
       setupConnection() {
         if (!this.conn) return;
 
+        let isReadyCalled = false;
         const onConnReady = () => {
+          if (isReadyCalled) return;
+          isReadyCalled = true;
           if (this._joinTimeoutTimer) {
             clearTimeout(this._joinTimeoutTimer);
             this._joinTimeoutTimer = null;
+          }
+          if (this._dcPollTimer) {
+            clearInterval(this._dcPollTimer);
+            this._dcPollTimer = null;
           }
           this.isP2P = true;
           this.isReconnecting = false;
@@ -6677,25 +6672,63 @@
             }
           } else {
             this.send({ type: 'GUEST_READY' });
+            // 每 600ms 連續重發直到收到 INIT_SYNC (防止首包丟包)
+            if (this._guestHandshakeTimer) clearInterval(this._guestHandshakeTimer);
+            var attempts = 0;
+            this._guestHandshakeTimer = setInterval(() => {
+              attempts++;
+              if (game && game.isP2P && game.round >= 1 && game.player.hand.length === 5) {
+                clearInterval(this._guestHandshakeTimer);
+                this._guestHandshakeTimer = null;
+              } else if (attempts < 10) {
+                this.send({ type: 'GUEST_READY' });
+              } else {
+                clearInterval(this._guestHandshakeTimer);
+                this._guestHandshakeTimer = null;
+              }
+            }, 600);
           }
         };
 
+        // 1. PeerJS on('open')
         if (this.conn.open) {
           onConnReady();
         } else {
           this.conn.on('open', onConnReady);
         }
 
+        // 2. iOS Safari WebKit RTCDataChannel 狀態輪詢 (解決 WebKit onopen 遺漏觸發問題)
+        if (this._dcPollTimer) clearInterval(this._dcPollTimer);
+        this._dcPollTimer = setInterval(() => {
+          if (!this.conn) {
+            clearInterval(this._dcPollTimer);
+            return;
+          }
+          const dc = this.conn.dataChannel;
+          if (this.conn.open || (dc && (dc.readyState === 'open' || dc.readyState === 2))) {
+            clearInterval(this._dcPollTimer);
+            this._dcPollTimer = null;
+            this.conn._open = true;
+            onConnReady();
+          }
+        }, 120);
+
+        // 3. 雙向備援：收到任何訊息即視為通道已通
         this.conn.on('data', (data) => {
+          if (!isReadyCalled) {
+            onConnReady();
+          }
           this._lastPong = Date.now();
           this.handleMessage(data);
         });
 
         this.conn.on('close', () => {
+          if (this._dcPollTimer) clearInterval(this._dcPollTimer);
           this.handleDisconnect('連線通道已關閉');
         });
 
         this.conn.on('error', (err) => {
+          if (this._dcPollTimer) clearInterval(this._dcPollTimer);
           this.handleDisconnect('傳輸錯誤: ' + (err.message || err));
         });
       },
