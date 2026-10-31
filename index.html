@@ -6358,14 +6358,27 @@
       }
     };
 
-    // 監聽 iOS / 行動端背景切換事件，確保切返遊戲即時自動恢復音訊與背景音樂
+    // 監聽 iOS / 行動端背景切換事件，確保切返遊戲即時自動恢復音訊，並自動檢測修復 P2P 聯機
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         Sound.recoverAudio();
+        if (typeof PvPManager !== 'undefined' && PvPManager && PvPManager.isOnline) {
+          PvPManager.handleAppResume();
+        }
       }
     });
-    window.addEventListener('pageshow', () => Sound.recoverAudio());
-    window.addEventListener('focus', () => Sound.recoverAudio());
+    window.addEventListener('pageshow', () => {
+      Sound.recoverAudio();
+      if (typeof PvPManager !== 'undefined' && PvPManager && PvPManager.isOnline) {
+        PvPManager.handleAppResume();
+      }
+    });
+    window.addEventListener('focus', () => {
+      Sound.recoverAudio();
+      if (typeof PvPManager !== 'undefined' && PvPManager && PvPManager.isOnline) {
+        PvPManager.handleAppResume();
+      }
+    });
     ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(evt => {
       document.addEventListener(evt, () => Sound.recoverAudio(), { passive: true });
     });
@@ -10121,6 +10134,17 @@
         const aRes = g.ai || `+${g.aTotal || 0}VP`;
         setBannerInfo(`第 ${game.round} 輪`, '計分階段', pRes, aRes);
 
+        // 【聯機模式：已確認進入下一輪，等待對手】
+        if (PvPManager.isOnline && PvPManager.myReadyState.nextRound) {
+          const btnWait = document.createElement('button');
+          btnWait.className = 'btn btn-slate';
+          btnWait.disabled = true;
+          btnWait.style.cssText = 'opacity:0.65; cursor:not-allowed; padding:2px 10px; font-size:10px; font-weight:800; border-radius:6px; min-height:34px; justify-content:center;';
+          btnWait.innerHTML = `<span>⏳ 等待對手</span><span style="font-size:8px; opacity:0.8;">對手結算中...</span>`;
+          bannerActions.appendChild(btnWait);
+          return;
+        }
+
         const btnNext = document.createElement('button');
         btnNext.className = 'btn btn-gold';
         btnNext.innerHTML = `<span>計分結算</span><span style="font-size:8px; opacity:0.9;">🔔 第 ${game.round + 1} 輪 ➔</span>`;
@@ -11909,21 +11933,9 @@
     }
 
     function handleAdvanceToNextPhase() {
-      if (PvPManager.isOnline) {
-        Sound.click();
-        let target = 'WAR';
-        if (game.phase === 'REVEAL') target = 'WAR';
-        else if (game.phase === 'WAR') target = 'DEVELOP';
-        else if (game.phase === 'DEVELOP') target = 'INCOME';
-        else if (game.phase === 'INCOME') target = 'VP';
-        else if (game.phase === 'VP') target = 'DRAW';
-
-        PvPManager.send('PHASE_ADVANCE', { targetPhase: target, round: (target === 'DRAW' ? game.round + 1 : game.round) });
-        PvPManager.syncPhaseAdvance(target, target === 'DRAW' ? game.round + 1 : game.round);
-        return;
-      }
-
       Sound.click();
+
+      // 各自獨立依節奏查看結果，不強行拉動對方跳轉
       if (game.phase === 'REVEAL') {
         game.phase = 'WAR';
         resolveWarPhase();
@@ -11937,6 +11949,23 @@
         game.phase = 'VP';
         resolveVPPhase();
       } else if (game.phase === 'VP') {
+        if (checkGameEnd()) {
+          game.phase = 'END';
+          updatePhaseStepper();
+          triggerGameOver();
+          return;
+        }
+
+        if (PvPManager.isOnline) {
+          // 【聯機模式：自己看完計分，發送 ROUND_READY 等待對手結算完成】
+          PvPManager.myReadyState.nextRound = true;
+          PvPManager.send('ROUND_READY', { round: game.round + 1 });
+          logMessage('⏳ 你已完成本輪結算，等待對手完成後進入下一輪...');
+          PvPManager.checkNextRoundBarrier();
+          renderBanner();
+          return;
+        }
+
         game.round++;
         game.phase = 'DRAW';
         updateUI();
@@ -12467,6 +12496,21 @@
       if (game && game.autoAdvanceTimer) {
         clearTimeout(game.autoAdvanceTimer);
       }
+      
+      if (PvPManager.isOnline) {
+        document.getElementById('game-over-modal').classList.add('hidden');
+        if (historyContainer) historyContainer.innerHTML = '';
+        historyRecordsCount = 0;
+        addInitialHistoryCard();
+        if (PvPManager.role === 'host') {
+          PvPManager.hostStartMatch();
+        } else {
+          PvPManager.send('RESTART_MATCH_REQUEST', {});
+          logMessage('⏳ 已向房主請求重新開局，等待全新洗牌發牌...');
+        }
+        return;
+      }
+
       const prevDiff = game ? game.aiDifficulty : 'balanced';
       const prevAuto = game ? game.autoAdvance : false;
 
@@ -13678,8 +13722,11 @@
       conn: null,
       myPendingDeploy: [], // 存放開牌前本輪自己暗置的真實卡牌物件 { slot, card }
       opponentFacedownSlots: new Set(),
-      opponentReadyState: { draw: false, deploy: false, nextPhase: false },
-      myReadyState: { draw: false, deploy: false, nextPhase: false },
+      opponentReadyState: { draw: false, deploy: false, nextRound: false },
+      myReadyState: { draw: false, deploy: false, nextRound: false },
+      heartbeatTimer: null,
+      lastHeartbeatTime: Date.now(),
+      isReconnecting: false,
 
       init() {
         this.bindEvents();
@@ -13898,6 +13945,9 @@
 
         this.conn.on('open', () => {
           console.log('🎉 P2P 通道連線成功！');
+          this.isReconnecting = false;
+          this.lastHeartbeatTime = Date.now();
+          this.startHeartbeat();
           this.updateLobbyStatusUI();
           this.closeLobby();
           Sound.victory();
@@ -13912,7 +13962,13 @@
           if (aiAvatar) aiAvatar.textContent = (this.role === 'host') ? '⚔️' : '👑';
 
           if (this.role === 'guest') {
-            alert(`🎉 成功進入房間 ${this.roomId}！雙方戰局已正式連線開始！`);
+            // 若為斷線重連進來，自動請求數據同步
+            if (game && game.round > 1) {
+              this.send('REQ_SYNC', {});
+              logMessage('🔄 連線已自動恢復，正在同步最新戰局...');
+            } else {
+              alert(`🎉 成功進入房間 ${this.roomId}！雙方戰局已正式連線開始！`);
+            }
           }
         });
 
@@ -13938,20 +13994,18 @@
         }
       },
 
-      // 房主啟動全新對局
+      // 房主啟動全新對局（嚴格單一牌庫發牌，嚴防卡牌複製）
       hostStartMatch() {
         game = new MagnoliaGame();
-        game.initDeck();
-        const hostHand = game.drawCards(5);
-        const guestHand = game.drawCards(5);
+        // 直接使用 MagnoliaGame 初始化抽取之乾淨手牌，避免重複扣牌
+        const hostHand = game.player.hand;
+        const guestHand = game.ai.hand;
 
-        game.player.hand = hostHand;
-        game.ai.hand = guestHand;
         game.round = 1;
         game.phase = 'DRAW';
 
-        this.myReadyState = { draw: false, deploy: false, nextPhase: false };
-        this.opponentReadyState = { draw: false, deploy: false, nextPhase: false };
+        this.myReadyState = { draw: false, deploy: false, nextRound: false };
+        this.opponentReadyState = { draw: false, deploy: false, nextRound: false };
 
         this.send('INIT_GAME', {
           round: 1,
@@ -13965,7 +14019,15 @@
 
       // 處理收到的對手封包
       handleIncomingPacket({ type, payload }) {
+        this.lastHeartbeatTime = Date.now();
         switch (type) {
+          case 'PING':
+            this.send('PONG', { t: Date.now() });
+            break;
+
+          case 'PONG':
+            // 心跳存活確認
+            break;
           case 'INIT_GAME':
             // 訪客收到開局手牌
             game = new MagnoliaGame();
@@ -13973,10 +14035,25 @@
             game.ai.hand = Array(payload.hostHandCount || 5).fill({ name: '對手手牌' });
             game.round = payload.round || 1;
             game.phase = payload.phase || 'DRAW';
-            this.myReadyState = { draw: false, deploy: false, nextPhase: false };
-            this.opponentReadyState = { draw: false, deploy: false, nextPhase: false };
+            this.myReadyState = { draw: false, deploy: false, nextRound: false };
+            this.opponentReadyState = { draw: false, deploy: false, nextRound: false };
             updateUI();
             logMessage('⚔️ 雙方已成功連線！第 1 輪【抽牌階段】開始，請檢視手牌並確認。');
+            break;
+
+          case 'ROUND_READY':
+            // 對手看完計分，已就緒進入下一輪抽牌
+            this.opponentReadyState.nextRound = true;
+            logMessage('對手已完成本輪結算，等待你完成。');
+            this.checkNextRoundBarrier();
+            renderBanner();
+            break;
+
+          case 'RESTART_MATCH_REQUEST':
+            // 訪客要求重開對局 -> 房主重新啟動
+            if (this.role === 'host') {
+              this.hostStartMatch();
+            }
             break;
 
           case 'DRAW_READY':
@@ -14061,7 +14138,7 @@
             break;
 
           case 'RESP_SYNC':
-            // 訪客收到房主傳來的全盤恢復快照
+            // 訪客收到房主傳來的全盤恢復快照（只同步公開棋盤與資源，絕不覆蓋當前手牌以防卡牌複製）
             if (this.role === 'guest') {
               game.round = payload.round;
               game.phase = payload.phase;
@@ -14075,7 +14152,6 @@
               game.ai.techPoints = payload.hostTech;
               game.player.faithPoints = payload.guestFaith;
               game.ai.faithPoints = payload.hostFaith;
-              if (payload.guestHand) game.player.hand = payload.guestHand;
               updateUI();
               alert('🔄 已成功同步恢復對局狀態！');
             }
@@ -14097,6 +14173,19 @@
           game.ai.facedownSlots.clear();
           updateUI();
           logMessage('🏰 雙方抽牌就緒！進入【部署階段】，每人最多暗置 2 張部隊。');
+        }
+      },
+
+      checkNextRoundBarrier() {
+        if (this.myReadyState.nextRound && this.opponentReadyState.nextRound) {
+          this.myReadyState.nextRound = false;
+          this.opponentReadyState.nextRound = false;
+          this.myReadyState.draw = false;
+          this.opponentReadyState.draw = false;
+          game.round++;
+          game.phase = 'DRAW';
+          updateUI();
+          logMessage(`🃏 雙方結算完畢！第 ${game.round} 輪【抽牌階段】開始！`);
         }
       },
 
@@ -14224,15 +14313,136 @@
         }
       },
 
+      startHeartbeat() {
+        this.stopHeartbeat();
+        this.lastHeartbeatTime = Date.now();
+        this.heartbeatTimer = setInterval(() => {
+          if (!this.isOnline || !this.conn) {
+            this.stopHeartbeat();
+            return;
+          }
+          if (this.conn.open) {
+            this.send('PING', { t: Date.now() });
+          }
+          // 若超過 8 秒無任何心跳，且當前不在重連中，自動檢測通道
+          if (Date.now() - this.lastHeartbeatTime > 8000 && !this.isReconnecting) {
+            console.warn('⚠️ 超過 8 秒未收到對手心跳，嘗試無感重連...');
+            this.silentReconnect();
+          }
+        }, 2800);
+      },
+
+      stopHeartbeat() {
+        if (this.heartbeatTimer) {
+          clearInterval(this.heartbeatTimer);
+          this.heartbeatTimer = null;
+        }
+      },
+
+      // 用戶從 WhatsApp / 後台切回網頁時自動喚醒處理
+      handleAppResume() {
+        if (!this.isOnline || !this.roomId) return;
+        console.log('📱 偵測到用戶從 WhatsApp/後台返回，檢查聯機狀態...');
+
+        // 1. 若當前通道看起來仍 open，先發一次探測 PING 並請求對齊
+        if (this.conn && this.conn.open) {
+          this.lastHeartbeatTime = Date.now();
+          this.send('PING', { resume: true });
+          if (this.role === 'guest') {
+            this.send('REQ_SYNC', {});
+          }
+          logMessage('🟢 已切回遊戲，連線正常維持中！');
+          this.startHeartbeat();
+          return;
+        }
+
+        // 2. 若通道已斷開，自動發動背景無感重連
+        this.silentReconnect();
+      },
+
+      // 背景自動無感重新接駁
+      silentReconnect() {
+        if (!this.isOnline || !this.roomId || this.isReconnecting) return;
+        this.isReconnecting = true;
+        this.stopHeartbeat();
+        logMessage('🔄 偵測到後台連線中斷，正在自動重新接駁對手...');
+
+        if (this.role === 'guest') {
+          // 訪客主動重新接駁房主
+          if (this.peer && !this.peer.destroyed) {
+            try {
+              if (this.conn) this.conn.close();
+              this.conn = this.peer.connect('MG-' + this.roomId, { reliable: true });
+              this.setupConnectionHandlers();
+            } catch (e) {
+              this.reconnect();
+            }
+          } else {
+            this.reconnect();
+          }
+        } else if (this.role === 'host') {
+          // 房主重啟監聽（保持原本房間 ID，絕不更換）
+          if (this.peer && !this.peer.destroyed) {
+            try {
+              if (this.peer.disconnected) {
+                this.peer.reconnect();
+              }
+            } catch (e) {}
+          } else {
+            try {
+              this.peer = new Peer('MG-' + this.roomId);
+              this.peer.on('connection', (c) => {
+                this.conn = c;
+                this.setupConnectionHandlers();
+                // 訪客接回後，自動將當前最新局勢同步給訪客
+                this.send('RESP_SYNC', {
+                  round: game.round,
+                  phase: game.phase,
+                  hostGrid: game.player.grid,
+                  guestGrid: game.ai.grid,
+                  hostGold: game.player.gold,
+                  guestGold: game.ai.gold,
+                  hostVp: game.player.vp,
+                  guestVp: game.ai.vp,
+                  hostTech: game.player.techPoints,
+                  guestTech: game.ai.techPoints,
+                  hostFaith: game.player.faithPoints,
+                  guestFaith: game.ai.faithPoints
+                });
+              });
+            } catch (e) {}
+          }
+        }
+
+        setTimeout(() => {
+          this.isReconnecting = false;
+        }, 3500);
+      },
+
       reconnect() {
         Sound.click();
-        if (this.role === 'guest' && this.fullPeerId) {
-          this.joinRoom(this.roomId);
-          setTimeout(() => {
-            this.send('REQ_SYNC', {});
-          }, 800);
+        if (this.role === 'guest' && this.roomId) {
+          const targetFullId = 'MG-' + this.roomId;
+          this.fullPeerId = targetFullId;
+          if (this.peer) {
+            try { this.peer.destroy(); } catch (e) {}
+          }
+          this.peer = new Peer();
+          this.peer.on('open', () => {
+            this.conn = this.peer.connect(targetFullId, { reliable: true });
+            this.setupConnectionHandlers();
+          });
         } else if (this.role === 'host' && this.roomId) {
-          this.createRoom();
+          // 房主手動重連：保持原房間號，嚴禁重新隨機生成
+          if (this.peer) {
+            try { this.peer.destroy(); } catch (e) {}
+          }
+          this.peer = new Peer('MG-' + this.roomId);
+          this.peer.on('connection', (c) => {
+            this.conn = c;
+            this.setupConnectionHandlers();
+          });
+          this.updateLobbyStatusUI();
         }
       },
 
@@ -14253,6 +14463,7 @@
       leaveRoom() {
         Sound.click();
         if (confirm('確定要離開當前聯機房間，返回單人練習模式嗎？')) {
+          this.stopHeartbeat();
           if (this.conn) {
             try { this.conn.close(); } catch (e) {}
           }
@@ -14297,8 +14508,9 @@ window.onload = () => {
       addInitialHistoryCard();
       adaptBannerPosition();
 
-      // 嘗試讀取已存檔戰局 (Auto-Save Resume)
-      const saved = GameSave.load();
+      // 嘗試讀取已存檔戰局 (Auto-Save Resume，若為聯機房間則略過單機舊存檔以防牌庫混亂)
+      const hasRoomHash = window.location.hash.includes('room=');
+      const saved = hasRoomHash ? null : GameSave.load();
       if (saved && saved.round && saved.phase && saved.phase !== 'END') {
         try {
           game.round = saved.round;
