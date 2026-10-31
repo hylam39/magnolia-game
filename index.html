@@ -9281,7 +9281,11 @@
     function renderHand() {
       const hintEl = document.getElementById('hand-action-hint');
       if (hintEl) {
-        if (game.phase === 'DRAW') {
+        if (PvPManager.isOnline && PvPManager.myReadyState.draw) {
+          hintEl.innerHTML = '<span style="color:#fbbf24; font-weight:800;">⏳ 你已確認抽牌</span>，等待對手完成抽牌...';
+        } else if (PvPManager.isOnline && PvPManager.myReadyState.deploy) {
+          hintEl.innerHTML = '<span style="color:#fbbf24; font-weight:800;">⏳ 你已鎖定部署</span>，等待對手確認後同時開牌...';
+        } else if (game.phase === 'DRAW') {
           hintEl.textContent = '拖曳手牌至九宮格切換棄牌/保留，或點擊放大檢視';
         } else if (game.phase === 'DEPLOY') {
           const placedCount = (game.player.facedownSlots ? game.player.facedownSlots.size : 0);
@@ -9385,6 +9389,11 @@
         function onPointerMove(moveEvent) {
           const dist = Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY);
           if (!isDragging && dist > 7) {
+            // 【聯機鎖定】若已確認抽牌或部署，禁止拖曳手牌
+            if (PvPManager.isOnline && (PvPManager.myReadyState.draw || PvPManager.myReadyState.deploy)) {
+              cleanupDrag();
+              return;
+            }
             // 只有在部署階段才能拖曳至棋盤
             if (game.phase !== 'DEPLOY' && game.phase !== 'DRAW') return;
             const card = game.player.hand[handIdx];
@@ -9629,6 +9638,11 @@
     }
 
     function handleCardClick(idx) {
+      // 【聯機鎖定】若已確認行動，禁止重複操作手牌
+      if (PvPManager.isOnline && (PvPManager.myReadyState.draw || PvPManager.myReadyState.deploy)) {
+        logMessage('⏳ 你已確認行動，請等待對手完成操作！');
+        return;
+      }
       const card = game.player.hand[idx];
       Sound.click();
 
@@ -9667,6 +9681,11 @@
     }
 
     function handlePlaceCard(slotIdx) {
+      // 【聯機鎖定】若已確認部署，禁止再放牌
+      if (PvPManager.isOnline && PvPManager.myReadyState.deploy) {
+        logMessage('⏳ 你已鎖定部署，無法再放置卡牌，請等待對手開牌！');
+        return;
+      }
       if (game.phase !== 'DEPLOY' || game.selectedHandIdx === null) return;
       const placedCount = (game.player.facedownSlots ? game.player.facedownSlots.size : 0);
       if (placedCount >= 2) {
@@ -9703,6 +9722,11 @@
     }
 
     function handleUndoPlaceCard(slotIdx) {
+      // 【聯機鎖定】若已確認部署，禁止撤回卡牌
+      if (PvPManager.isOnline && PvPManager.myReadyState.deploy) {
+        logMessage('⚠️ 你已確認部署，無法再撤回卡牌，請等待對手開牌！');
+        return;
+      }
       if (game.phase !== 'DEPLOY') return;
       if (!game.player.facedownSlots || !game.player.facedownSlots.has(slotIdx)) return;
 
@@ -9948,6 +9972,19 @@
       if (game.phase === 'DRAW') {
         bannerIcon.textContent = '🃏';
         const discardCount = game.discardSelections.size;
+
+        // 【聯機抽牌等待鎖定】
+        if (PvPManager.isOnline && PvPManager.myReadyState.draw) {
+          setBannerInfo(`第 ${game.round} 輪`, '抽牌階段', '✅ 你已確認，等待對手抽牌...', '對手思考換牌中...');
+          const btnWait = document.createElement('button');
+          btnWait.className = 'btn btn-slate';
+          btnWait.disabled = true;
+          btnWait.style.cssText = 'opacity:0.65; cursor:not-allowed; padding:2px 10px; font-size:10px; font-weight:800; border-radius:6px; min-height:34px; justify-content:center;';
+          btnWait.innerHTML = `<span>⏳ 等待對手</span><span style="font-size:8px; opacity:0.8;">對手抽牌中...</span>`;
+          bannerActions.appendChild(btnWait);
+          return;
+        }
+
         const pRes = discardCount > 0 ? `換 ${discardCount} 張手牌 (已選取 ${discardCount} 張棄置)` : '保留 5 張手牌 (不棄牌)';
         const aRes = `手牌已備妥 (${game.ai.hand.length}/5)`;
         setBannerInfo(`第 ${game.round} 輪`, '抽牌階段', pRes, aRes);
@@ -9967,6 +10004,19 @@
 
       } else if (game.phase === 'DEPLOY') {
         bannerIcon.textContent = '🏰';
+
+        // 【聯機部署等待鎖定】
+        if (PvPManager.isOnline && PvPManager.myReadyState.deploy) {
+          setBannerInfo(`第 ${game.round} 輪`, '部署階段', '✅ 你已鎖定部署，等待對手...', '對手排兵佈陣中...');
+          const btnWait = document.createElement('button');
+          btnWait.className = 'btn btn-slate';
+          btnWait.disabled = true;
+          btnWait.style.cssText = 'opacity:0.65; cursor:not-allowed; padding:2px 10px; font-size:10px; font-weight:800; border-radius:6px; min-height:34px; justify-content:center;';
+          btnWait.innerHTML = `<span>⏳ 等待對手</span><span style="font-size:8px; opacity:0.8;">對手開牌中...</span>`;
+          bannerActions.appendChild(btnWait);
+          return;
+        }
+
         const placed = game.player.facedownSlots ? game.player.facedownSlots.size : Math.max(0, game.playerDeploymentsThisRound);
         game.playerDeploymentsThisRound = placed;
         const preview = getDeployConfirmationPreview();
@@ -10126,6 +10176,8 @@
     }
     function handleConfirmDraw() {
       if (PvPManager.isOnline) {
+        if (PvPManager.myReadyState.draw) return; // 防重複觸發
+
         const kept = [];
         const discardedArr = [];
         game.player.hand.forEach((card, idx) => {
@@ -10141,7 +10193,10 @@
         const need = 5 - game.player.hand.length;
 
         if (PvPManager.role === 'host') {
-          // 房主直接從 deck 補牌
+          // 房主直接從主 deck 補牌，並將自己棄嘅牌推入主 discardPile (官方洗牌規則)
+          if (discardedArr.length > 0) {
+            game.discardPile.push(...discardedArr);
+          }
           if (need > 0) {
             game.player.hand.push(...game.drawCards(need));
           }
@@ -10149,8 +10204,12 @@
           PvPManager.send('DRAW_READY', {});
           PvPManager.checkDrawPhaseBarrier();
         } else {
-          // 訪客向房主請求補發 need 張牌
-          PvPManager.send('GUEST_DRAW_REQUEST', { needCount: need });
+          // 訪客向房主請求補發 need 張牌，並送出自己棄嘅卡牌存入主棄牌堆
+          PvPManager.myReadyState.draw = true;
+          PvPManager.send('GUEST_DRAW_REQUEST', { 
+            needCount: need,
+            discardedCards: discardedArr
+          });
         }
 
         updateUI();
@@ -10586,6 +10645,8 @@
 
     function handleFinishDeploy() {
       if (PvPManager.isOnline) {
+        if (PvPManager.myReadyState.deploy) return; // 防重複觸發
+
         const placedSlots = Array.from(game.player.facedownSlots || []);
         const placedItems = placedSlots.map(s => ({ slot: s, card: game.player.grid[s] })).filter(x => x.card);
         const placedCount = placedItems.length;
@@ -10601,7 +10662,7 @@
 
         logMessage('⏳ 你已確認暗置部隊，等待對手確認後同時開牌...');
         PvPManager.checkDeployPhaseBarrier();
-        renderBanner();
+        updateUI();
         return;
       }
 
@@ -13928,6 +13989,10 @@
           case 'GUEST_DRAW_REQUEST':
             // 房主收到訪客補牌請求
             if (this.role === 'host') {
+              // 將訪客棄嘅牌存入官方主棄牌堆 (官方洗牌規則)
+              if (payload.discardedCards && payload.discardedCards.length > 0) {
+                game.discardPile.push(...payload.discardedCards);
+              }
               const count = payload.needCount || 0;
               const newCards = game.drawCards(count);
               this.send('HOST_DRAW_REFILL', { newCards });
@@ -14052,15 +14117,89 @@
         this.opponentReadyState.deploy = false;
 
         // 將自己本輪 pending 的真實卡牌放入棋盤
+        const revealedPlayer = [];
         this.myPendingDeploy.forEach(({ slot, card }) => {
           game.player.grid[slot] = card;
+          revealedPlayer.push(slot);
         });
         this.myPendingDeploy = [];
         game.player.facedownSlots.clear();
 
+        const revealedOpponent = Array.from(this.opponentFacedownSlots || []);
+        this.opponentFacedownSlots.clear();
+        game.ai.facedownSlots.clear();
+
+        game.justRevealedSlots.player = new Set(revealedPlayer);
+        game.justRevealedSlots.ai = new Set(revealedOpponent);
+
         Sound.flip();
+
+        // 觸發雙方部署即時效果與連線檢查
+        const pItems = [];
+        const revealDetails = [];
+        revealedPlayer.forEach(slot => {
+          const card = game.player.grid[slot];
+          if (card) {
+            const effGain = game.triggerDeployEffects(game.player, card, true, slot);
+            if (effGain) {
+              pItems.push(effGain.short);
+              revealDetails.push(effGain.detail);
+            }
+          }
+        });
+        const pLineGains = game.checkLineBonuses(game.player, true);
+        if (pLineGains && pLineGains.length > 0) {
+          pLineGains.forEach(lg => {
+            pItems.push(lg.short);
+            revealDetails.push(lg.detail);
+          });
+          const comboList = pLineGains.filter(g => g.vfx).map(g => g.vfx);
+          if (comboList.length > 0) LineComboVFX.play(comboList);
+        }
+
+        const aItems = [];
+        revealedOpponent.forEach(slot => {
+          const card = game.ai.grid[slot];
+          if (card) {
+            const effGain = game.triggerDeployEffects(game.ai, card, false, slot);
+            if (effGain) {
+              aItems.push(effGain.short);
+              revealDetails.push(effGain.detail);
+            }
+          }
+        });
+        const aLineGains = game.checkLineBonuses(game.ai, false);
+        if (aLineGains && aLineGains.length > 0) {
+          aLineGains.forEach(lg => {
+            aItems.push(lg.short);
+            revealDetails.push(lg.detail);
+          });
+        }
+
+        game.phaseGains = {
+          phase: 'REVEAL',
+          player: pItems.length > 0 ? pItems.join('、') : '部隊進駐就位',
+          ai: aItems.length > 0 ? aItems.join('、') : '部隊進駐就位'
+        };
+
+        addHistoryPhaseCard({
+          round: game.round,
+          phaseName: '部署揭曉',
+          icon: '⚡',
+          title: '部隊進駐與即時資源',
+          playerText: game.phaseGains.player,
+          aiText: game.phaseGains.ai,
+          details: revealDetails
+        });
+
         updateUI();
         logMessage('⚡ 雙方同時開牌揭曉！點擊「進入戰爭」開始兩軍交鋒。');
+
+        setTimeout(() => {
+          game.justRevealedSlots.player.clear();
+          game.justRevealedSlots.ai.clear();
+          renderGrids();
+        }, 650);
       },
 
       syncPhaseAdvance(targetPhase, nextRound) {
@@ -14421,66 +14560,78 @@ window.onload = () => {
       centerActions.innerHTML = '';
 
       if (handIdx !== null && game.phase === 'DEPLOY') {
-        const placedCount = (game.player.facedownSlots ? game.player.facedownSlots.size : 0);
-        const isLimitReached = (placedCount >= 2);
-        const canAfford = (card.cost <= game.player.gold);
-        const btnDeploy = document.createElement('button');
-        if (isLimitReached) {
-          btnDeploy.className = 'btn btn-slate';
-          btnDeploy.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; opacity:0.65; cursor:not-allowed; width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
-          btnDeploy.textContent = `⚠️ 本輪部署已達上限 (2/2)`;
-          btnDeploy.onclick = (e) => {
+        if (PvPManager.isOnline && PvPManager.myReadyState.deploy) {
+          // 【聯機鎖定】已鎖定部署，不顯示操作按鈕
+        } else {
+          const placedCount = (game.player.facedownSlots ? game.player.facedownSlots.size : 0);
+          const isLimitReached = (placedCount >= 2);
+          const canAfford = (card.cost <= game.player.gold);
+          const btnDeploy = document.createElement('button');
+          if (isLimitReached) {
+            btnDeploy.className = 'btn btn-slate';
+            btnDeploy.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; opacity:0.65; cursor:not-allowed; width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
+            btnDeploy.textContent = `⚠️ 本輪部署已達上限 (2/2)`;
+            btnDeploy.onclick = (e) => {
+              e.stopPropagation();
+            };
+          } else if (canAfford) {
+            btnDeploy.className = 'btn btn-gold';
+            btnDeploy.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; box-shadow:0 4px 14px rgba(245,158,11,0.4); width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
+            btnDeploy.textContent = `✨ 準備部署 (💰${card.cost})`;
+            btnDeploy.onclick = (e) => {
+              e.stopPropagation();
+              closeCenterCardModal();
+              handleCardClick(handIdx);
+            };
+          } else {
+            btnDeploy.className = 'btn btn-slate';
+            btnDeploy.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; opacity:0.65; cursor:not-allowed; width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
+            btnDeploy.textContent = `⚠️ 金幣不足 (需 💰${card.cost})`;
+            btnDeploy.onclick = (e) => {
+              e.stopPropagation();
+            };
+          }
+          centerActions.appendChild(btnDeploy);
+        }
+      } else if (handIdx !== null && game.phase === 'DRAW') {
+        if (PvPManager.isOnline && PvPManager.myReadyState.draw) {
+          // 【聯機鎖定】已確認抽牌，不顯示棄牌/保留按鈕
+        } else {
+          const isMarked = game.discardSelections.has(handIdx);
+          const btnDiscard = document.createElement('button');
+          btnDiscard.className = isMarked ? 'btn btn-slate' : 'btn btn-red';
+          btnDiscard.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; box-shadow:0 4px 14px rgba(0,0,0,0.6); width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
+          btnDiscard.textContent = isMarked ? '↩️ 保留此牌' : '🗑️ 標記棄牌';
+          btnDiscard.onclick = (e) => {
             e.stopPropagation();
+            if (game.discardSelections.has(handIdx)) {
+              game.discardSelections.delete(handIdx);
+              try { Sound.click(); } catch (err) {}
+            } else {
+              game.discardSelections.add(handIdx);
+              try { Sound.cardDrop(); } catch (err) {}
+            }
+            closeCenterCardModal();
+            renderHand();
+            renderBanner();
           };
-        } else if (canAfford) {
-          btnDeploy.className = 'btn btn-gold';
-          btnDeploy.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; box-shadow:0 4px 14px rgba(245,158,11,0.4); width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
-          btnDeploy.textContent = `✨ 準備部署 (💰${card.cost})`;
-          btnDeploy.onclick = (e) => {
+          centerActions.appendChild(btnDiscard);
+        }
+      } else if (slotIdx !== null && isFacedown && game.phase === 'DEPLOY') {
+        if (PvPManager.isOnline && PvPManager.myReadyState.deploy) {
+          // 【聯機鎖定】已鎖定部署，不顯示撤回按鈕
+        } else {
+          const btnUndo = document.createElement('button');
+          btnUndo.className = 'btn btn-gold';
+          btnUndo.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; box-shadow:0 4px 14px rgba(245,158,11,0.4); width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
+          btnUndo.textContent = `↩️ 撤回卡牌 (+${card.cost} 金幣)`;
+          btnUndo.onclick = (e) => {
             e.stopPropagation();
             closeCenterCardModal();
-            handleCardClick(handIdx);
+            handleUndoPlaceCard(slotIdx);
           };
-        } else {
-          btnDeploy.className = 'btn btn-slate';
-          btnDeploy.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; opacity:0.65; cursor:not-allowed; width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
-          btnDeploy.textContent = `⚠️ 金幣不足 (需 💰${card.cost})`;
-          btnDeploy.onclick = (e) => {
-            e.stopPropagation();
-          };
+          centerActions.appendChild(btnUndo);
         }
-        centerActions.appendChild(btnDeploy);
-      } else if (handIdx !== null && game.phase === 'DRAW') {
-        const isMarked = game.discardSelections.has(handIdx);
-        const btnDiscard = document.createElement('button');
-        btnDiscard.className = isMarked ? 'btn btn-slate' : 'btn btn-red';
-        btnDiscard.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; box-shadow:0 4px 14px rgba(0,0,0,0.6); width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
-        btnDiscard.textContent = isMarked ? '↩️ 保留此牌' : '🗑️ 標記棄牌';
-        btnDiscard.onclick = (e) => {
-          e.stopPropagation();
-          if (game.discardSelections.has(handIdx)) {
-            game.discardSelections.delete(handIdx);
-            try { Sound.click(); } catch (err) {}
-          } else {
-            game.discardSelections.add(handIdx);
-            try { Sound.cardDrop(); } catch (err) {}
-          }
-          closeCenterCardModal();
-          renderHand();
-          renderBanner();
-        };
-        centerActions.appendChild(btnDiscard);
-      } else if (slotIdx !== null && isFacedown && game.phase === 'DEPLOY') {
-        const btnUndo = document.createElement('button');
-        btnUndo.className = 'btn btn-gold';
-        btnUndo.style.cssText = 'padding:8px 22px; font-size:12.5px; font-weight:800; border-radius:20px; box-shadow:0 4px 14px rgba(245,158,11,0.4); width:auto; display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0 auto;';
-        btnUndo.textContent = `↩️ 撤回卡牌 (+${card.cost} 金幣)`;
-        btnUndo.onclick = (e) => {
-          e.stopPropagation();
-          closeCenterCardModal();
-          handleUndoPlaceCard(slotIdx);
-        };
-        centerActions.appendChild(btnUndo);
       }
 
       // 「關閉 ✕」按鈕：嚴格置中（內文字與按鈕本身均水平置中），圓角膠囊造型
