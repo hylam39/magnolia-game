@@ -5195,34 +5195,11 @@
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
 
-  
-    /* P2P WebRTC Multiplayer Animations & Elements */
-    .p2p-pulse-dot {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #eab308;
-      animation: pulse-p2p-dot 1.2s infinite ease-in-out;
-      box-shadow: 0 0 6px currentColor;
-    }
-    @keyframes pulse-p2p-dot {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1.25); }
-    }
-    .p2p-active-border {
-      border-color: #c084fc !important;
-      box-shadow: 0 0 12px rgba(192, 132, 252, 0.4) !important;
-    }
-    .btn-p2p-gold {
-      background: linear-gradient(135deg, #c084fc, #9333ea) !important;
-      color: #ffffff !important;
-      border-color: #e9d5ff !important;
-      box-shadow: 0 0 10px rgba(192, 132, 252, 0.4) !important;
-    }
-
   </style>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+  <!-- PeerJS SDK (WebRTC P2P for zero-config direct browser-to-browser gaming) -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
 </head>
 <body>
 
@@ -5234,11 +5211,6 @@
       </span>
       <span style="color:#475569; font-size:12px;">|</span>
       <span id="round-indicator" style="font-size:12px; font-weight:700; color:#fbbf24;">第 1 輪</span>
-      <!-- P2P 房號狀態標籤 -->
-      <span id="p2p-header-badge" class="stat-pill" style="display:none; background:rgba(126,34,206,0.3); border:1px solid #c084fc; color:#f5d0fe; font-size:9.5px; padding:1px 6px; gap:4px;" title="P2P 雙人對戰進行中">
-        <span>👥 房號: <strong id="p2p-room-code-badge" style="color:#fef08a; font-family:monospace;"></strong></span>
-      </span>
-
       <!-- 電子遊戲式 6 大階段動態符文進度軌 -->
       <div class="phase-stepper-hud" id="phase-stepper-hud" title="當前輪次六大階段流程">
         <span class="phase-step-pill step-active" data-step="DRAW">🃏抽牌</span>
@@ -5265,6 +5237,10 @@
     </div>
 
     <div class="header-menu-wrap" id="header-menu-wrap">
+      <button id="btn-header-pvp" class="btn btn-slate" style="padding:3px 8px; border-color:rgba(56,189,248,0.55); color:#7dd3fc; font-weight:800; gap:3px;" title="開啟雙人網上對戰大廳">
+        <span id="header-pvp-icon">🌐</span>
+        <span id="header-pvp-label">雙人對戰</span>
+      </button>
       <button id="btn-header-home" class="btn btn-slate" style="padding:3px 8px; border-color:rgba(245,158,11,0.5); color:#fde047; font-weight:800; gap:3px;" title="返回遊戲主頁面 (開始/繼續/圖鑑/戰績)">
         <span>🏰</span>
         <span>主頁</span>
@@ -5284,14 +5260,13 @@
       <span style="font-size:9px; color:#64748b;">點擊切換</span>
     </div>
     <div class="options-menu-grid">
+            <button id="btn-popover-pvp" class="btn btn-slate" style="border-color:rgba(56,189,248,0.5); color:#7dd3fc;" title="開啟雙人網上對戰大廳">
+        <span>🌐</span>
+        <span>雙人對戰</span>
+      </button>
       <button id="btn-title-menu" class="btn btn-slate" style="border-color:rgba(245,158,11,0.45); color:#fde047;" title="開啟遊戲主頁面 (開始/繼續/圖鑑/戰績)">
         <span>🏰</span>
         <span>主頁</span>
-      </button>
-      
-      <button id="btn-popover-p2p" class="btn btn-slate" style="border-color:rgba(168,85,247,0.5); color:#d8b4fe;" title="雙人 P2P 免費即時連線對戰">
-        <span>👥</span>
-        <span id="p2p-popover-btn-text">P2P連線</span>
       </button>
       <button id="btn-difficulty" class="btn btn-slate" title="切換電腦 AI 領主難度（休閒 / 平衡 / 大師）">
         <span id="diff-icon">🤖</span>
@@ -5836,6 +5811,14 @@
 
       <!-- Main Menu Buttons List (主頁按鈕清單) -->
       <div class="title-menu-list">
+                <button id="btn-main-pvp" class="title-menu-item" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.22) 0%, rgba(2, 132, 199, 0.32) 100%), #0f172a; border-color: #38bdf8; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.22);" title="雙人跨裝置實時聯機對戰">
+          <div class="title-menu-icon" style="background: linear-gradient(135deg, #38bdf8, #0284c7); color: #020617;">🌐</div>
+          <div class="title-menu-text">
+            <div class="title-menu-title" style="color: #7dd3fc;">雙人網上對戰 (零設定 P2P 開箱即玩)</div>
+            <div class="title-menu-sub">創建房間／邀請好友，零帳號免設定，即時跨裝置連線切磋</div>
+          </div>
+          <div class="title-menu-arrow" style="color: #38bdf8;">▶</div>
+        </button>
         <button id="btn-main-start" class="title-menu-item title-menu-primary" title="選擇挑戰難度並開始全新戰局">
           <div class="title-menu-icon">⚔️</div>
           <div class="title-menu-text">
@@ -5843,16 +5826,6 @@
             <div class="title-menu-sub">挑選 AI 領主（休閒/平衡/大師），開啟全新戰局</div>
           </div>
           <div class="title-menu-arrow">▶</div>
-        </button>
-
-        
-        <button id="btn-main-p2p" class="title-menu-item" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.22) 0%, rgba(126, 34, 206, 0.35) 100%), #0f172a; border-color: #c084fc; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.25);" title="建立或加入房間，兩部 iPhone/iPad 直連對戰">
-          <div class="title-menu-icon" style="background: linear-gradient(135deg, #c084fc, #9333ea); color: #fff;">👥</div>
-          <div class="title-menu-text">
-            <div class="title-menu-title" style="color: #f5d0fe;">P2P 雙人即時對戰 (免伺服器)</div>
-            <div class="title-menu-sub">輸入房號直連 · SHA-256 同步暗置、同時開牌</div>
-          </div>
-          <div class="title-menu-arrow" style="color: #c084fc;">▶</div>
         </button>
 
         <button id="btn-main-continue" class="title-menu-item title-menu-secondary" title="返回當前進行中的戰局">
@@ -6126,582 +6099,9 @@
     <div id="center-card-actions" class="center-card-actions-bar"></div>
   </div>
     
-
-  <!-- P2P WebRTC Multiplayer Modal (P2P 雙人即時連線對戰室) -->
-  <div id="p2p-modal" class="modal-backdrop hidden" style="z-index:250;">
-    <div class="modal-box" style="max-width:480px; width:95vw; max-height:90vh; border-color:#c084fc; box-shadow:0 25px 60px rgba(0,0,0,0.95), 0 0 35px rgba(168,85,247,0.3);">
-      <!-- Header -->
-      <div style="padding:10px 14px; border-bottom:1px solid #334155; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(90deg, rgba(30,27,75,0.95), rgba(15,23,42,0.98));">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:18px;">👥</span>
-          <div>
-            <h3 style="font-weight:800; color:#f5d0fe; font-size:13.5px; letter-spacing:0.5px;">P2P 雙人免費即時連線對戰</h3>
-            <div style="font-size:9.5px; color:#c084fc;">WebRTC / PeerJS 直連 · 無需後端維護成本</div>
-          </div>
-        </div>
-        <button id="btn-close-p2p-modal" style="background:none; border:none; color:#cbd5e1; font-size:18px; cursor:pointer;" title="關閉視窗">✕</button>
-      </div>
-
-      <!-- Mode Switch Tabs -->
-      <div style="display:flex; border-bottom:1px solid #1e293b; background:#0b1120;">
-        <button id="p2p-tab-host" class="modal-tab-btn active" style="flex:1; padding:8px; font-size:11.5px; color:#e9d5ff; border-bottom-color:#c084fc;">🏠 建立房間 (開房 Host)</button>
-        <button id="p2p-tab-join" class="modal-tab-btn" style="flex:1; padding:8px; font-size:11.5px;">🚪 加入房間 (入房 Join)</button>
-      </div>
-
-      <!-- Modal Body -->
-      <div style="padding:14px; display:flex; flex-direction:column; gap:12px; font-size:11.5px; overflow-y:auto; max-height:65vh;">
-        <!-- TAB 1: HOST -->
-        <div id="p2p-panel-host" style="display:flex; flex-direction:column; gap:10px;">
-          <div style="color:#cbd5e1; line-height:1.45;">
-            利用瀏覽器 WebRTC 技術，自動產生一組專屬房號。另一部 iPhone/iPad 輸入相同房號即可直連，實現<strong>同步暗置、同時開牌</strong>！
-          </div>
-
-          <!-- Room Code Display Box -->
-          <div style="background:#020617; border:1.5px solid rgba(168,85,247,0.6); border-radius:10px; padding:12px; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow:inset 0 0 15px rgba(0,0,0,0.8);">
-            <div style="font-size:10.5px; font-weight:700; color:#c084fc; letter-spacing:1px;">✦ 你的對戰房間號碼 ✦</div>
-            <div id="p2p-host-code-display" style="font-family:ui-monospace, Menlo, monospace; font-size:26px; font-weight:900; color:#fef08a; letter-spacing:6px; text-shadow:0 0 12px rgba(251,191,36,0.6);">
-              ------
-            </div>
-            <div id="p2p-host-status" style="font-size:10px; color:#94a3b8; display:flex; align-items:center; gap:5px;">
-              <span class="p2p-pulse-dot"></span>
-              <span id="p2p-host-status-text">點擊下方按鈕啟動房間</span>
-            </div>
-          </div>
-
-          <!-- Copy Buttons -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-            <button id="btn-p2p-copy-code" class="btn btn-slate" style="justify-content:center; padding:7px 10px; border-color:rgba(168,85,247,0.5); color:#e9d5ff; font-weight:700;">
-              <span>📋 複製 5 位房號</span>
-            </button>
-            <button id="btn-p2p-copy-link" class="btn btn-slate" style="justify-content:center; padding:7px 10px; border-color:rgba(168,85,247,0.5); color:#e9d5ff; font-weight:700;">
-              <span>🔗 複製對戰網址</span>
-            </button>
-          </div>
-
-          <div style="display:flex; justify-content:center;">
-            <button id="btn-p2p-refresh-code" class="btn btn-slate" style="font-size:10px; color:#94a3b8; padding:3px 10px;">
-              🔄 更換新房號
-            </button>
-          </div>
-        </div>
-
-        <!-- TAB 2: JOIN -->
-        <div id="p2p-panel-join" style="display:none; flex-direction:column; gap:10px;">
-          <div style="color:#cbd5e1; line-height:1.45;">
-            請向房主索取 5 位房間號碼，輸入後點擊「加入對戰」即可立即連線進房：
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <label style="font-size:10.5px; font-weight:700; color:#c084fc;">輸入房號：</label>
-            <input type="text" id="p2p-join-input" placeholder="例如: 84920" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" style="background:#020617; border:2px solid #a855f7; border-radius:8px; padding:10px; font-size:22px; font-family:ui-monospace, Menlo, monospace; font-weight:900; color:#fef08a; text-align:center; letter-spacing:5px; outline:none; text-transform:uppercase;">
-          </div>
-
-          <div id="p2p-join-status" style="font-size:10.5px; color:#94a3b8; min-height:16px; text-align:center;">
-            請輸入 5 位房號後點擊下方按鈕
-          </div>
-
-          <button id="btn-p2p-join-action" class="btn btn-gold" style="width:100%; justify-content:center; padding:9px; font-size:13px; font-weight:900; background:linear-gradient(135deg, #c084fc, #9333ea); color:#fff; border-color:#e9d5ff; box-shadow:0 4px 14px rgba(147,51,234,0.45);">
-            <span>⚔️ 連線加入對戰！</span>
-          </button>
-        </div>
-
-        <!-- Security / Anti-Cheat Feature Box -->
-        <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(168,85,247,0.3); border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:4px; font-size:10px; color:#94a3b8; line-height:1.4;">
-          <div style="display:flex; align-items:center; gap:4px; font-weight:800; color:#c084fc;">
-            <span>🛡️ 安全防作弊機制已啟用：</span>
-          </div>
-          <div>• <strong>密碼學承諾（SHA-256 Commit-Reveal）</strong>：暗置時僅交換加密雜湊值，開牌時校驗比對，防止任何一方偷睇暗牌或事後偷換卡牌！</div>
-          <div>• <strong>端到端 WebRTC 加密</strong>：雙方裝置透過 DTLS 加密通道直接通訊，無第三方窺探。</div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div style="padding:8px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:space-between; background:#0b1120;">
-        <span style="font-size:9.5px; color:#64748b;">💡 支持兩部 iPhone / iPad / 電腦同室或遠程直連</span>
-        <button id="btn-close-p2p-bottom" class="btn btn-slate" style="padding:4px 12px; font-size:10.5px;">關閉</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- P2P Disconnected Alert Modal -->
-  <div id="p2p-disconnect-modal" class="modal-backdrop hidden" style="z-index:260;">
-    <div class="modal-box" style="max-width:380px;">
-      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; align-items:center; gap:6px; background:#0f172a;">
-        <span style="font-size:16px;">⚠️</span>
-        <h3 style="font-weight:800; color:#fca5a5; font-size:13px;">對手已中斷連線</h3>
-      </div>
-      <div style="padding:14px; font-size:11.5px; color:#cbd5e1; line-height:1.55;">
-        對手玩家已離開對局或網絡連線中斷。<br>
-        你可以選擇由電腦 AI 接管對手陣容繼續完成本局，或返回遊戲主頁面。
-      </div>
-      <div style="padding:8px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:flex-end; gap:8px; background:#0b1120;">
-        <button id="btn-p2p-ai-takeover" class="btn btn-gold" style="padding:5px 14px; font-size:11px; font-weight:800;">🤖 由 AI 接管繼續</button>
-        <button id="btn-p2p-return-home" class="btn btn-slate" style="padding:5px 14px; font-size:11px;">🏰 返回主頁</button>
-      </div>
-    </div>
-  </div>
-
 <script>
     // 100% 離線純 Web Audio API 合成音效引擎
-
-    // =========================================================
-    // 🔒 密碼學安全引擎：SHA-256 雜湊承諾計算 (Commit-Reveal)
-    // =========================================================
-    function sha256Sync(ascii) {
-      function rightRotate(value, amount) {
-        return (value >>> amount) | (value << (32 - amount));
-      }
-      var mathPow = Math.pow;
-      var maxWord = mathPow(2, 32);
-      var lengthProperty = 'length';
-      var i, j;
-      var result = '';
-      var words = [];
-      var asciiBitLength = ascii[lengthProperty] * 8;
-      var hash = [];
-      var k = [];
-      var primeCounter = 0;
-      var isComposite = {};
-      for (var candidate = 2; primeCounter < 64; candidate++) {
-        if (!isComposite[candidate]) {
-          for (i = 0; i < 313; i += candidate) {
-            isComposite[i] = candidate;
-          }
-          hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
-          k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
-        }
-      }
-      ascii += '\x80';
-      while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
-      for (i = 0; i < ascii[lengthProperty]; i++) {
-        j = ascii.charCodeAt(i);
-        if (j >> 8) return '';
-        words[i >> 2] |= j << ((3 - i) % 4) * 8;
-      }
-      words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
-      words[words[lengthProperty]] = (asciiBitLength);
-      for (j = 0; j < words[lengthProperty];) {
-        var w = words.slice(j, j += 16);
-        var oldHash = hash;
-        hash = hash.slice(0, 8);
-        for (i = 0; i < 64; i++) {
-          var i2 = i + j;
-          var w15 = w[i - 15], w2 = w[i - 2];
-          var a = hash[0], e = hash[4];
-          var temp1 = hash[7]
-            + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
-            + ((e & hash[5]) ^ ((~e) & hash[6]))
-            + k[i]
-            + (w[i] = (i < 16) ? w[i] : (
-              w[i - 16]
-              + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
-              + w[i - 7]
-              + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
-            ) | 0);
-          var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
-            + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
-          hash = [(temp1 + temp2) | 0].concat(hash);
-          hash[4] = (hash[4] + temp1) | 0;
-        }
-        for (i = 0; i < 8; i++) {
-          hash[i] = (hash[i] + oldHash[i]) | 0;
-        }
-      }
-      for (i = 0; i < 8; i++) {
-        for (j = 3; j + 1; j--) {
-          var b = (hash[i] >> (j * 8)) & 255;
-          result += ((b < 16) ? 0 : '') + b.toString(16);
-        }
-      }
-      return result;
-    }
-
-    async function sha256(str) {
-      if (window.crypto && window.crypto.subtle && window.crypto.subtle.digest) {
-        try {
-          const buf = new TextEncoder().encode(str);
-          const hashBuf = await window.crypto.subtle.digest('SHA-256', buf);
-          return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        } catch(e) {}
-      }
-      return sha256Sync(str);
-    }
-
-    // =========================================================
-    // 📡 P2P 即時連線管理器 (WebRTC PeerJS Engine)
-    // =========================================================
-    const P2PManager = {
-      peer: null,
-      conn: null,
-      isP2P: false,
-      isHost: false,
-      roomCode: '',
-      localDrawReady: false,
-      remoteDrawReady: false,
-      localDiscardIndices: [],
-      remoteDiscardCount: 0,
-      localDeployCommitted: false,
-      remoteDeployCommitted: false,
-      localCommitData: null,
-      remoteCommitHashes: {},
-      remoteCompensation: 0,
-      localPhaseReady: false,
-      remotePhaseReady: false,
-
-      generateRoomCode() {
-        return Math.floor(10000 + Math.random() * 90000).toString();
-      },
-
-      getPeerId(code) {
-        return 'mgla-' + code.toUpperCase();
-      },
-
-      initHost() {
-        this.cleanup();
-        this.isHost = true;
-        this.roomCode = this.generateRoomCode();
-        const peerId = this.getPeerId(this.roomCode);
-
-        const displayEl = document.getElementById('p2p-host-code-display');
-        const statusEl = document.getElementById('p2p-host-status-text');
-        if (displayEl) displayEl.textContent = this.roomCode;
-        if (statusEl) statusEl.textContent = '正在向 WebRTC 註冊房號...';
-
-        if (typeof Peer === 'undefined') {
-          if (statusEl) statusEl.textContent = '⚠️ PeerJS 載入中，請檢查網絡連線...';
-          return;
-        }
-
-        try {
-          this.peer = new Peer(peerId, { debug: 1 });
-        } catch (e) {
-          if (statusEl) statusEl.textContent = '❌ 初始化失敗: ' + (e.message || e);
-          return;
-        }
-
-        this.peer.on('open', (id) => {
-          if (statusEl) statusEl.innerHTML = '<span style="color:#4ade80;">🟢 房間已就緒！等待對手加入...</span>';
-        });
-
-        this.peer.on('connection', (connection) => {
-          this.conn = connection;
-          this.setupConnection();
-        });
-
-        this.peer.on('error', (err) => {
-          if (err.type === 'unavailable-id') {
-            this.initHost();
-          } else {
-            if (statusEl) statusEl.textContent = '⚠️ 連線提示: ' + (err.type || err);
-          }
-        });
-      },
-
-      initJoin(roomCode) {
-        this.cleanup();
-        this.isHost = false;
-        this.roomCode = roomCode.trim().toUpperCase();
-        const targetPeerId = this.getPeerId(this.roomCode);
-
-        const statusEl = document.getElementById('p2p-join-status');
-        if (statusEl) statusEl.innerHTML = '<span style="color:#fde047;">🟡 正在搜尋房間並建立 WebRTC 直連...</span>';
-
-        if (typeof Peer === 'undefined') {
-          if (statusEl) statusEl.textContent = '⚠️ PeerJS 載入中，請稍候重試...';
-          return;
-        }
-
-        try {
-          this.peer = new Peer({ debug: 1 });
-        } catch (e) {
-          if (statusEl) statusEl.textContent = '❌ 初始化失敗: ' + (e.message || e);
-          return;
-        }
-
-        this.peer.on('open', () => {
-          const connection = this.peer.connect(targetPeerId, { reliable: true });
-          this.conn = connection;
-          this.setupConnection();
-        });
-
-        this.peer.on('error', (err) => {
-          if (statusEl) statusEl.innerHTML = '<span style="color:#f87171;">🔴 連線失敗：找不到房號【' + roomCode + '】或對手已離線</span>';
-        });
-      },
-
-      setupConnection() {
-        if (!this.conn) return;
-
-        this.conn.on('open', () => {
-          this.isP2P = true;
-          this.updateUIP2PStatus(true);
-          document.getElementById('p2p-modal').classList.add('hidden');
-          document.getElementById('title-screen-modal').classList.add('hidden');
-
-          if (this.isHost) {
-            this.startMatchAsHost();
-          }
-        });
-
-        this.conn.on('data', (data) => {
-          this.handleMessage(data);
-        });
-
-        this.conn.on('close', () => {
-          this.handleDisconnect();
-        });
-
-        this.conn.on('error', () => {
-          this.handleDisconnect();
-        });
-      },
-
-      send(msg) {
-        if (this.conn && this.conn.open) {
-          try {
-            this.conn.send(msg);
-          } catch (e) {}
-        }
-      },
-
-      updateUIP2PStatus(active) {
-        const badge = document.getElementById('p2p-header-badge');
-        const badgeRoom = document.getElementById('p2p-room-code-badge');
-        const aiTitle = document.getElementById('ai-lord-title');
-        const aiName = document.getElementById('ai-lord-name');
-        const aiAvatar = document.getElementById('ai-lord-avatar');
-        const popoverText = document.getElementById('p2p-popover-btn-text');
-
-        if (badge) badge.style.display = active ? 'inline-flex' : 'none';
-        if (badgeRoom) badgeRoom.textContent = this.roomCode;
-
-        if (active) {
-          if (aiTitle) aiTitle.textContent = this.isHost ? '連線客座' : '連線房主';
-          if (aiName) aiName.textContent = '對手玩家';
-          if (aiAvatar) aiAvatar.textContent = '👤';
-          if (popoverText) popoverText.textContent = '退出連線';
-          const duelAiTitle = document.querySelector('.ai-vp-row .duel-vp-title');
-          if (duelAiTitle) duelAiTitle.innerHTML = '<span style="color:#f87171;">👤 對手 VP</span>';
-        } else {
-          if (popoverText) popoverText.textContent = 'P2P連線';
-          const duelAiTitle = document.querySelector('.ai-vp-row .duel-vp-title');
-          if (duelAiTitle) duelAiTitle.innerHTML = '<span style="color:#f87171;">🤖 AI VP</span>';
-          if (typeof syncAiLordUI === 'function') syncAiLordUI();
-        }
-      },
-
-      startMatchAsHost() {
-        resetGameInternal(true);
-        const hostHandIds = game.player.hand.map(c => c.id);
-        const guestHandIds = game.ai.hand.map(c => c.id);
-        const deckIds = game.deck.map(c => c.id);
-
-        this.send({
-          type: 'INIT_SYNC',
-          deckIds,
-          hostHandIds,
-          guestHandIds,
-          roomCode: this.roomCode
-        });
-
-        logMessage(`👥 <strong>【P2P 雙人對戰開始】</strong>你以<strong>房主</strong>身分就位 (房間: ${this.roomCode})`);
-        updateUI();
-      },
-
-      handleMessage(msg) {
-        if (!msg || !msg.type) return;
-
-        if (msg.type === 'INIT_SYNC') {
-          resetGameInternal(true);
-          const makeCard = (id, idx) => {
-            const def = CARD_DB.find(c => c.id === id);
-            return {
-              ...def,
-              uid: `${def.id}-${idx}-${Math.random()}`,
-              matchStats: { vp:0, gold:0, tech:0, faith:0, warRounds:0, warPowerTotal:0 }
-            };
-          };
-
-          game.player.hand = msg.guestHandIds.map((id, i) => makeCard(id, i));
-          game.ai.hand = msg.hostHandIds.map((id, i) => makeCard(id, i));
-          game.deck = msg.deckIds.map((id, i) => makeCard(id, i));
-
-          this.roomCode = msg.roomCode || this.roomCode;
-          this.updateUIP2PStatus(true);
-          logMessage(`👥 <strong>【P2P 雙人對戰開始】</strong>已成功連線至房間 <strong>${this.roomCode}</strong>`);
-          updateUI();
-        } else if (msg.type === 'DRAW_DISCARD') {
-          this.remoteDrawReady = true;
-          this.remoteDiscardCount = msg.discardCount || 0;
-          this.remoteDiscardIndices = msg.discardIndices || [];
-
-          if (this.localDrawReady) {
-            this.resolveDrawPhaseP2P();
-          } else {
-            renderBanner();
-          }
-        } else if (msg.type === 'DRAW_RESOLVED_SYNC') {
-          const makeCard = (id, idx) => {
-            const def = CARD_DB.find(c => c.id === id);
-            return {
-              ...def,
-              uid: `${def.id}-${idx}-${Math.random()}`,
-              matchStats: { vp:0, gold:0, tech:0, faith:0, warRounds:0, warPowerTotal:0 }
-            };
-          };
-          msg.guestNewCards.forEach((id, i) => {
-            game.player.hand.push(makeCard(id, i));
-          });
-          game.ai.hand = msg.hostHandIds.map((id, i) => makeCard(id, i));
-          game.deck = msg.remainingDeckIds.map((id, i) => makeCard(id, i));
-
-          this.localDrawReady = false;
-          this.remoteDrawReady = false;
-          game.phase = 'DEPLOY';
-          game.playerDeploymentsThisRound = 0;
-          game.player.facedownSlots.clear();
-          game.ai.facedownSlots.clear();
-          updateUI();
-        } else if (msg.type === 'DEPLOY_SLOTS_UPDATE') {
-          game.ai.facedownSlots = new Set(msg.slots || []);
-          renderGrids();
-          renderBanner();
-        } else if (msg.type === 'DEPLOY_COMMIT') {
-          this.remoteDeployCommitted = true;
-          this.remoteCommitHashes = {};
-          (msg.hashes || []).forEach(h => {
-            this.remoteCommitHashes[h.slot] = h.hash;
-          });
-          this.remoteCompensation = msg.compensation || 0;
-
-          if (this.localDeployCommitted) {
-            this.exchangeDeployReveals();
-          } else {
-            renderBanner();
-          }
-        } else if (msg.type === 'DEPLOY_REVEAL') {
-          this.processDeployReveal(msg.reveals || []);
-        } else if (msg.type === 'PHASE_READY') {
-          this.remotePhaseReady = true;
-          if (this.localPhaseReady) {
-            this.localPhaseReady = false;
-            this.remotePhaseReady = false;
-            executePhaseAdvanceDirect();
-          } else {
-            renderBanner();
-          }
-        } else if (msg.type === 'EMOTE') {
-          triggerAiSpeech('custom', msg.text || '...');
-        } else if (msg.type === 'REMATCH_REQ') {
-          if (this.isHost) {
-            this.startMatchAsHost();
-          } else {
-            floatPillText(document.getElementById('p-vp-num'), '對手邀請再來一局！', '#fbbf24');
-          }
-        }
-      },
-
-      resolveDrawPhaseP2P() {
-        if (!this.isHost) return;
-        const hostDrawCards = game.drawCards(this.localDiscardIndices.length);
-        game.player.hand.push(...hostDrawCards);
-
-        const guestDrawCards = game.drawCards(this.remoteDiscardCount);
-        const keptAi = [];
-        game.ai.hand.forEach((card, idx) => {
-          if (!this.remoteDiscardIndices.includes(idx)) keptAi.push(card);
-          else game.discardPile.push(card);
-        });
-        game.ai.hand = [...keptAi, ...guestDrawCards];
-
-        this.send({
-          type: 'DRAW_RESOLVED_SYNC',
-          hostHandIds: game.player.hand.map(c => c.id),
-          guestNewCards: guestDrawCards.map(c => c.id),
-          remainingDeckIds: game.deck.map(c => c.id)
-        });
-
-        this.localDrawReady = false;
-        this.remoteDrawReady = false;
-        game.phase = 'DEPLOY';
-        game.playerDeploymentsThisRound = 0;
-        game.player.facedownSlots.clear();
-        game.ai.facedownSlots.clear();
-        updateUI();
-      },
-
-      async exchangeDeployReveals() {
-        this.send({
-          type: 'DEPLOY_REVEAL',
-          reveals: this.localCommitData ? this.localCommitData.reveals : []
-        });
-      },
-
-      async processDeployReveal(reveals) {
-        let hasCheating = false;
-        for (const r of reveals) {
-          const expected = this.remoteCommitHashes[r.slot];
-          const actual = await sha256(r.slot + ':' + r.cardId + ':' + r.salt);
-          if (expected && expected !== actual) {
-            hasCheating = true;
-            break;
-          }
-        }
-
-        if (hasCheating) {
-          logMessage('⚠️ <strong>【作弊警報】</strong>檢測到對手開牌雜湊值不吻合（疑似事後換牌）！');
-        }
-
-        reveals.forEach(r => {
-          const def = CARD_DB.find(c => c.id === r.cardId);
-          if (def) {
-            game.ai.grid[r.slot] = {
-              ...def,
-              uid: `${def.id}-${Math.random()}`,
-              matchStats: { vp:0, gold:0, tech:0, faith:0, warRounds:0, warPowerTotal:0 }
-            };
-            game.ai.facedownSlots.add(r.slot);
-          }
-        });
-
-        game.ai.pendingCompensation = this.remoteCompensation;
-
-        this.localDeployCommitted = false;
-        this.remoteDeployCommitted = false;
-        this.localCommitData = null;
-
-        handleFinishDeployCore();
-      },
-
-      handleDisconnect() {
-        if (!this.isP2P) return;
-        this.isP2P = false;
-        this.updateUIP2PStatus(false);
-        const modal = document.getElementById('p2p-disconnect-modal');
-        if (modal) modal.classList.remove('hidden');
-      },
-
-      cleanup() {
-        if (this.conn) {
-          try { this.conn.close(); } catch(e){}
-          this.conn = null;
-        }
-        if (this.peer) {
-          try { this.peer.destroy(); } catch(e){}
-          this.peer = null;
-        }
-        this.isP2P = false;
-        this.localDrawReady = false;
-        this.remoteDrawReady = false;
-        this.localDeployCommitted = false;
-        this.remoteDeployCommitted = false;
-        this.localPhaseReady = false;
-        this.remotePhaseReady = false;
-        this.updateUIP2PStatus(false);
-      }
-    };
-
-        const Sound = {
+    const Sound = {
       cardDrop() {
         if (this.muted) return;
         try {
@@ -10295,13 +9695,6 @@
 
       logMessage(`🛡️ 你在格位 ${slotIdx + 1} <strong>暗置</strong>了【${card.name}】（開牌前點擊格位可隨時撤回）`);
 
-      if (P2PManager.isP2P) {
-        P2PManager.send({
-          type: 'DEPLOY_SLOTS_UPDATE',
-          slots: Array.from(game.player.facedownSlots)
-        });
-      }
-
       if (game.playerDeploymentsThisRound >= 2 || game.player.grid.filter(c => c !== null).length >= 9) {
         logMessage(`✅ 你本輪暗置已達上限（2張），請點擊「完成部署，同時開牌！」。`);
       }
@@ -10346,13 +9739,6 @@
       Sound.click();
 
       logMessage(`↩️ 你撤回了格位 ${slotIdx + 1} 的暗置卡牌【${card.name}】（退回 ${card.cost} 金）`);
-
-      if (P2PManager.isP2P) {
-        P2PManager.send({
-          type: 'DEPLOY_SLOTS_UPDATE',
-          slots: Array.from(game.player.facedownSlots)
-        });
-      }
       updateUI();
     }
 
@@ -10568,22 +9954,15 @@
 
         const btnDraw = document.createElement('button');
         btnDraw.className = 'btn btn-gold';
-
-        if (P2PManager.isP2P && P2PManager.localDrawReady) {
-          btnDraw.className = 'btn btn-slate';
-          btnDraw.innerHTML = `<span>已備妥手牌</span><span style="font-size:8px; color:#c084fc;">等待對手 (1/2) ⏳</span>`;
-          btnDraw.disabled = true;
+        if (discardCount > 0) {
+          btnDraw.innerHTML = `<span>確認棄牌 (${discardCount})</span><span style="font-size:8px; opacity:0.9;">補滿手牌 ➔</span>`;
         } else {
-          if (discardCount > 0) {
-            btnDraw.innerHTML = `<span>確認棄牌 (${discardCount})</span><span style="font-size:8px; opacity:0.9;">補滿手牌 ➔</span>`;
-          } else {
-            btnDraw.innerHTML = `<span>保留手牌</span><span style="font-size:8px; opacity:0.9;">直接開始 ➔</span>`;
-          }
-          btnDraw.addEventListener('click', (e) => {
-            e.stopPropagation();
-            handleConfirmDraw();
-          });
+          btnDraw.innerHTML = `<span>保留手牌</span><span style="font-size:8px; opacity:0.9;">直接開始 ➔</span>`;
         }
+        btnDraw.addEventListener('click', (e) => {
+          e.stopPropagation();
+          handleConfirmDraw();
+        });
         bannerActions.appendChild(btnDraw);
 
       } else if (game.phase === 'DEPLOY') {
@@ -10604,24 +9983,17 @@
 
         const btnFinish = document.createElement('button');
         btnFinish.className = 'btn btn-emerald';
-
-        if (P2PManager.isP2P && P2PManager.localDeployCommitted) {
-          btnFinish.className = 'btn btn-slate';
-          btnFinish.innerHTML = `<span>已鎖定暗置</span><span style="font-size:8px; color:#c084fc;">等待對手 (1/2) ⏳</span>`;
-          btnFinish.disabled = true;
+        if (placed === 0) {
+          btnFinish.innerHTML = `<span>不部署部隊</span><span style="font-size:8px; opacity:0.9;">領取 2 金 ➔</span>`;
+        } else if (placed === 1) {
+          btnFinish.innerHTML = `<span>確認開牌</span><span style="font-size:8px; opacity:0.9;">領取 1 金 ➔</span>`;
         } else {
-          if (placed === 0) {
-            btnFinish.innerHTML = `<span>不部署部隊</span><span style="font-size:8px; opacity:0.9;">領取 2 金 ➔</span>`;
-          } else if (placed === 1) {
-            btnFinish.innerHTML = `<span>確認開牌</span><span style="font-size:8px; opacity:0.9;">領取 1 金 ➔</span>`;
-          } else {
-            btnFinish.innerHTML = `<span>完成部署</span><span style="font-size:8px; opacity:0.9;">同時開牌 ➔</span>`;
-          }
-          btnFinish.addEventListener('click', (e) => {
-            e.stopPropagation();
-            handleFinishDeploy();
-          });
+          btnFinish.innerHTML = `<span>完成部署</span><span style="font-size:8px; opacity:0.9;">同時開牌 ➔</span>`;
         }
+        btnFinish.addEventListener('click', (e) => {
+          e.stopPropagation();
+          handleFinishDeploy();
+        });
         bannerActions.appendChild(btnFinish);
 
       } else if (game.phase === 'REVEAL') {
@@ -10632,13 +10004,8 @@
         setBannerInfo(`第 ${game.round} 輪`, '部署揭曉', pRes, aRes);
 
         const btnNext = document.createElement('button');
-        btnNext.className = (P2PManager.isP2P && P2PManager.localPhaseReady) ? 'btn btn-slate' : 'btn btn-gold';
-        if (P2PManager.isP2P && P2PManager.localPhaseReady) {
-          btnNext.innerHTML = `<span>已就緒</span><span style="font-size:8px; color:#c084fc;">等待對手 (1/2) ⏳</span>`;
-          btnNext.disabled = true;
-        } else {
-          btnNext.innerHTML = `<span>部署完成</span><span style="font-size:8px; opacity:0.9;">⚔️ 進入戰爭 ➔</span>`;
-        }
+        btnNext.className = 'btn btn-gold';
+        btnNext.innerHTML = `<span>部署完成</span><span style="font-size:8px; opacity:0.9;">⚔️ 進入戰爭 ➔</span>`;
         btnNext.title = '點擊進入戰爭階段（亦可點擊畫面空白處）';
         btnNext.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -10758,13 +10125,44 @@
       }
     }
     function handleConfirmDraw() {
+      if (PvPManager.isOnline) {
+        const kept = [];
+        const discardedArr = [];
+        game.player.hand.forEach((card, idx) => {
+          if (game.discardSelections.has(idx)) {
+            discardedArr.push(card);
+          } else {
+            kept.push(card);
+          }
+        });
+        game.player.hand = kept;
+        game.discardSelections.clear();
+
+        const need = 5 - game.player.hand.length;
+
+        if (PvPManager.role === 'host') {
+          // 房主直接從 deck 補牌
+          if (need > 0) {
+            game.player.hand.push(...game.drawCards(need));
+          }
+          PvPManager.myReadyState.draw = true;
+          PvPManager.send('DRAW_READY', {});
+          PvPManager.checkDrawPhaseBarrier();
+        } else {
+          // 訪客向房主請求補發 need 張牌
+          PvPManager.send('GUEST_DRAW_REQUEST', { needCount: need });
+        }
+
+        updateUI();
+        logMessage('⏳ 你已完成抽牌確認，等待對手抽牌...');
+        return;
+      }
+
       const overlay = document.getElementById('player-grid-discard-overlay');
       if (overlay) overlay.className = 'grid-discard-overlay hidden';
 
       const kept = [];
       const discardedNames = [];
-      const discardIndices = Array.from(game.discardSelections);
-
       game.player.hand.forEach((card, idx) => {
         if (game.discardSelections.has(idx)) {
           game.discardPile.push(card);
@@ -10775,23 +10173,6 @@
       });
       game.player.hand = kept;
       game.discardSelections.clear();
-
-      if (P2PManager.isP2P) {
-        P2PManager.localDrawReady = true;
-        P2PManager.localDiscardIndices = discardIndices;
-        P2PManager.send({
-          type: 'DRAW_DISCARD',
-          discardCount: discardIndices.length,
-          discardIndices: discardIndices
-        });
-
-        if (P2PManager.isHost && P2PManager.remoteDrawReady) {
-          P2PManager.resolveDrawPhaseP2P();
-        } else {
-          renderBanner();
-        }
-        return;
-      }
 
       const need = 5 - game.player.hand.length;
       let drawnCards = [];
@@ -11203,48 +10584,27 @@
       return need;
     }
 
-    async function handleP2PCommitDeploy() {
-      const placedSlots = Array.from(game.player.facedownSlots);
-      const reveals = [];
-      const hashes = [];
-
-      for (const s of placedSlots) {
-        const card = game.player.grid[s];
-        if (card) {
-          const salt = Math.random().toString(36).substring(2) + Date.now().toString(36);
-          const hash = await sha256(s + ':' + card.id + ':' + salt);
-          reveals.push({ slot: s, cardId: card.id, salt });
-          hashes.push({ slot: s, hash });
-        }
-      }
-
-      const placedCount = placedSlots.length;
-      const comp = placedCount === 0 ? 2 : (placedCount === 1 ? 1 : 0);
-      P2PManager.localCommitData = { reveals, hashes, compensation: comp };
-      P2PManager.localDeployCommitted = true;
-
-      P2PManager.send({
-        type: 'DEPLOY_COMMIT',
-        hashes,
-        compensation: comp
-      });
-
-      if (P2PManager.remoteDeployCommitted) {
-        P2PManager.exchangeDeployReveals();
-      } else {
-        renderBanner();
-      }
-    }
-
     function handleFinishDeploy() {
-      if (P2PManager.isP2P) {
-        handleP2PCommitDeploy();
+      if (PvPManager.isOnline) {
+        const placedSlots = Array.from(game.player.facedownSlots || []);
+        const placedItems = placedSlots.map(s => ({ slot: s, card: game.player.grid[s] })).filter(x => x.card);
+        const placedCount = placedItems.length;
+
+        if (placedCount === 0) game.player.gold += 2;
+        else if (placedCount === 1) game.player.gold += 1;
+
+        PvPManager.myPendingDeploy = placedItems;
+        PvPManager.myReadyState.deploy = true;
+
+        // 向對手只傳送 slot 索引（絕不提前洩露 card 物件內容！）
+        PvPManager.send('DEPLOY_COMMIT', { placedSlots: placedSlots });
+
+        logMessage('⏳ 你已確認暗置部隊，等待對手確認後同時開牌...');
+        PvPManager.checkDeployPhaseBarrier();
+        renderBanner();
         return;
       }
-      handleFinishDeployCore();
-    }
 
-    function handleFinishDeployCore() {
       // Record starting resources before reveal & compensation
       const pGoldStart = game.player.gold;
       const pVpStart = game.player.vp;
@@ -12488,28 +11848,21 @@
     }
 
     function handleAdvanceToNextPhase() {
-      Sound.click();
-      if (P2PManager.isP2P) {
-        P2PManager.localPhaseReady = true;
-        P2PManager.send({
-          type: 'PHASE_READY',
-          phase: game.phase,
-          round: game.round
-        });
+      if (PvPManager.isOnline) {
+        Sound.click();
+        let target = 'WAR';
+        if (game.phase === 'REVEAL') target = 'WAR';
+        else if (game.phase === 'WAR') target = 'DEVELOP';
+        else if (game.phase === 'DEVELOP') target = 'INCOME';
+        else if (game.phase === 'INCOME') target = 'VP';
+        else if (game.phase === 'VP') target = 'DRAW';
 
-        if (P2PManager.remotePhaseReady) {
-          P2PManager.localPhaseReady = false;
-          P2PManager.remotePhaseReady = false;
-          executePhaseAdvanceDirect();
-        } else {
-          renderBanner();
-        }
+        PvPManager.send('PHASE_ADVANCE', { targetPhase: target, round: (target === 'DRAW' ? game.round + 1 : game.round) });
+        PvPManager.syncPhaseAdvance(target, target === 'DRAW' ? game.round + 1 : game.round);
         return;
       }
-      executePhaseAdvanceDirect();
-    }
 
-    function executePhaseAdvanceDirect() {
+      Sound.click();
       if (game.phase === 'REVEAL') {
         game.phase = 'WAR';
         resolveWarPhase();
@@ -13049,19 +12402,6 @@
 
 
     function resetGame() {
-      if (P2PManager.isP2P) {
-        if (P2PManager.isHost) {
-          P2PManager.startMatchAsHost();
-        } else {
-          P2PManager.send({ type: 'REMATCH_REQ' });
-          floatPillText(document.getElementById('p-vp-num'), '已向房主發送再戰請求...', '#c084fc');
-        }
-        return;
-      }
-      resetGameInternal(false);
-    }
-
-    function resetGameInternal(isP2P = false) {
       Fireworks.stop();
       if (game && game.autoAdvanceTimer) {
         clearTimeout(game.autoAdvanceTimer);
@@ -13078,9 +12418,6 @@
       if (historyContainer) historyContainer.innerHTML = '';
       historyRecordsCount = 0;
       addInitialHistoryCard();
-      if (typeof P2PManager !== 'undefined') {
-        P2PManager.updateUIP2PStatus(isP2P);
-      }
       updateUI();
     }
 
@@ -14267,191 +13604,553 @@
     }
     window.addEventListener('resize', handleWindowResize);
 
+    
+    // =========================================================================
+    // 🌐 純 PeerJS 零設定雙人實時聯機管理器 (Zero-Config PeerJS PvPManager)
+    // =========================================================================
+    const PvPManager = {
+      isOnline: false,
+      role: 'host', // 'host' (房主 / Player 1) or 'guest' (訪客 / Player 2)
+      roomId: '', // 4 位純文字房間號，例如 '8492'
+      fullPeerId: '', // 實際 PeerJS ID，例如 'MG-8492'
+      peer: null,
+      conn: null,
+      myPendingDeploy: [], // 存放開牌前本輪自己暗置的真實卡牌物件 { slot, card }
+      opponentFacedownSlots: new Set(),
+      opponentReadyState: { draw: false, deploy: false, nextPhase: false },
+      myReadyState: { draw: false, deploy: false, nextPhase: false },
 
-    // =========================================================
-    // 👥 P2P 對戰視窗與互動按鈕事件綁定
-    // =========================================================
-    function openP2PModal() {
-      Sound.click();
-      document.getElementById('p2p-modal').classList.remove('hidden');
-      // If no room code yet, generate host room
-      if (!P2PManager.roomCode) {
-        P2PManager.initHost();
-      }
-    }
+      init() {
+        this.bindEvents();
+        this.checkUrlForRoom();
+      },
 
-    function closeP2PModal() {
-      Sound.click();
-      document.getElementById('p2p-modal').classList.add('hidden');
-    }
+      bindEvents() {
+        const btnHeaderPvP = document.getElementById('btn-header-pvp');
+        if (btnHeaderPvP) btnHeaderPvP.addEventListener('click', () => this.openLobby());
 
-    document.getElementById('btn-main-p2p').addEventListener('click', () => {
-      openP2PModal();
-    });
-
-    document.getElementById('btn-popover-p2p').addEventListener('click', () => {
-      closeOptionsMenu();
-      if (P2PManager.isP2P) {
-        P2PManager.cleanup();
-        resetGameInternal(false);
-        logMessage('🚪 已退出 P2P 連線模式，返回單人單機戰局。');
-      } else {
-        openP2PModal();
-      }
-    });
-
-    document.getElementById('btn-close-p2p-modal').addEventListener('click', closeP2PModal);
-    document.getElementById('btn-close-p2p-bottom').addEventListener('click', closeP2PModal);
-
-    const p2pModalEl = document.getElementById('p2p-modal');
-    if (p2pModalEl) {
-      p2pModalEl.addEventListener('click', (e) => {
-        if (e.target.id === 'p2p-modal') closeP2PModal();
-      });
-    }
-
-    // Host & Join Tabs
-    const tabHost = document.getElementById('p2p-tab-host');
-    const tabJoin = document.getElementById('p2p-tab-join');
-    const panelHost = document.getElementById('p2p-panel-host');
-    const panelJoin = document.getElementById('p2p-panel-join');
-
-    if (tabHost && tabJoin) {
-      tabHost.addEventListener('click', () => {
-        Sound.click();
-        tabHost.classList.add('active');
-        tabHost.style.borderBottomColor = '#c084fc';
-        tabHost.style.color = '#e9d5ff';
-        tabJoin.classList.remove('active');
-        tabJoin.style.borderBottomColor = 'transparent';
-        tabJoin.style.color = '#94a3b8';
-        panelHost.style.display = 'flex';
-        panelJoin.style.display = 'none';
-        if (!P2PManager.isHost || !P2PManager.roomCode) {
-          P2PManager.initHost();
+        const btnMainPvP = document.getElementById('btn-main-pvp');
+        if (btnMainPvP) {
+          btnMainPvP.addEventListener('click', () => {
+            closeTitleScreen();
+            this.openLobby();
+          });
         }
-      });
 
-      tabJoin.addEventListener('click', () => {
+        const btnPopoverPvP = document.getElementById('btn-popover-pvp');
+        if (btnPopoverPvP) {
+          btnPopoverPvP.addEventListener('click', () => {
+            closeOptionsMenu();
+            this.openLobby();
+          });
+        }
+
+        const btnClose = document.getElementById('btn-close-pvp-modal');
+        if (btnClose) btnClose.addEventListener('click', () => this.closeLobby());
+        const btnCloseBottom = document.getElementById('btn-pvp-close-bottom');
+        if (btnCloseBottom) btnCloseBottom.addEventListener('click', () => this.closeLobby());
+
+        const btnCreate = document.getElementById('btn-pvp-create');
+        if (btnCreate) btnCreate.addEventListener('click', () => this.createRoom());
+
+        const btnCopy = document.getElementById('btn-pvp-copy-link');
+        if (btnCopy) btnCopy.addEventListener('click', () => this.copyInviteLink());
+
+        const btnJoin = document.getElementById('btn-pvp-join');
+        if (btnJoin) btnJoin.addEventListener('click', () => {
+          const inp = document.getElementById('pvp-input-room-id');
+          const code = inp ? inp.value.trim().toUpperCase() : '';
+          if (!code) {
+            alert('請先輸入 4 位房間代號！');
+            return;
+          }
+          this.joinRoom(code);
+        });
+
+        const btnLeave = document.getElementById('btn-pvp-leave-room');
+        if (btnLeave) btnLeave.addEventListener('click', () => this.leaveRoom());
+
+        const btnReconnect = document.getElementById('btn-pvp-reconnect');
+        if (btnReconnect) btnReconnect.addEventListener('click', () => this.reconnect());
+      },
+
+      openLobby() {
         Sound.click();
-        tabJoin.classList.add('active');
-        tabJoin.style.borderBottomColor = '#c084fc';
-        tabJoin.style.color = '#e9d5ff';
-        tabHost.classList.remove('active');
-        tabHost.style.borderBottomColor = 'transparent';
-        tabHost.style.color = '#94a3b8';
-        panelHost.style.display = 'none';
-        panelJoin.style.display = 'flex';
-        const input = document.getElementById('p2p-join-input');
-        if (input) setTimeout(() => input.focus(), 150);
-      });
-    }
+        const modal = document.getElementById('pvp-modal');
+        if (modal) modal.classList.remove('hidden');
+        this.updateLobbyStatusUI();
+      },
 
-    // Refresh Room Code
-    document.getElementById('btn-p2p-refresh-code').addEventListener('click', () => {
-      Sound.click();
-      P2PManager.initHost();
-    });
+      closeLobby() {
+        Sound.click();
+        const modal = document.getElementById('pvp-modal');
+        if (modal) modal.classList.add('hidden');
+      },
 
-    function copyFallback(textToCopy, successMsg) {
-      try {
-        const tempInput = document.createElement('textarea');
-        tempInput.value = textToCopy;
-        tempInput.style.position = 'fixed';
-        tempInput.style.opacity = '0';
-        document.body.appendChild(tempInput);
-        tempInput.focus();
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        floatPillText(document.getElementById('p2p-host-code-display'), successMsg, '#34d399');
-      } catch (err) {
-        floatPillText(document.getElementById('p2p-host-code-display'), '✓ 房號: ' + textToCopy, '#fbbf24');
-      }
-    }
+      updateLobbyStatusUI() {
+        const dot = document.getElementById('pvp-status-dot');
+        const text = document.getElementById('pvp-status-text');
+        const btnLeave = document.getElementById('btn-pvp-leave-room');
+        const btnReconnect = document.getElementById('btn-pvp-reconnect');
+        const createdBox = document.getElementById('pvp-created-room-box');
+        const dispId = document.getElementById('pvp-display-room-id');
+        const copyBtn = document.getElementById('btn-pvp-copy-link');
 
-    // Copy Code
-    document.getElementById('btn-p2p-copy-code').addEventListener('click', () => {
-      Sound.click();
-      const code = P2PManager.roomCode;
-      if (!code) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(code).then(() => {
-          floatPillText(document.getElementById('p2p-host-code-display'), '✓ 房號已複製！', '#34d399');
-        }).catch(() => {
-          copyFallback(code, '✓ 房號已複製！');
+        if (!this.isOnline) {
+          if (dot) dot.style.background = '#94a3b8';
+          if (text) text.textContent = '未進入房間 (單機 AI 練習模式)';
+          if (btnLeave) btnLeave.classList.add('hidden');
+          if (btnReconnect) btnReconnect.classList.add('hidden');
+          if (createdBox) createdBox.classList.add('hidden');
+          if (copyBtn) copyBtn.classList.add('hidden');
+        } else {
+          const isConnOpen = this.conn && this.conn.open;
+          if (dot) dot.style.background = isConnOpen ? '#34d399' : '#f59e0b';
+          const roleLabel = (this.role === 'host') ? '👑 房主 (Player 1)' : '⚔️ 訪客 (Player 2)';
+          if (text) {
+            text.textContent = isConnOpen
+              ? `🟢 房間: ${this.roomId} ｜ 角色: ${roleLabel}`
+              : `⚠️ 房間: ${this.roomId} (連線中斷/等待對手)`;
+          }
+          if (btnLeave) btnLeave.classList.remove('hidden');
+          if (btnReconnect) {
+            if (!isConnOpen) btnReconnect.classList.remove('hidden');
+            else btnReconnect.classList.add('hidden');
+          }
+          if (createdBox) createdBox.classList.remove('hidden');
+          if (dispId) dispId.textContent = this.roomId;
+          if (copyBtn) copyBtn.classList.remove('hidden');
+        }
+      },
+
+      // 生成隨機 4 位純文字房間碼 (例如: 8492, 3K9P)
+      generateRoomId() {
+        const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        let res = '';
+        for (let i = 0; i < 4; i++) {
+          res += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return res;
+      },
+
+      cleanPeerId(id) {
+        return id.replace(/^MG-/i, '').trim().toUpperCase();
+      },
+
+      createRoom() {
+        if (!window.Peer) {
+          alert('PeerJS 庫正在載入中，請稍候片刻再試！');
+          return;
+        }
+        Sound.click();
+
+        const shortId = this.generateRoomId();
+        this.roomId = shortId;
+        this.fullPeerId = 'MG-' + shortId;
+        this.role = 'host';
+        this.isOnline = true;
+
+        if (this.peer) {
+          try { this.peer.destroy(); } catch (e) {}
+        }
+
+        try {
+          this.peer = new Peer(this.fullPeerId);
+        } catch (e) {
+          console.error(e);
+          alert('無法初始化 Peer 連線: ' + e.message);
+          this.isOnline = false;
+          return;
+        }
+
+        this.peer.on('open', (id) => {
+          console.log('✅ 房主 Peer 已建立，房間 ID:', shortId);
+          window.location.hash = `room=${shortId}`;
+          sessionStorage.setItem('magnolia_online_room', shortId);
+          sessionStorage.setItem('magnolia_online_role', 'host');
+          this.updateLobbyStatusUI();
+
+          const waitEl = document.getElementById('pvp-waiting-opponent-text');
+          if (waitEl) waitEl.textContent = '⏳ 等待好友加入...';
         });
-      } else {
-        copyFallback(code, '✓ 房號已複製！');
-      }
-    });
 
-    // Copy Link
-    document.getElementById('btn-p2p-copy-link').addEventListener('click', () => {
-      Sound.click();
-      const code = P2PManager.roomCode;
-      if (!code) return;
-      const url = window.location.href.split('#')[0] + '#room=' + code;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(() => {
-          floatPillText(document.getElementById('p2p-host-code-display'), '✓ 連線網址已複製！', '#34d399');
-        }).catch(() => {
-          copyFallback(url, '✓ 對戰網址已複製！');
+        this.peer.on('connection', (c) => {
+          console.log('好友連入成功！');
+          this.conn = c;
+          this.setupConnectionHandlers();
+
+          const waitEl = document.getElementById('pvp-waiting-opponent-text');
+          if (waitEl) waitEl.innerHTML = '<span style="color:#34d399; font-weight:800;">🟢 好友已進房！</span>';
+
+          // Host 洗牌開局
+          this.hostStartMatch();
         });
-      } else {
-        copyFallback(url, '✓ 對戰網址已複製！');
-      }
-    });
 
-    // Join Action
-    document.getElementById('btn-p2p-join-action').addEventListener('click', () => {
-      Sound.click();
-      const input = document.getElementById('p2p-join-input');
-      const code = input ? input.value.trim() : '';
-      if (!code) {
-        const statusEl = document.getElementById('p2p-join-status');
-        if (statusEl) statusEl.innerHTML = '<span style="color:#ef4444;">⚠️ 請先輸入 5 位房間號碼！</span>';
-        return;
-      }
-      P2PManager.initJoin(code);
-    });
+        this.peer.on('error', (err) => {
+          console.warn('Peer error:', err);
+          if (err.type === 'unavailable-id') {
+            // 隨機號偶爾重合時自動重試
+            this.createRoom();
+          } else {
+            this.updateLobbyStatusUI();
+          }
+        });
+      },
 
-    // Disconnect modal buttons
-    document.getElementById('btn-p2p-ai-takeover').addEventListener('click', () => {
-      Sound.click();
-      document.getElementById('p2p-disconnect-modal').classList.add('hidden');
-      P2PManager.isP2P = false;
-      P2PManager.updateUIP2PStatus(false);
-      logMessage('🤖 已切換為<strong>電腦 AI 接管對局</strong>，你可以繼續完成本局戰局。');
-      updateUI();
-    });
+      joinRoom(targetRoomId) {
+        if (!window.Peer) {
+          alert('PeerJS 庫正在載入中，請稍候片刻再試！');
+          return;
+        }
+        Sound.click();
 
-    document.getElementById('btn-p2p-return-home').addEventListener('click', () => {
-      Sound.click();
-      document.getElementById('p2p-disconnect-modal').classList.add('hidden');
-      P2PManager.cleanup();
-      resetGameInternal(false);
-      openTitleScreen();
-    });
+        const cleanId = this.cleanPeerId(targetRoomId);
+        const targetFullId = 'MG-' + cleanId;
 
-    // Check hash for #room=XXXX on window load
-    function checkUrlRoomHash() {
-      try {
-        const hash = window.location.hash;
-        if (hash && hash.includes('room=')) {
-          const match = hash.match(/room=([A-Za-z0-9]+)/);
-          if (match && match[1]) {
-            const code = match[1];
-            openP2PModal();
-            if (tabJoin) tabJoin.click();
-            const input = document.getElementById('p2p-join-input');
-            if (input) input.value = code;
+        this.roomId = cleanId;
+        this.fullPeerId = targetFullId;
+        this.role = 'guest';
+        this.isOnline = true;
+
+        if (this.peer) {
+          try { this.peer.destroy(); } catch (e) {}
+        }
+
+        // Guest 本機 Peer 隨機生成 ID
+        this.peer = new Peer();
+
+        this.peer.on('open', (myId) => {
+          console.log('Guest 本地 Peer 就緒，正在連入 Host:', targetFullId);
+          this.conn = this.peer.connect(targetFullId, { reliable: true });
+          this.setupConnectionHandlers();
+        });
+
+        this.peer.on('error', (err) => {
+          console.error('Peer join error:', err);
+          alert(`連線房間失敗: ${err.type}\n請檢查房間號碼是否正確，或由房主重新建立！`);
+          this.updateLobbyStatusUI();
+        });
+      },
+
+      setupConnectionHandlers() {
+        if (!this.conn) return;
+
+        this.conn.on('open', () => {
+          console.log('🎉 P2P 通道連線成功！');
+          this.updateLobbyStatusUI();
+          this.closeLobby();
+          Sound.victory();
+
+          const hdrLabel = document.getElementById('header-pvp-label');
+          if (hdrLabel) hdrLabel.textContent = `房:${this.roomId}`;
+          const aiTitle = document.getElementById('ai-lord-title');
+          const aiName = document.getElementById('ai-lord-name');
+          const aiAvatar = document.getElementById('ai-lord-avatar');
+          if (aiTitle) aiTitle.textContent = (this.role === 'host') ? '訪客好友' : '房主對手';
+          if (aiName) aiName.textContent = (this.role === 'host') ? 'Player 2' : 'Player 1';
+          if (aiAvatar) aiAvatar.textContent = (this.role === 'host') ? '⚔️' : '👑';
+
+          if (this.role === 'guest') {
+            alert(`🎉 成功進入房間 ${this.roomId}！雙方戰局已正式連線開始！`);
+          }
+        });
+
+        this.conn.on('data', (data) => {
+          this.handleIncomingPacket(data);
+        });
+
+        this.conn.on('close', () => {
+          console.warn('P2P 連線中斷');
+          this.updateLobbyStatusUI();
+          logMessage('⚠️ 與對手連線暫時中斷。切回網頁時可點擊「重新連接」自動同步。');
+        });
+
+        this.conn.on('error', (e) => {
+          console.error('P2P conn error:', e);
+          this.updateLobbyStatusUI();
+        });
+      },
+
+      send(type, payload = {}) {
+        if (this.conn && this.conn.open) {
+          this.conn.send({ type, payload });
+        }
+      },
+
+      // 房主啟動全新對局
+      hostStartMatch() {
+        game = new MagnoliaGame();
+        game.initDeck();
+        const hostHand = game.drawCards(5);
+        const guestHand = game.drawCards(5);
+
+        game.player.hand = hostHand;
+        game.ai.hand = guestHand;
+        game.round = 1;
+        game.phase = 'DRAW';
+
+        this.myReadyState = { draw: false, deploy: false, nextPhase: false };
+        this.opponentReadyState = { draw: false, deploy: false, nextPhase: false };
+
+        this.send('INIT_GAME', {
+          round: 1,
+          phase: 'DRAW',
+          guestHand: guestHand,
+          hostHandCount: hostHand.length
+        });
+
+        updateUI();
+      },
+
+      // 處理收到的對手封包
+      handleIncomingPacket({ type, payload }) {
+        switch (type) {
+          case 'INIT_GAME':
+            // 訪客收到開局手牌
+            game = new MagnoliaGame();
+            game.player.hand = payload.guestHand;
+            game.ai.hand = Array(payload.hostHandCount || 5).fill({ name: '對手手牌' });
+            game.round = payload.round || 1;
+            game.phase = payload.phase || 'DRAW';
+            this.myReadyState = { draw: false, deploy: false, nextPhase: false };
+            this.opponentReadyState = { draw: false, deploy: false, nextPhase: false };
+            updateUI();
+            logMessage('⚔️ 雙方已成功連線！第 1 輪【抽牌階段】開始，請檢視手牌並確認。');
+            break;
+
+          case 'DRAW_READY':
+            // 對手抽牌階段準備完成
+            this.opponentReadyState.draw = true;
+            logMessage('對手已完成抽牌確認。');
+            this.checkDrawPhaseBarrier();
+            break;
+
+          case 'GUEST_DRAW_REQUEST':
+            // 房主收到訪客補牌請求
+            if (this.role === 'host') {
+              const count = payload.needCount || 0;
+              const newCards = game.drawCards(count);
+              this.send('HOST_DRAW_REFILL', { newCards });
+              this.opponentReadyState.draw = true;
+              this.checkDrawPhaseBarrier();
+            }
+            break;
+
+          case 'HOST_DRAW_REFILL':
+            // 訪客收到房主補發的手牌
+            if (this.role === 'guest') {
+              game.player.hand.push(...(payload.newCards || []));
+              this.myReadyState.draw = true;
+              this.send('DRAW_READY', {});
+              this.checkDrawPhaseBarrier();
+              updateUI();
+            }
+            break;
+
+          case 'DEPLOY_COMMIT':
+            // 對手完成暗置部隊（嚴格防作弊：只包含格位索引，不洩露卡牌內容！）
+            this.opponentReadyState.deploy = true;
+            this.opponentFacedownSlots = new Set(payload.placedSlots || []);
+            this.opponentFacedownSlots.forEach(slot => {
+              game.ai.grid[slot] = { name: '暗置部隊', facedown: true, cost: 0, power: 0, race: '人類', class: '騎士' };
+              game.ai.facedownSlots.add(slot);
+            });
+            renderGrids();
+            logMessage('對手已確認暗置部隊，等待你完成部署。');
+            this.checkDeployPhaseBarrier();
+            break;
+
+          case 'DEPLOY_REVEAL':
+            // 收到對手公開的真實卡牌物件
+            (payload.cards || []).forEach(({ slot, card }) => {
+              game.ai.grid[slot] = card;
+            });
+            game.ai.facedownSlots.clear();
+            this.executeSimultaneousReveal();
+            break;
+
+          case 'PHASE_ADVANCE':
+            // 同步推進到下一階段 (WAR, DEVELOP, INCOME, VP, DRAW)
+            this.syncPhaseAdvance(payload.targetPhase, payload.round);
+            break;
+
+          case 'REQ_SYNC':
+            // 對手切 App 剛回來，向房主請求全盤狀態恢復 (Snapshot)
+            if (this.role === 'host') {
+              this.send('RESP_SYNC', {
+                round: game.round,
+                phase: game.phase,
+                hostGrid: game.player.grid,
+                guestGrid: game.ai.grid,
+                hostGold: game.player.gold,
+                guestGold: game.ai.gold,
+                hostVp: game.player.vp,
+                guestVp: game.ai.vp,
+                hostTech: game.player.techPoints,
+                guestTech: game.ai.techPoints,
+                hostFaith: game.player.faithPoints,
+                guestFaith: game.ai.faithPoints,
+                guestHand: game.ai.hand
+              });
+            }
+            break;
+
+          case 'RESP_SYNC':
+            // 訪客收到房主傳來的全盤恢復快照
+            if (this.role === 'guest') {
+              game.round = payload.round;
+              game.phase = payload.phase;
+              game.player.grid = payload.guestGrid;
+              game.ai.grid = payload.hostGrid;
+              game.player.gold = payload.guestGold;
+              game.ai.gold = payload.hostGold;
+              game.player.vp = payload.guestVp;
+              game.ai.vp = payload.hostVp;
+              game.player.techPoints = payload.guestTech;
+              game.ai.techPoints = payload.hostTech;
+              game.player.faithPoints = payload.guestFaith;
+              game.ai.faithPoints = payload.hostFaith;
+              if (payload.guestHand) game.player.hand = payload.guestHand;
+              updateUI();
+              alert('🔄 已成功同步恢復對局狀態！');
+            }
+            break;
+
+          case 'EMOTE':
+            triggerAiSpeech('reply', payload.text);
+            break;
+        }
+      },
+
+      checkDrawPhaseBarrier() {
+        if (this.myReadyState.draw && this.opponentReadyState.draw) {
+          this.myReadyState.draw = false;
+          this.opponentReadyState.draw = false;
+          game.phase = 'DEPLOY';
+          game.playerDeploymentsThisRound = 0;
+          game.player.facedownSlots.clear();
+          game.ai.facedownSlots.clear();
+          updateUI();
+          logMessage('🏰 雙方抽牌就緒！進入【部署階段】，每人最多暗置 2 張部隊。');
+        }
+      },
+
+      checkDeployPhaseBarrier() {
+        if (this.myReadyState.deploy && this.opponentReadyState.deploy) {
+          // 雙方都已完成暗置 -> 同時向對方公開真實卡牌！
+          this.send('DEPLOY_REVEAL', { cards: this.myPendingDeploy });
+          if (this.role === 'host') {
+            // 房主主動觸發揭曉
+            this.executeSimultaneousReveal();
           }
         }
-      } catch (e) {}
-    }
+      },
 
-        window.onload = () => {
+      executeSimultaneousReveal() {
+        game.phase = 'REVEAL';
+        this.myReadyState.deploy = false;
+        this.opponentReadyState.deploy = false;
+
+        // 將自己本輪 pending 的真實卡牌放入棋盤
+        this.myPendingDeploy.forEach(({ slot, card }) => {
+          game.player.grid[slot] = card;
+        });
+        this.myPendingDeploy = [];
+        game.player.facedownSlots.clear();
+
+        Sound.flip();
+        updateUI();
+        logMessage('⚡ 雙方同時開牌揭曉！點擊「進入戰爭」開始兩軍交鋒。');
+      },
+
+      syncPhaseAdvance(targetPhase, nextRound) {
+        if (targetPhase === 'WAR') {
+          game.phase = 'WAR';
+          resolveWarPhase();
+        } else if (targetPhase === 'DEVELOP') {
+          game.phase = 'DEVELOP';
+          resolveDevelopPhase();
+        } else if (targetPhase === 'INCOME') {
+          game.phase = 'INCOME';
+          resolveIncomePhase();
+        } else if (targetPhase === 'VP') {
+          game.phase = 'VP';
+          resolveVPPhase();
+        } else if (targetPhase === 'DRAW') {
+          game.round = nextRound || (game.round + 1);
+          game.phase = 'DRAW';
+          this.myReadyState = { draw: false, deploy: false, nextPhase: false };
+          this.opponentReadyState = { draw: false, deploy: false, nextPhase: false };
+          updateUI();
+        }
+      },
+
+      reconnect() {
+        Sound.click();
+        if (this.role === 'guest' && this.fullPeerId) {
+          this.joinRoom(this.roomId);
+          setTimeout(() => {
+            this.send('REQ_SYNC', {});
+          }, 800);
+        } else if (this.role === 'host' && this.roomId) {
+          this.createRoom();
+        }
+      },
+
+      copyInviteLink() {
+        Sound.click();
+        const url = window.location.origin + window.location.pathname + '#room=' + this.roomId;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            alert(`📋 邀請連結已複製到剪貼簿！\n傳送給好友即可直接點擊進房：\n${url}`);
+          }).catch(() => {
+            prompt('請複製以下邀請連結發給好友：', url);
+          });
+        } else {
+          prompt('請複製以下邀請連結發給好友：', url);
+        }
+      },
+
+      leaveRoom() {
+        Sound.click();
+        if (confirm('確定要離開當前聯機房間，返回單人練習模式嗎？')) {
+          if (this.conn) {
+            try { this.conn.close(); } catch (e) {}
+          }
+          if (this.peer) {
+            try { this.peer.destroy(); } catch (e) {}
+          }
+          this.isOnline = false;
+          this.roomId = '';
+          this.fullPeerId = '';
+          this.conn = null;
+          this.peer = null;
+          window.location.hash = '';
+          sessionStorage.removeItem('magnolia_online_room');
+          sessionStorage.removeItem('magnolia_online_role');
+          this.updateLobbyStatusUI();
+          resetGame();
+          alert('已退出網上對戰，恢復為單人 AI 練習模式。');
+        }
+      },
+
+      checkUrlForRoom() {
+        const hash = window.location.hash;
+        const match = hash.match(/room=([A-Za-z0-9_-]+)/);
+        if (match) {
+          const roomParam = this.cleanPeerId(match[1]);
+          setTimeout(() => {
+            this.openLobby();
+            const inp = document.getElementById('pvp-input-room-id');
+            if (inp) inp.value = roomParam;
+          }, 600);
+        }
+      }
+    };
+
+
+window.onload = () => {
+      PvPManager.init();
       AmbientEmbers.init();
       Compendium.init();
       CareerStore.renderToUI();
@@ -14496,10 +14195,7 @@
       syncAiLordUI();
 
       // 初次開啟顯示大氣電子遊戲主頁面
-      checkUrlRoomHash();
-      if (!window.location.hash.includes('room=')) {
-        openTitleScreen();
-      }
+      openTitleScreen();
     };
   
 
@@ -14889,6 +14585,94 @@
     </div>
 
     <div class="war-theater-bar-bottom">⚔️ 榮耀歸於勝者 · GLORY TO THE VICTOR ⚔️</div>
+  </div>
+
+
+  <!-- ===================================================
+       雙人實時連線對戰大廳彈窗 (PeerJS Zero-Config PvP Modal)
+       =================================================== -->
+  <div id="pvp-modal" class="modal-backdrop hidden" style="z-index: 250;">
+    <div class="modal-box" style="max-width: 460px; width: 95vw; max-height: 92vh; background: linear-gradient(180deg, #0f172a 0%, #090d16 100%); border: 1.5px solid #38bdf8; box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 30px rgba(56,189,248,0.25);">
+      <!-- Header -->
+      <div style="padding: 10px 14px; border-bottom: 1px solid rgba(56,189,248,0.3); display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.9);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">🌐</span>
+          <div>
+            <h3 style="font-weight: 800; color: #7dd3fc; font-size: 13.5px; margin: 0; line-height: 1.2;">雙人網上對戰大廳 (零設定開箱即玩)</h3>
+            <div style="font-size: 9.5px; color: #94a3b8;">免註冊帳號 · 免伺服器 · 點對點極速連線</div>
+          </div>
+        </div>
+        <button id="btn-close-pvp-modal" style="background: none; border: none; color: #cbd5e1; font-size: 18px; cursor: pointer; padding: 2px 6px;">✕</button>
+      </div>
+
+      <!-- Body -->
+      <div style="padding: 12px 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 11px;">
+        <!-- 當前連線狀態條 -->
+        <div id="pvp-lobby-status-banner" style="background: rgba(2, 6, 23, 0.85); border: 1px solid #334155; border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span id="pvp-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block;"></span>
+            <span id="pvp-status-text" style="color: #cbd5e1; font-weight: 700; font-size: 11px;">未進入房間 (單機 AI 練習模式)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <button id="btn-pvp-reconnect" class="btn btn-gold hidden" style="padding: 2px 8px; font-size: 10px;">🔄 重新連接</button>
+            <button id="btn-pvp-leave-room" class="btn btn-red hidden" style="padding: 2px 8px; font-size: 10px;">離開房間</button>
+          </div>
+        </div>
+
+        <!-- 區域 1: 創建專屬房間 (房主 Host) -->
+        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-weight: 800; color: #fde047; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+              <span>👑</span> 創建房間 (成為房主)
+            </span>
+            <span style="font-size: 9.5px; color: #94a3b8;">先行執黑·託管發牌</span>
+          </div>
+          <div style="font-size: 10px; color: #cbd5e1; line-height: 1.35;">
+            點擊「創建全新房間」系統會立即生成 4 位房間代號，並提供一鍵分享連結給好友。
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+            <button id="btn-pvp-create" class="btn btn-gold" style="padding: 6px 14px; font-size: 11.5px; font-weight: 800; flex: 1; justify-content: center;">
+              <span>🏰</span> 創建全新房間
+            </button>
+            <button id="btn-pvp-copy-link" class="btn btn-slate hidden" style="padding: 6px 12px; font-size: 11px; border-color: #38bdf8; color: #7dd3fc; white-space: nowrap;">
+              <span>📋</span> 複製邀請連結
+            </button>
+          </div>
+          <div id="pvp-created-room-box" class="hidden" style="margin-top: 4px; background: rgba(2, 6, 23, 0.95); border: 1.5px dashed #f59e0b; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-size: 10px; color: #94a3b8;">你的 4 位房間號：</div>
+            <div id="pvp-display-room-id" style="font-size: 20px; font-weight: 900; color: #fde047; font-family: ui-monospace, Menlo, monospace; letter-spacing: 2px;">-</div>
+            <div style="font-size: 10px; color: #34d399;" id="pvp-waiting-opponent-text">⏳ 等待好友加入...</div>
+          </div>
+        </div>
+
+        <!-- 區域 2: 輸入代碼加入房間 (訪客 Guest) -->
+        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-weight: 800; color: #7dd3fc; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+              <span>⚔️</span> 加入已有房間 (成為訪客)
+            </span>
+            <span style="font-size: 9.5px; color: #94a3b8;">輸入好友給你的 4 位房間代號</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+            <input type="text" id="pvp-input-room-id" placeholder="例如: 8492" maxlength="10" style="background: #020617; border: 1.5px solid #334155; border-radius: 6px; padding: 6px 10px; color: #fde047; font-size: 15px; font-weight: 900; font-family: ui-monospace, monospace; text-transform: uppercase; width: 140px; text-align: center; outline: none;">
+            <button id="btn-pvp-join" class="btn btn-emerald" style="padding: 6px 16px; font-size: 11.5px; font-weight: 800; flex: 1; justify-content: center;">
+              <span>🚀</span> 立即加入房間
+            </button>
+          </div>
+        </div>
+
+        <!-- 提示備註 -->
+        <div style="font-size: 9.5px; color: #64748b; line-height: 1.4; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px;">
+          💡 <strong>零帳號開箱即玩：</strong>完全不需要註冊或設定任何資料庫。連線後兩部手機直接點對點傳輸。若切換 App 短暫斷線，點擊「重新連接」即可瞬間同步當前棋盤！
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="padding: 8px 14px; border-top: 1px solid rgba(56,189,248,0.25); display: flex; align-items: center; justify-content: space-between; background: rgba(11, 17, 32, 0.95);">
+        <span style="font-size: 10px; color: #94a3b8;">玖陣王國 Magnolia · P2P 實時聯機版</span>
+        <button id="btn-pvp-close-bottom" class="btn btn-slate" style="padding: 4px 14px; font-size: 11px;">關閉大廳</button>
+      </div>
+    </div>
   </div>
 
 </body>
