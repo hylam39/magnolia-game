@@ -2458,9 +2458,9 @@
     #ai-panel {
       order: 1 !important;
       flex: 0 0 auto !important;
-      height: clamp(170px, 28vh, 320px) !important;
-      min-height: 165px !important;
-      max-height: 340px !important;
+      height: clamp(150px, 23vh, 260px) !important;
+      min-height: 145px !important;
+      max-height: 280px !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
@@ -2684,9 +2684,9 @@
     }
 
     #ai-panel {
-      height: clamp(170px, 28vh, 320px) !important;
-      min-height: 165px !important;
-      max-height: 340px !important;
+      height: clamp(150px, 23vh, 260px) !important;
+      min-height: 145px !important;
+      max-height: 280px !important;
     }
 
     .card-top-name {
@@ -3112,18 +3112,18 @@
     .m-ladder-cell.cell-tech-active { background: #38bdf8 !important; border-color: #7dd3fc !important; box-shadow: 0 0 4px #38bdf8 !important; }
     .m-ladder-cell.cell-faith-active { background: #c084fc !important; border-color: #e9d5ff !important; box-shadow: 0 0 4px #c084fc !important; }
 
-    /* 4. BOTTOM: Hand Dock (5 等分直向網格，確保最右卡牌永不出界) */
+    /* 4. BOTTOM: Hand Dock (5 等分直向網格，高度緊湊優化，多餘空間回饋九宮格) */
     #player-hand-container {
-      height: clamp(118px, 17vh, 180px) !important;
-      min-height: 114px !important;
-      max-height: 190px !important;
+      height: clamp(86px, 11.8vh, 98px) !important;
+      min-height: 84px !important;
+      max-height: 104px !important;
       flex: 0 0 auto !important;
       display: flex !important;
       flex-direction: column !important;
       background: rgba(11, 17, 32, 0.96) !important;
       border: 1px solid rgba(245, 158, 11, 0.35) !important;
       border-radius: 7px !important;
-      padding: 2px 3px !important;
+      padding: 1.5px 2px !important;
       gap: 1px !important;
       width: 100% !important;
       box-sizing: border-box !important;
@@ -3175,13 +3175,13 @@
     .hand-card.selected { border-color: #fbbf24 !important; box-shadow: 0 0 10px rgba(251, 191, 36, 0.8) !important; transform: translateY(-2px) !important; }
     .hand-card.marked-discard { border-color: #ef4444 !important; background: rgba(69, 10, 10, 0.9) !important; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important; }
 
-    /* 5-Row Mini Hand Cards (直向版原始佈局：Row1錢/戰力各50% -> Row2卡名置中 -> Row3/4技能 -> Row5種族/職業) */
+    /* 5-Row Mini Hand Cards (直向版原始佈局：高度緊湊化，技能1、2保留兩行空間，無多餘空隙) */
     .mini-row-top {
       display: grid !important;
       grid-template-columns: 1fr 1fr !important;
       gap: 0 !important;
       width: 100% !important;
-      height: 15px !important;
+      height: 13px !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
       flex-shrink: 0 !important;
     }
@@ -3190,7 +3190,7 @@
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      font-size: 8.5px !important;
+      font-size: 7.8px !important;
       font-weight: 800 !important;
       line-height: 1 !important;
       font-family: monospace !important;
@@ -3231,17 +3231,17 @@
       display: block !important;
       width: 100% !important;
       text-align: center !important;
-      font-size: 8.5px !important;
+      font-size: 7.8px !important;
       font-weight: 800 !important;
       color: #f8fafc !important;
-      padding: 1.5px 1px !important;
+      padding: 0.5px 1px !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
       box-sizing: border-box !important;
       background: rgba(30, 41, 59, 0.45) !important;
       flex-shrink: 0 !important;
-      line-height: 1.2 !important;
+      line-height: 1.15 !important;
     }
 
     .mini-hand-skills-container {
@@ -3260,44 +3260,45 @@
       display: flex !important;
       align-items: flex-start !important;
       justify-content: flex-start !important;
-      gap: 2.5px !important;
+      gap: 2px !important;
       width: 100% !important;
-      height: 20px !important;
-      min-height: 20px !important;
-      max-height: 22px !important;
-      padding: 1px 2px !important;
+      flex: 1 1 0 !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      padding: 0.5px 1.5px !important;
       border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
       box-sizing: border-box !important;
       overflow: hidden !important;
       flex-shrink: 0 !important;
       background: rgba(2, 6, 23, 0.65) !important;
-      border-left: 2.5px solid #f59e0b;
+      border-left: 2px solid #f59e0b;
     }
 
     .mini-row-eff-line.eff-empty {
       align-items: center !important;
       justify-content: center !important;
       background: rgba(15, 23, 42, 0.3) !important;
-      border-left: 2.5px solid #334155 !important;
+      border-left: 2px solid #334155 !important;
     }
 
     .eff-empty-dash {
       color: #475569 !important;
-      font-size: 8px !important;
+      font-size: 7.5px !important;
     }
 
     .mini-eff-timing-icon {
-      font-size: 7.5px !important;
+      font-size: 6.8px !important;
       line-height: 1 !important;
       flex-shrink: 0 !important;
-      margin-top: 1px !important;
+      margin-top: 0.5px !important;
       background: none !important;
       border: none !important;
       padding: 0 !important;
     }
 
     .mini-eff-desc {
-      font-size: 6.6px !important;
+      font-size: 6.2px !important;
       font-weight: 600 !important;
       line-height: 1.15 !important;
       white-space: normal !important;
@@ -3317,7 +3318,7 @@
       grid-template-columns: 1fr 1fr !important;
       gap: 0 !important;
       width: 100% !important;
-      height: 16px !important;
+      height: 13.5px !important;
       border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
       flex-shrink: 0 !important;
     }
@@ -3326,9 +3327,9 @@
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      font-size: 7.2px !important;
+      font-size: 6.8px !important;
       font-weight: 700 !important;
-      padding: 2px 0 !important;
+      padding: 1px 0 !important;
       line-height: 1 !important;
       white-space: nowrap !important;
       box-sizing: border-box !important;
@@ -9731,6 +9732,10 @@
         logMessage(`✅ 你本輪暗置已達上限（2張），請點擊「完成部署，同時開牌！」。`);
       }
 
+      if (PvPManager.isOnline) {
+        PvPManager.broadcastMyState();
+      }
+
       updateUI();
     }
 
@@ -9776,6 +9781,9 @@
       Sound.click();
 
       logMessage(`↩️ 你撤回了格位 ${slotIdx + 1} 的暗置卡牌【${card.name}】（退回 ${card.cost} 金）`);
+      if (PvPManager.isOnline) {
+        PvPManager.broadcastMyState();
+      }
       updateUI();
     }
 
@@ -10225,7 +10233,11 @@
             game.player.hand.push(...game.drawCards(need));
           }
           PvPManager.myReadyState.draw = true;
-          PvPManager.send('DRAW_READY', {});
+          PvPManager.send('DRAW_READY', {
+            deckCount: game.deck.length,
+            discardPile: game.discardPile,
+            handCount: game.player.hand.length
+          });
           PvPManager.checkDrawPhaseBarrier();
         } else {
           // 訪客向房主請求補發 need 張牌，並送出自己棄嘅卡牌存入主棄牌堆
@@ -10682,7 +10694,11 @@
         PvPManager.myReadyState.deploy = true;
 
         // 向對手只傳送 slot 索引（絕不提前洩露 card 物件內容！）
-        PvPManager.send('DEPLOY_COMMIT', { placedSlots: placedSlots });
+        PvPManager.send('DEPLOY_COMMIT', { 
+          placedSlots: placedSlots,
+          compensationGold: (placedCount === 0 ? 2 : (placedCount === 1 ? 1 : 0))
+        });
+        PvPManager.broadcastMyState();
 
         logMessage('⏳ 你已確認暗置部隊，等待對手確認後同時開牌...');
         PvPManager.checkDeployPhaseBarrier();
@@ -11318,6 +11334,10 @@
         details: warDetails
       });
 
+      if (PvPManager.isOnline) {
+        PvPManager.broadcastMyState();
+      }
+
       updateMeters();
       renderGrids();
       renderBanner();
@@ -11532,6 +11552,10 @@
         details: developDetails
       });
 
+      if (PvPManager.isOnline) {
+        PvPManager.broadcastMyState();
+      }
+
       updateMeters();
       renderGrids();
       renderBanner();
@@ -11651,6 +11675,10 @@
         aiText: game.phaseGains.ai,
         details: incomeDetails
       });
+
+      if (PvPManager.isOnline) {
+        PvPManager.broadcastMyState();
+      }
 
       updateMeters();
       renderGrids();
@@ -11913,6 +11941,10 @@
         details: vpDetails
       });
 
+      if (PvPManager.isOnline) {
+        PvPManager.broadcastMyState();
+      }
+
       updateMeters();
       renderGrids();
 
@@ -12008,6 +12040,15 @@
       // 儲存終局數據供覆盤使用與更新生涯戰績
       game.endSummary = { pTotal, aTotal, pWonGame, margin, pStats, aStats, pMultiplier, aMultiplier, pGoldVP, aGoldVP };
       CareerStore.recordMatch(pTotal, pWonGame);
+
+      if (PvPManager.isOnline) {
+        PvPManager.send('FINAL_SCORE_SYNC', {
+          vp: game.player.vp,
+          gold: game.player.gold,
+          goldVp: pGoldVP,
+          totalVp: pTotal
+        });
+      }
 
       addHistoryPhaseCard({
         round: game.round,
@@ -13068,6 +13109,10 @@
           this.clear();
           return;
         }
+        if (typeof PvPManager !== 'undefined' && PvPManager && PvPManager.isOnline) {
+          // PVP 模式下不寫入單機存檔，避免一般模式打開時讀入殘留 PVP 狀態
+          return;
+        }
         try {
           const snapshot = {
             round: g.round,
@@ -13715,6 +13760,7 @@
     // =========================================================================
     const PvPManager = {
       isOnline: false,
+      hasMatchStarted: false, // 核心標記：記錄當前房間是否已開局，防止重連時重置遊戲
       role: 'host', // 'host' (房主 / Player 1) or 'guest' (訪客 / Player 2)
       roomId: '', // 4 位純文字房間號，例如 '8492'
       fullPeerId: '', // 實際 PeerJS ID，例如 'MG-8492'
@@ -13780,6 +13826,9 @@
 
         const btnReconnect = document.getElementById('btn-pvp-reconnect');
         if (btnReconnect) btnReconnect.addEventListener('click', () => this.reconnect());
+
+        const btnRestartMatch = document.getElementById('btn-pvp-restart-match');
+        if (btnRestartMatch) btnRestartMatch.addEventListener('click', () => this.requestRematch());
       },
 
       openLobby() {
@@ -13800,6 +13849,7 @@
         const text = document.getElementById('pvp-status-text');
         const btnLeave = document.getElementById('btn-pvp-leave-room');
         const btnReconnect = document.getElementById('btn-pvp-reconnect');
+        const btnRestart = document.getElementById('btn-pvp-restart-match');
         const createdBox = document.getElementById('pvp-created-room-box');
         const dispId = document.getElementById('pvp-display-room-id');
         const copyBtn = document.getElementById('btn-pvp-copy-link');
@@ -13809,6 +13859,7 @@
           if (text) text.textContent = '未進入房間 (單機 AI 練習模式)';
           if (btnLeave) btnLeave.classList.add('hidden');
           if (btnReconnect) btnReconnect.classList.add('hidden');
+          if (btnRestart) btnRestart.classList.add('hidden');
           if (createdBox) createdBox.classList.add('hidden');
           if (copyBtn) copyBtn.classList.add('hidden');
         } else {
@@ -13817,13 +13868,17 @@
           const roleLabel = (this.role === 'host') ? '👑 房主 (Player 1)' : '⚔️ 訪客 (Player 2)';
           if (text) {
             text.textContent = isConnOpen
-              ? `🟢 房間: ${this.roomId} ｜ 角色: ${roleLabel}`
-              : `⚠️ 房間: ${this.roomId} (連線中斷/等待對手)`;
+              ? `🟢 房間: ${this.roomId} ｜ ${roleLabel}`
+              : `⚠️ 房間: ${this.roomId} (等待對手連線...)`;
           }
           if (btnLeave) btnLeave.classList.remove('hidden');
           if (btnReconnect) {
             if (!isConnOpen) btnReconnect.classList.remove('hidden');
             else btnReconnect.classList.add('hidden');
+          }
+          if (btnRestart) {
+            if (isConnOpen) btnRestart.classList.remove('hidden');
+            else btnRestart.classList.add('hidden');
           }
           if (createdBox) createdBox.classList.remove('hidden');
           if (dispId) dispId.textContent = this.roomId;
@@ -13842,7 +13897,7 @@
       },
 
       cleanPeerId(id) {
-        return id.replace(/^MG-/i, '').trim().toUpperCase();
+        return (id || '').replace(/^MG-/i, '').trim().toUpperCase();
       },
 
       createRoom() {
@@ -13857,6 +13912,7 @@
         this.fullPeerId = 'MG-' + shortId;
         this.role = 'host';
         this.isOnline = true;
+        this.hasMatchStarted = false; // 新房間，標記尚未開局
 
         if (this.peer) {
           try { this.peer.destroy(); } catch (e) {}
@@ -13883,15 +13939,22 @@
         });
 
         this.peer.on('connection', (c) => {
-          console.log('好友連入成功！');
+          console.log('對手連入/重連成功！');
           this.conn = c;
           this.setupConnectionHandlers();
 
           const waitEl = document.getElementById('pvp-waiting-opponent-text');
           if (waitEl) waitEl.innerHTML = '<span style="color:#34d399; font-weight:800;">🟢 好友已進房！</span>';
 
-          // Host 洗牌開局
-          this.hostStartMatch();
+          // 核心修復：如果本局已經在進行中（中途斷線重連），絕不 hostStartMatch()，而是全盤同步！
+          if (this.hasMatchStarted && game && game.round >= 1 && game.phase !== 'END') {
+            logMessage('🟢 對手已重新連線！正在無縫同步現有戰局...');
+            this.sendSyncStateToGuest();
+          } else {
+            // 全新開局
+            this.hasMatchStarted = true;
+            this.hostStartMatch();
+          }
         });
 
         this.peer.on('error', (err) => {
@@ -13929,6 +13992,9 @@
 
         this.peer.on('open', (myId) => {
           console.log('Guest 本地 Peer 就緒，正在連入 Host:', targetFullId);
+          window.location.hash = `room=${cleanId}`;
+          sessionStorage.setItem('magnolia_online_room', cleanId);
+          sessionStorage.setItem('magnolia_online_role', 'guest');
           this.conn = this.peer.connect(targetFullId, { reliable: true });
           this.setupConnectionHandlers();
         });
@@ -13962,13 +14028,12 @@
           if (aiAvatar) aiAvatar.textContent = (this.role === 'host') ? '⚔️' : '👑';
 
           if (this.role === 'guest') {
-            // 若為斷線重連進來，自動請求數據同步
-            if (game && game.round > 1) {
-              this.send('REQ_SYNC', {});
-              logMessage('🔄 連線已自動恢復，正在同步最新戰局...');
-            } else {
-              alert(`🎉 成功進入房間 ${this.roomId}！雙方戰局已正式連線開始！`);
-            }
+            // 連上後主動向房主請求對齊數據
+            this.send('REQ_SYNC', {});
+            logMessage('🟢 已連接到房間，正在同步對局數據...');
+          } else if (this.role === 'host' && this.hasMatchStarted) {
+            // 房主主動推播同步給新連入的訪客
+            this.sendSyncStateToGuest();
           }
         });
 
@@ -13979,7 +14044,7 @@
         this.conn.on('close', () => {
           console.warn('P2P 連線中斷');
           this.updateLobbyStatusUI();
-          logMessage('⚠️ 與對手連線暫時中斷。切回網頁時可點擊「重新連接」自動同步。');
+          logMessage('⚠️ 與對手連線暫時中斷。切回網頁時將自動無感重連，或可點擊「重新連接」。');
         });
 
         this.conn.on('error', (e) => {
@@ -13990,14 +14055,33 @@
 
       send(type, payload = {}) {
         if (this.conn && this.conn.open) {
-          this.conn.send({ type, payload });
+          try {
+            this.conn.send({ type, payload });
+          } catch (e) {
+            console.warn('send error:', e);
+          }
         }
+      },
+
+      // 核心：即時廣播本機玩家最新金幣、VP、技術、信仰與戰力給對手
+      broadcastMyState(extra = {}) {
+        if (!this.isOnline || !this.conn || !this.conn.open || typeof game === 'undefined' || !game) return;
+        this.send('PLAYER_STATE', {
+          gold: game.player.gold,
+          vp: game.player.vp,
+          techPoints: game.player.techPoints,
+          faithPoints: game.player.faithPoints,
+          power: game.player.power,
+          handCount: game.player.hand.length,
+          awardedLines: Array.from(game.player.awardedLines || []),
+          ...extra
+        });
       },
 
       // 房主啟動全新對局（嚴格單一牌庫發牌，嚴防卡牌複製）
       hostStartMatch() {
+        this.hasMatchStarted = true;
         game = new MagnoliaGame();
-        // 直接使用 MagnoliaGame 初始化抽取之乾淨手牌，避免重複扣牌
         const hostHand = game.player.hand;
         const guestHand = game.ai.hand;
 
@@ -14007,14 +14091,56 @@
         this.myReadyState = { draw: false, deploy: false, nextRound: false };
         this.opponentReadyState = { draw: false, deploy: false, nextRound: false };
 
+        // 核心：發牌時同步 Master Deck 剩餘張數與中央棄牌堆
         this.send('INIT_GAME', {
           round: 1,
           phase: 'DRAW',
           guestHand: guestHand,
-          hostHandCount: hostHand.length
+          hostHandCount: hostHand.length,
+          deckCount: game.deck.length,
+          discardPile: game.discardPile
         });
 
         updateUI();
+        this.broadcastMyState();
+        logMessage('⚔️ 雙人全新對局開始！第 1 輪【抽牌階段】開始，請檢視手牌並確認。');
+      },
+
+      // 房主將當前全盤戰局完整同步給訪客
+      sendSyncStateToGuest() {
+        if (!this.conn || !this.conn.open || !game) return;
+        this.send('RESP_SYNC', {
+          round: game.round,
+          phase: game.phase,
+          hostGrid: game.player.grid,
+          guestGrid: game.ai.grid,
+          hostGold: game.player.gold,
+          guestGold: game.ai.gold,
+          hostVp: game.player.vp,
+          guestVp: game.ai.vp,
+          hostTech: game.player.techPoints,
+          guestTech: game.ai.techPoints,
+          hostFaith: game.player.faithPoints,
+          guestFaith: game.ai.faithPoints,
+          hostFacedown: Array.from(game.player.facedownSlots || []),
+          guestFacedown: Array.from(game.ai.facedownSlots || []),
+          phaseGains: game.phaseGains || null,
+          deckCount: game.deck.length,
+          discardPile: game.discardPile,
+          hasMatchStarted: true
+        });
+      },
+
+      // 請求/發起同房再戰一局（Rematch）
+      requestRematch() {
+        Sound.click();
+        if (this.role === 'host') {
+          this.hostStartMatch();
+          logMessage('🔄 房主已重新洗牌發牌，全新一局開始！');
+        } else {
+          this.send('RESTART_MATCH_REQUEST', {});
+          logMessage('⏳ 已向房主發送【再戰一局】請求，等待發牌...');
+        }
       },
 
       // 處理收到的對手封包
@@ -14028,17 +14154,54 @@
           case 'PONG':
             // 心跳存活確認
             break;
+
           case 'INIT_GAME':
-            // 訪客收到開局手牌
+            // 訪客收到開局手牌與共用牌庫數據
+            this.hasMatchStarted = true;
             game = new MagnoliaGame();
             game.player.hand = payload.guestHand;
             game.ai.hand = Array(payload.hostHandCount || 5).fill({ name: '對手手牌' });
+            if (payload.deckCount !== undefined) {
+              game.deck = Array(payload.deckCount).fill({ name: '牌庫未知' });
+            }
+            if (payload.discardPile) {
+              game.discardPile = payload.discardPile;
+            }
             game.round = payload.round || 1;
             game.phase = payload.phase || 'DRAW';
             this.myReadyState = { draw: false, deploy: false, nextRound: false };
             this.opponentReadyState = { draw: false, deploy: false, nextRound: false };
             updateUI();
+            this.broadcastMyState();
             logMessage('⚔️ 雙方已成功連線！第 1 輪【抽牌階段】開始，請檢視手牌並確認。');
+            break;
+
+          case 'PLAYER_STATE':
+            // 即時接收對手真實資源與得分！
+            if (payload.gold !== undefined) game.ai.gold = payload.gold;
+            if (payload.vp !== undefined) game.ai.vp = payload.vp;
+            if (payload.techPoints !== undefined) game.ai.techPoints = payload.techPoints;
+            if (payload.faithPoints !== undefined) game.ai.faithPoints = payload.faithPoints;
+            if (payload.power !== undefined) game.ai.power = payload.power;
+            if (payload.handCount !== undefined) {
+              game.ai.hand = Array(payload.handCount).fill({ name: '對手手牌' });
+            }
+            if (payload.awardedLines) {
+              game.ai.awardedLines = new Set(payload.awardedLines);
+            }
+            updateMeters();
+            renderGrids();
+            break;
+
+          case 'FINAL_SCORE_SYNC':
+            // 終局結算絕對對齊
+            if (payload.gold !== undefined) game.ai.gold = payload.gold;
+            if (payload.vp !== undefined) game.ai.vp = payload.vp;
+            if (game.endSummary) {
+              game.endSummary.aTotal = payload.totalVp;
+              game.endSummary.aGoldVP = payload.goldVp;
+            }
+            updateMeters();
             break;
 
           case 'ROUND_READY':
@@ -14059,12 +14222,16 @@
           case 'DRAW_READY':
             // 對手抽牌階段準備完成
             this.opponentReadyState.draw = true;
+            if (payload.discardPile) game.discardPile = payload.discardPile;
+            if (payload.deckCount !== undefined) game.deck = Array(payload.deckCount).fill({ name: '牌庫未知' });
+            if (payload.handCount !== undefined) game.ai.hand = Array(payload.handCount).fill({ name: '對手手牌' });
             logMessage('對手已完成抽牌確認。');
             this.checkDrawPhaseBarrier();
+            updateUI();
             break;
 
           case 'GUEST_DRAW_REQUEST':
-            // 房主收到訪客補牌請求
+            // 房主收到訪客補牌請求 (主牌庫統一發牌)
             if (this.role === 'host') {
               // 將訪客棄嘅牌存入官方主棄牌堆 (官方洗牌規則)
               if (payload.discardedCards && payload.discardedCards.length > 0) {
@@ -14072,18 +14239,27 @@
               }
               const count = payload.needCount || 0;
               const newCards = game.drawCards(count);
-              this.send('HOST_DRAW_REFILL', { newCards });
+              this.send('HOST_DRAW_REFILL', { 
+                newCards,
+                deckCount: game.deck.length,
+                discardPile: game.discardPile
+              });
               this.opponentReadyState.draw = true;
               this.checkDrawPhaseBarrier();
+              updateUI();
             }
             break;
 
           case 'HOST_DRAW_REFILL':
-            // 訪客收到房主補發的手牌
+            // 訪客收到房主從主牌庫補發的手牌與主棄牌堆最新狀態
             if (this.role === 'guest') {
               game.player.hand.push(...(payload.newCards || []));
+              if (payload.discardPile) game.discardPile = payload.discardPile;
+              if (payload.deckCount !== undefined) game.deck = Array(payload.deckCount).fill({ name: '牌庫未知' });
               this.myReadyState.draw = true;
-              this.send('DRAW_READY', {});
+              this.send('DRAW_READY', {
+                handCount: game.player.hand.length
+              });
               this.checkDrawPhaseBarrier();
               updateUI();
             }
@@ -14117,28 +14293,14 @@
             break;
 
           case 'REQ_SYNC':
-            // 對手切 App 剛回來，向房主請求全盤狀態恢復 (Snapshot)
+            // 對手請求全盤狀態恢復 (Snapshot)
             if (this.role === 'host') {
-              this.send('RESP_SYNC', {
-                round: game.round,
-                phase: game.phase,
-                hostGrid: game.player.grid,
-                guestGrid: game.ai.grid,
-                hostGold: game.player.gold,
-                guestGold: game.ai.gold,
-                hostVp: game.player.vp,
-                guestVp: game.ai.vp,
-                hostTech: game.player.techPoints,
-                guestTech: game.ai.techPoints,
-                hostFaith: game.player.faithPoints,
-                guestFaith: game.ai.faithPoints,
-                guestHand: game.ai.hand
-              });
+              this.sendSyncStateToGuest();
             }
             break;
 
           case 'RESP_SYNC':
-            // 訪客收到房主傳來的全盤恢復快照（只同步公開棋盤與資源，絕不覆蓋當前手牌以防卡牌複製）
+            // 訪客收到房主傳來的全盤恢復快照 (含主牌庫與主棄牌堆鏡像)
             if (this.role === 'guest') {
               game.round = payload.round;
               game.phase = payload.phase;
@@ -14152,8 +14314,22 @@
               game.ai.techPoints = payload.hostTech;
               game.player.faithPoints = payload.guestFaith;
               game.ai.faithPoints = payload.hostFaith;
+              game.player.facedownSlots = new Set(payload.guestFacedown || []);
+              game.ai.facedownSlots = new Set(payload.hostFacedown || []);
+              if (payload.phaseGains) {
+                game.phaseGains = payload.phaseGains;
+              }
+              if (payload.discardPile) {
+                game.discardPile = payload.discardPile;
+              }
+              if (payload.deckCount !== undefined) {
+                game.deck = Array(payload.deckCount).fill({ name: '牌庫未知' });
+              }
+              this.hasMatchStarted = true;
+              this.isReconnecting = false;
               updateUI();
-              alert('🔄 已成功同步恢復對局狀態！');
+              this.broadcastMyState();
+              logMessage('🟢 已成功同步恢復對局狀態，請繼續對戰！');
             }
             break;
 
@@ -14281,6 +14457,10 @@
           details: revealDetails
         });
 
+        if (this.isOnline) {
+          this.broadcastMyState();
+        }
+
         updateUI();
         logMessage('⚡ 雙方同時開牌揭曉！點擊「進入戰爭」開始兩軍交鋒。');
 
@@ -14350,6 +14530,8 @@
           this.send('PING', { resume: true });
           if (this.role === 'guest') {
             this.send('REQ_SYNC', {});
+          } else if (this.role === 'host') {
+            this.sendSyncStateToGuest();
           }
           logMessage('🟢 已切回遊戲，連線正常維持中！');
           this.startHeartbeat();
@@ -14395,20 +14577,12 @@
                 this.conn = c;
                 this.setupConnectionHandlers();
                 // 訪客接回後，自動將當前最新局勢同步給訪客
-                this.send('RESP_SYNC', {
-                  round: game.round,
-                  phase: game.phase,
-                  hostGrid: game.player.grid,
-                  guestGrid: game.ai.grid,
-                  hostGold: game.player.gold,
-                  guestGold: game.ai.gold,
-                  hostVp: game.player.vp,
-                  guestVp: game.ai.vp,
-                  hostTech: game.player.techPoints,
-                  guestTech: game.ai.techPoints,
-                  hostFaith: game.player.faithPoints,
-                  guestFaith: game.ai.faithPoints
-                });
+                if (this.hasMatchStarted) {
+                  this.sendSyncStateToGuest();
+                } else {
+                  this.hasMatchStarted = true;
+                  this.hostStartMatch();
+                }
               });
             } catch (e) {}
           }
@@ -14441,6 +14615,12 @@
           this.peer.on('connection', (c) => {
             this.conn = c;
             this.setupConnectionHandlers();
+            if (this.hasMatchStarted) {
+              this.sendSyncStateToGuest();
+            } else {
+              this.hasMatchStarted = true;
+              this.hostStartMatch();
+            }
           });
           this.updateLobbyStatusUI();
         }
@@ -14471,11 +14651,17 @@
             try { this.peer.destroy(); } catch (e) {}
           }
           this.isOnline = false;
+          this.hasMatchStarted = false;
           this.roomId = '';
           this.fullPeerId = '';
           this.conn = null;
           this.peer = null;
-          window.location.hash = '';
+          // 徹底清除 URL Hash，防止下次刷新自動進房
+          try {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+          } catch (e) {
+            window.location.hash = '';
+          }
           sessionStorage.removeItem('magnolia_online_room');
           sessionStorage.removeItem('magnolia_online_role');
           this.updateLobbyStatusUI();
@@ -14497,8 +14683,6 @@
         }
       }
     };
-
-
 window.onload = () => {
       PvPManager.init();
       AmbientEmbers.init();
@@ -14977,7 +15161,8 @@ window.onload = () => {
             <span id="pvp-status-text" style="color: #cbd5e1; font-weight: 700; font-size: 11px;">未進入房間 (單機 AI 練習模式)</span>
           </div>
           <div style="display: flex; align-items: center; gap: 4px;">
-            <button id="btn-pvp-reconnect" class="btn btn-gold hidden" style="padding: 2px 8px; font-size: 10px;">🔄 重新連接</button>
+            <button id="btn-pvp-restart-match" class="btn btn-emerald hidden" style="padding: 2px 8px; font-size: 10px;" title="在當前房間直接全新洗牌開局">🔄 洗牌再戰</button>
+            <button id="btn-pvp-reconnect" class="btn btn-gold hidden" style="padding: 2px 8px; font-size: 10px;">⚡ 重新連接</button>
             <button id="btn-pvp-leave-room" class="btn btn-red hidden" style="padding: 2px 8px; font-size: 10px;">離開房間</button>
           </div>
         </div>
