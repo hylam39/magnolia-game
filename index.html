@@ -2527,7 +2527,7 @@
     }
 
     #app-banner {
-      /* order: 0 removed - moved inside #player-panel below 我的王國 */
+      order: 2 !important;
       position: relative !important;
       width: 100% !important;
       display: flex !important;
@@ -3921,11 +3921,9 @@
       /* 戰場外層網格：頂部 1 橫排 (VP & 戰力天秤 BAR) 橫跨 Window 闊度，下方左右兩王國嚴格 1fr 1fr 對稱 */
       #battlefield {
         display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        grid-template-rows: auto 1fr !important;
-        grid-template-areas:
-          "duel duel"
-          "player ai" !important;
+        grid-template-columns: 1fr minmax(210px, 260px) 1fr !important;
+        grid-template-rows: 1fr !important;
+        grid-template-areas: "player banner ai" !important;
         width: 100% !important;
         max-width: 100vw !important;
         height: calc(100dvh - clamp(36px, 4.4vh, 44px)) !important;
@@ -4283,9 +4281,9 @@
       /* 戰場外層網格：僅由左右兩個王國 1fr 1fr 構成，佔用全部可用高度 */
       #battlefield {
         display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
+        grid-template-columns: 1fr minmax(180px, 230px) 1fr !important;
         grid-template-rows: 1fr !important;
-        grid-template-areas: "player ai" !important;
+        grid-template-areas: "player banner ai" !important;
         width: 100% !important;
         max-width: 100vw !important;
         height: calc(100dvh - 28px) !important;
@@ -5674,6 +5672,7 @@
 
     /* 3. 王國階段公告重新排版 (左邊階段、中間上下兩行AI與玩家結算、右邊歷程與下一步按鈕) */
     #app-banner {
+      order: 2 !important;
       position: relative !important;
       width: 100% !important;
       display: flex !important;
@@ -5803,8 +5802,80 @@
       white-space: nowrap !important;
     }
 
-    /* 4. 橫向模式排版鏡像 (Mirror: AI 在右側時儀表板鏡像翻轉至靠中央) */
+    /* 4. 橫向模式排版鏡像與中央公告欄 (Mirror & Center Banner) */
     @media (orientation: landscape) {
+      #battlefield {
+        display: grid !important;
+        grid-template-columns: 1fr minmax(210px, 260px) 1fr !important;
+        grid-template-rows: 1fr !important;
+        grid-template-areas: "player banner ai" !important;
+      }
+      #player-panel {
+        grid-area: player !important;
+      }
+      #app-banner {
+        grid-area: banner !important;
+        order: unset !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        padding: 6px 5px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        border-radius: 8px !important;
+      }
+      #app-banner .banner-main-row {
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        align-items: stretch !important;
+        height: 100% !important;
+        gap: 6px !important;
+      }
+      #app-banner .banner-left-phase {
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+        padding-right: 0 !important;
+        padding-bottom: 4px !important;
+        justify-content: center !important;
+      }
+      #app-banner .banner-details-box {
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 5px 4px !important;
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 6px !important;
+      }
+      #app-banner .banner-line-ai, #app-banner .banner-line-player {
+        white-space: normal !important;
+        line-height: 1.25 !important;
+      }
+      #app-banner .banner-right-controls {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 6px !important;
+      }
+      #app-banner .banner-right-controls .banner-history-btn {
+        width: 100% !important;
+        min-height: 28px !important;
+        justify-content: center !important;
+      }
+      #app-banner #banner-actions {
+        width: 100% !important;
+        display: flex !important;
+      }
+      #app-banner #banner-actions .btn {
+        width: 100% !important;
+        min-height: 36px !important;
+        justify-content: center !important;
+        font-size: 11px !important;
+      }
+      #ai-panel {
+        grid-area: ai !important;
+      }
       #ai-panel .upper-grid-section {
         flex-direction: row-reverse !important;
       }
@@ -9687,24 +9758,15 @@
     }
 
     function adaptBannerPosition() {
-      const isLandscape = window.matchMedia('(orientation: landscape)').matches || (window.innerWidth > window.innerHeight);
       const banner = document.getElementById('app-banner');
       const battlefield = document.getElementById('battlefield');
       const playerPanel = document.getElementById('player-panel');
-      const aiPanel = document.getElementById('ai-panel');
-      const aiCore = aiPanel ? aiPanel.querySelector('.kingdom-board-core') : null;
 
-      if (!banner || !battlefield) return;
+      if (!banner || !battlefield || !playerPanel) return;
 
-      if (isLandscape) {
-        if (aiCore && banner.parentElement !== aiCore) {
-          aiCore.appendChild(banner);
-        }
-      } else {
-        // 直向模式：將 Settlement Banner 穩定置於雙方玩家中間 (AI 與 Player 之間)
-        if (banner.parentElement !== battlefield) {
-          battlefield.insertBefore(banner, playerPanel);
-        }
+      // 階段公告穩定置於畫面中央 (即雙方九宮格/玩家範圍之間: AI 與 Player 之間)
+      if (banner.parentElement !== battlefield || banner.nextElementSibling !== playerPanel) {
+        battlefield.insertBefore(banner, playerPanel);
       }
     }
 
@@ -14638,7 +14700,7 @@
         {
           targetSelector: '#app-banner',
           icon: '📣',
-          title: '3/5 · 頂部階段橫幅（推進流程＆翻查歷程）',
+          title: '3/5 · 中央王國階段公告（推進流程＆翻查歷程）',
           bullets: [
             '<span><strong style="color:#fbbf24;">右側主操作鈕：</strong>每個階段嘅確認按鈕（確認棄牌、同時開牌、進入下一階段）都集中喺橫幅<strong>最右方</strong>。</span>',
             '<span><strong style="color:#7dd3fc;">點擊開啟完整歷程：</strong>橫幅左方會即時滾動雙方結算明細；<strong>點擊橫幅左側任意位置或「📜 歷程」</strong>即可查閱完整戰局紀錄（最新事件排最頂）。</span>'
