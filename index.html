@@ -2457,14 +2457,14 @@
     /* 1. TOP: AI Kingdom (直向 / 窄視窗佈局) */
     #ai-panel {
       order: 1 !important;
-      flex: 0 0 auto !important;
-      height: clamp(160px, 24vh, 215px) !important;
-      min-height: 145px !important;
-      max-height: 225px !important;
+      flex: 0 0 clamp(215px, 31vh, 280px) !important;
+      height: clamp(215px, 31vh, 280px) !important;
+      min-height: 205px !important;
+      max-height: 290px !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
-      padding: 2px 5px !important;
+      padding: 2px 4px !important;
       border-radius: 8px !important;
       border-color: rgba(239, 68, 68, 0.35) !important;
       background: rgba(15, 23, 42, 0.92) !important;
@@ -2472,8 +2472,8 @@
       position: relative !important;
     }
 
-    #ai-panel .kingdom-board-core { flex: 1 1 auto !important; height: calc(100% - 28px) !important; margin: 0 !important; }
-    #ai-panel .upper-grid-section { display: flex !important; width: 100% !important; height: 100% !important; }
+    #ai-panel .kingdom-board-core { flex: 1 1 auto !important; height: 100% !important; margin: 0 !important; }
+    #ai-panel .upper-grid-section { display: flex !important; flex-direction: row !important; align-items: stretch !important; justify-content: space-between !important; width: 100% !important; height: 100% !important; gap: 4px !important; }
     #ai-panel .side-meters-pair, #ai-panel .vertical-meter-box, #ai-panel .lower-hand-section { display: none !important; }
     .ai-status-bottom-row { margin-top: 2px !important; flex-shrink: 0 !important; }
 
@@ -2676,17 +2676,21 @@
     #player-panel .upper-grid-section {
       flex: 1 1 auto !important;
       display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      justify-content: space-between !important;
       width: 100% !important;
       height: auto !important;
       min-height: 0 !important;
       overflow: hidden !important;
       max-height: none !important;
+      gap: 4px !important;
     }
 
     #ai-panel {
-      height: clamp(160px, 24vh, 215px) !important;
-      min-height: 145px !important;
-      max-height: 225px !important;
+      height: clamp(215px, 31vh, 280px) !important;
+      min-height: 205px !important;
+      max-height: 290px !important;
     }
 
     .card-top-name {
@@ -5458,10 +5462,10 @@
       gap: 3px !important;
     }
     #ai-panel {
-      flex: 0 0 clamp(160px, 24vh, 215px) !important;
-      height: clamp(160px, 24vh, 215px) !important;
-      min-height: 155px !important;
-      max-height: 225px !important;
+      flex: 0 0 clamp(215px, 31vh, 280px) !important;
+      height: clamp(215px, 31vh, 280px) !important;
+      min-height: 205px !important;
+      max-height: 290px !important;
       padding: 2px 4px !important;
     }
     #player-panel {
@@ -5482,6 +5486,153 @@
     #ai-grid, #player-grid {
       height: 100% !important;
       min-height: 0 !important;
+    }
+
+  
+    /* ===================================================
+       全新排版：右側儀表板 (戰力靠左、金錢靠右、下方技術/信仰進度條)
+       =================================================== */
+    .grid-side-dashboard {
+      flex: 0 0 clamp(92px, 26.5vw, 122px) !important;
+      width: clamp(92px, 26.5vw, 122px) !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(7, 11, 22, 0.98)) !important;
+      border: 1px solid rgba(245, 158, 11, 0.35) !important;
+      border-radius: 7px !important;
+      padding: 2.5px 3.5px !important;
+      box-sizing: border-box !important;
+      gap: 2px !important;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5) !important;
+      overflow: hidden !important;
+    }
+    #ai-panel .grid-side-dashboard {
+      border-color: rgba(239, 68, 68, 0.45) !important;
+    }
+    .side-name-vp-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      height: 18px !important;
+      min-height: 18px !important;
+      padding-bottom: 1.5px !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-sizing: border-box !important;
+      flex-shrink: 0 !important;
+    }
+    .side-name-vp-row .status-name-box {
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 58px !important;
+      flex: 0 1 auto !important;
+    }
+    .side-name-vp-row .status-vp-pill {
+      width: auto !important;
+      min-width: 34px !important;
+      max-width: 44px !important;
+      flex: 0 0 auto !important;
+      font-size: 8.5px !important;
+      padding: 1px 3px !important;
+    }
+    .side-power-gold-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 3px !important;
+      width: 100% !important;
+      height: 20px !important;
+      min-height: 20px !important;
+      box-sizing: border-box !important;
+      flex-shrink: 0 !important;
+    }
+    .side-power-gold-row .status-power-pill {
+      flex: 1 1 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      justify-content: center !important;
+      padding: 1.5px 3px !important;
+      font-size: 9.5px !important;
+      border-radius: 5px !important;
+    }
+    .side-power-gold-row .status-gold-pill {
+      flex: 1 1 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      justify-content: center !important;
+      padding: 1.5px 3px !important;
+      font-size: 9.5px !important;
+      border-radius: 5px !important;
+    }
+    .grid-side-dashboard .header-tech-faith-wrap {
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 2px 2px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-around !important;
+      gap: 2px !important;
+      background: rgba(2, 6, 23, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      border-radius: 5px !important;
+      box-sizing: border-box !important;
+    }
+    .grid-side-dashboard .header-tf-compact-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 2px !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 10px !important;
+      box-sizing: border-box !important;
+    }
+    .grid-side-dashboard .tf-compact-left {
+      display: flex !important;
+      align-items: center !important;
+      gap: 1.5px !important;
+      flex: 0 0 auto !important;
+      width: auto !important;
+      min-width: 28px !important;
+      max-width: 32px !important;
+      box-sizing: border-box !important;
+      font-size: 7px !important;
+      line-height: 1 !important;
+    }
+    .grid-side-dashboard .tf-compact-left .tf-icon {
+      font-size: 8px !important;
+    }
+    .grid-side-dashboard .tf-compact-left .meter-badge {
+      font-size: 6.5px !important;
+      padding: 0.5px 2px !important;
+    }
+    .grid-side-dashboard .mobile-ladder-cells {
+      display: grid !important;
+      grid-template-columns: repeat(15, 1fr) !important;
+      gap: 1px !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      height: 7px !important;
+      background: rgba(2, 6, 23, 0.6) !important;
+      padding: 1px !important;
+      border-radius: 2px !important;
+    }
+    .player-grid-wrapper, .ai-grid-wrapper {
+      position: relative !important;
+      flex: 1 1 auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      display: block !important;
+      box-sizing: border-box !important;
     }
 
   </style>
@@ -5599,10 +5750,91 @@
   <main id="battlefield">
     <!-- RIGHT: AI / Player 2 (電腦對手) -->
     <section class="board-panel" id="ai-panel" style="border-color: rgba(239, 68, 68, 0.35);">
-      <!-- 1. AI 3x3 Grid on TOP (Request 3: 將AI個九宮格搬上去) -->
-      <div class="kingdom-board-core ai-board-core-top" style="flex:1 1 auto; width:100%; min-height:0;">
+      <!-- 1. AI 3x3 Grid & 右邊儀表板 (九宮格調高，右側戰力靠左、金錢靠右、下方進度條) -->
+      <div class="kingdom-board-core ai-board-core-top" style="flex:1 1 auto; width:100%; height:100%; min-height:0; margin:0;">
         <div class="upper-grid-section" style="width:100%; height:100%;">
-          <div class="grid-3x3" id="ai-grid"></div>
+          <div class="ai-grid-wrapper" style="position:relative; width:auto; height:100%; flex:1 1 auto; min-width:0; min-height:0; display:block; box-sizing:border-box;">
+            <div class="grid-3x3" id="ai-grid"></div>
+          </div>
+
+          <!-- AI 九宮格右邊儀表板 -->
+          <div class="grid-side-dashboard" id="ai-side-dashboard">
+            <!-- 頂部: 領主名與 VP 框 -->
+            <div class="side-name-vp-row">
+              <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:44px; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" class="status-name-box" title="點擊與對手領主互動">
+                <span id="ai-lord-avatar" style="font-size:10px; background:rgba(127,29,29,0.5); border:1px solid #f87171; border-radius:50%; width:16px; height:16px; min-width:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">🤖</span>
+                <span id="ai-lord-name" style="font-size:9.5px; font-weight:800; color:#f87171; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">巴爾</span>
+                <span id="ai-lord-title" style="display:none;">鐵血宰相</span>
+                <span id="ai-hand-count" style="display:none;">5/5</span>
+              </div>
+              <span class="stat-pill status-vp-pill" id="ai-vp-pill" title="電腦勝利點數 (40 VP 終局)" style="background:rgba(239,68,68,0.22); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+                🏆<strong id="ai-vp-num">0</strong>
+              </span>
+            </div>
+
+            <!-- 進度條上方: 戰力框靠左、金錢框靠右 -->
+            <div class="side-power-gold-row">
+              <span class="stat-pill status-power-pill" id="ai-power-pill" title="電腦即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+                ⚔️<strong id="ai-power">0</strong>
+              </span>
+              <span class="stat-pill status-gold-pill" id="ai-gold-pill" title="電腦國庫金幣" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+                💰<strong id="ai-gold">5</strong>
+              </span>
+            </div>
+
+            <!-- 下方: 電腦技術/信仰進度條 -->
+            <div class="header-tech-faith-wrap" title="AI 技術與信仰即時進度 (滿 15 點達 Lv4)">
+              <!-- AI Tech Row -->
+              <div class="header-tf-compact-row" title="AI 技術點數 (滿 15 點達 Lv4)">
+                <div class="tf-compact-left">
+                  <span class="tf-icon">⚙️</span>
+                  <span class="meter-badge badge-tech" id="ai-tech-badge">Lv0</span>
+                </div>
+                <div class="mobile-ladder-cells">
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-2" title="2點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-4" title="4點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-5" title="5點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-6" title="6點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-tech-cell-7" title="7點 (Lv3)"><span>3</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-8" title="8點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-9" title="9點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-10" title="10點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-11" title="11點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-12" title="12點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-13" title="13點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-14" title="14點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-tech-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
+                </div>
+              </div>
+
+              <!-- AI Faith Row -->
+              <div class="header-tf-compact-row" title="AI 信仰點數 (滿 15 點達 Lv4)">
+                <div class="tf-compact-left">
+                  <span class="tf-icon">✝️</span>
+                  <span class="meter-badge badge-faith" id="ai-faith-badge">Lv0</span>
+                </div>
+                <div class="mobile-ladder-cells">
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-2" title="2點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-4" title="4點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-5" title="5點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-6" title="6點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-faith-cell-7" title="7點 (Lv3)"><span>3</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-8" title="8點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-9" title="9點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-10" title="10點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-11" title="11點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-12" title="12點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-13" title="13點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-14" title="14點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-faith-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <!-- 3. AI Hand Cards Dock (橫向模式完美對稱顯示對手手牌暗面) -->
         <div class="lower-hand-section" id="ai-hand-container" style="display:none;">
@@ -5619,89 +5851,9 @@
         </div>
       </div>
       <div id="ai-speech-container"></div>
-
-      <!-- 2. AI Status Row on BOTTOM (Request 3: 「名、技術/信仰進度、」嗰個ROW搬落來) -->
-      <div class="panel-header mobile-header-row ai-status-bottom-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:2.5px; min-height:26px; padding:1px 2px;">
-        <!-- 1. AI 領主 (移除 N/9) -->
-        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" class="status-name-box" title="點擊與對手領主互動">
-          <span id="ai-lord-avatar" style="font-size:10px; background:rgba(127,29,29,0.5); border:1px solid #f87171; border-radius:50%; width:16px; height:16px; min-width:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">🤖</span>
-          <span id="ai-lord-name" style="font-size:9.5px; font-weight:800; color:#f87171; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">巴爾</span>
-          <span id="ai-lord-title" style="display:none;">鐵血宰相</span>
-          <span id="ai-hand-count" style="display:none;">5/5</span>
-        </div>
-
-        <!-- 2. 電腦戰力 -->
-        <span class="stat-pill" id="ai-power-pill" class="stat-pill status-power-pill" title="電腦即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          ⚔️<strong id="ai-power">0</strong>
-        </span>
-
-        <!-- 3. 電腦技術/信仰進度條 -->
-        <div class="header-tech-faith-wrap" title="AI 技術與信仰即時進度 (滿 15 點達 Lv4)">
-          <!-- AI Tech Row -->
-          <div class="header-tf-compact-row" title="AI 技術點數 (滿 15 點達 Lv4)">
-            <div class="tf-compact-left">
-              <span class="tf-icon">⚙️</span>
-              <span class="meter-badge badge-tech" id="ai-tech-badge">Lv0</span>
-            </div>
-            <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-4" title="4點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-5" title="5點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-tech-cell-7" title="7點 (Lv3)"><span>3</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-8" title="8點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-9" title="9點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-10" title="10點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-11" title="11點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-12" title="12點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-13" title="13點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-tech-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
-            </div>
-          </div>
-
-          <!-- AI Faith Row -->
-          <div class="header-tf-compact-row" title="AI 信仰點數 (滿 15 點達 Lv4)">
-            <div class="tf-compact-left">
-              <span class="tf-icon">✝️</span>
-              <span class="meter-badge badge-faith" id="ai-faith-badge">Lv0</span>
-            </div>
-            <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-4" title="4點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-5" title="5點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-faith-cell-7" title="7點 (Lv3)"><span>3</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-8" title="8點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-9" title="9點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-10" title="10點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-11" title="11點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-12" title="12點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-13" title="13點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-faith-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. 電腦錢 -->
-        <span class="stat-pill" id="ai-gold-pill" class="stat-pill status-gold-pill" title="電腦國庫金幣" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          💰<strong id="ai-gold">5</strong>
-        </span>
-
-        <!-- 5. 電腦 VP -->
-        <span class="stat-pill" id="ai-vp-pill" class="stat-pill status-vp-pill" title="電腦勝利點數 (40 VP 終局)" style="background:rgba(239,68,68,0.22); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          🏆<strong id="ai-vp-num">0</strong>
-        </span>
-      </div>
     </section>
 
-    
-    <!-- CENTER: 王國階段公告與操作按鈕 (Settlement Banner with Filters) -->
+    <!-- CENTER: 王國階段公告與操作按鈕 (搬去原本玩家/AI狀態列位置) -->
     <div id="app-banner" class="center-settlement-banner">
       <!-- 階段篩選器 Filter Strip -->
       <div class="banner-main-row" style="display:flex; align-items:center; justify-content:space-between; width:100%; min-width:0; gap:4px;">
@@ -5725,95 +5877,95 @@
       </div>
     </div>
 
-
     <!-- LEFT: Player 1 (我的王國) -->
     <section class="board-panel" id="player-panel" style="border-color: rgba(245, 158, 11, 0.4);">
-      <!-- Header Row: [我的王國 (X/9)] ➔ [技術/信仰進度條] ➔ [💰 金幣] (技/信放喺王國同錢中間) -->
-      <div class="panel-header mobile-header-row player-status-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:2.5px; min-height:26px; padding:1px 2px;">
-        <!-- 1. 我的王國 (移除 N/9) -->
-        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box;" id="player-header-left-box" class="status-name-box">
-          <span style="font-size:11px; flex-shrink:0;">👑</span>
-          <span style="font-size:10px; font-weight:800; color:#fcd34d; white-space:nowrap;">我的王國</span>
-        </div>
-
-        <!-- 2. 戰力 (簡化為數字) -->
-        <span class="stat-pill" id="p-power-pill" class="stat-pill status-power-pill" title="我的即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          ⚔️<strong id="p-power">0</strong>
-        </span>
-
-        <!-- 3. 技術/信仰進度條 (第 1/3/7/15 格標記 1/2/3/4，無 N/15 文字) -->
-        <div class="header-tech-faith-wrap" title="技術與信仰即時進度 (滿 15 點達 Lv4)">
-          <!-- Tech Row -->
-          <div class="header-tf-compact-row" title="技術點數 (滿 15 點達 Lv4)">
-            <div class="tf-compact-left">
-              <span class="tf-icon">⚙️</span>
-              <span class="meter-badge badge-tech" id="p-tech-badge">Lv0</span>
-            </div>
-            <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-4" title="4點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-5" title="5點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-tech-cell-7" title="7點 (Lv3)"><span>3</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-8" title="8點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-9" title="9點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-10" title="10點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-11" title="11點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-12" title="12點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-13" title="13點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-tech-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
-            </div>
-          </div>
-
-          <!-- Faith Row -->
-          <div class="header-tf-compact-row" title="信仰點數 (滿 15 點達 Lv4)">
-            <div class="tf-compact-left">
-              <span class="tf-icon">✝️</span>
-              <span class="meter-badge badge-faith" id="p-faith-badge">Lv0</span>
-            </div>
-            <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-4" title="4點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-5" title="5點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-faith-cell-7" title="7點 (Lv3)"><span>3</span></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-8" title="8點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-9" title="9點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-10" title="10點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-11" title="11點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-12" title="12點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-13" title="13點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-faith-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. 錢 -->
-        <span class="stat-pill" id="p-gold-pill" class="stat-pill status-gold-pill" title="國庫金幣" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          💰<strong id="p-gold">5</strong>
-        </span>
-
-        <!-- 5. VP -->
-        <span class="stat-pill" id="p-vp-pill" class="stat-pill status-vp-pill" title="勝利點數 (40 VP 終局)" style="background:rgba(245,158,11,0.22); color:#fde047; border:1px solid rgba(245,158,11,0.6); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          🏆<strong id="p-vp-num">0</strong>
-        </span>
-      </div>
       <div id="player-speech-container"></div>
 
       <!-- Main Board Core -->
       <div class="kingdom-board-core">
         <div class="upper-grid-section">
           <!-- Player Grid Wrapper -->
-          <div class="player-grid-wrapper" style="position:relative; width:100%; height:100%; flex:1 1 auto; min-width:0; min-height:0; display:block; box-sizing:border-box;">
+          <div class="player-grid-wrapper" style="position:relative; width:auto; height:100%; flex:1 1 auto; min-width:0; min-height:0; display:block; box-sizing:border-box;">
             <div class="grid-3x3" id="player-grid"></div>
             <div id="player-grid-discard-overlay" class="grid-discard-overlay hidden">
               <span id="player-grid-discard-text">🗑️ 拖曳手牌至此處棄牌</span>
+            </div>
+          </div>
+
+          <!-- Player 九宮格右邊儀表板 -->
+          <div class="grid-side-dashboard" id="player-side-dashboard">
+            <!-- 頂部: 王國名與 VP 框 -->
+            <div class="side-name-vp-row">
+              <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:44px; box-sizing:border-box;" id="player-header-left-box" class="status-name-box">
+                <span style="font-size:11px; flex-shrink:0;">👑</span>
+                <span style="font-size:10px; font-weight:800; color:#fcd34d; white-space:nowrap;">我的王國</span>
+              </div>
+              <span class="stat-pill status-vp-pill" id="p-vp-pill" title="勝利點數 (40 VP 終局)" style="background:rgba(245,158,11,0.22); color:#fde047; border:1px solid rgba(245,158,11,0.6); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+                🏆<strong id="p-vp-num">0</strong>
+              </span>
+            </div>
+
+            <!-- 進度條上方: 戰力框靠左、金錢框靠右 -->
+            <div class="side-power-gold-row">
+              <span class="stat-pill status-power-pill" id="p-power-pill" title="我的即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+                ⚔️<strong id="p-power">0</strong>
+              </span>
+              <span class="stat-pill status-gold-pill" id="p-gold-pill" title="國庫金幣" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+                💰<strong id="p-gold">5</strong>
+              </span>
+            </div>
+
+            <!-- 下方: 我的技術/信仰進度條 -->
+            <div class="header-tech-faith-wrap" title="技術與信仰即時進度 (滿 15 點達 Lv4)">
+              <!-- Tech Row -->
+              <div class="header-tf-compact-row" title="技術點數 (滿 15 點達 Lv4)">
+                <div class="tf-compact-left">
+                  <span class="tf-icon">⚙️</span>
+                  <span class="meter-badge badge-tech" id="p-tech-badge">Lv0</span>
+                </div>
+                <div class="mobile-ladder-cells">
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-2" title="2點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-4" title="4點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-5" title="5點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-6" title="6點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-tech-cell-7" title="7點 (Lv3)"><span>3</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-8" title="8點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-9" title="9點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-10" title="10點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-11" title="11點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-12" title="12點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-13" title="13點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-14" title="14點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-tech-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
+                </div>
+              </div>
+
+              <!-- Faith Row -->
+              <div class="header-tf-compact-row" title="信仰點數 (滿 15 點達 Lv4)">
+                <div class="tf-compact-left">
+                  <span class="tf-icon">✝️</span>
+                  <span class="meter-badge badge-faith" id="p-faith-badge">Lv0</span>
+                </div>
+                <div class="mobile-ladder-cells">
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-2" title="2點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-4" title="4點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-5" title="5點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-6" title="6點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-faith-cell-7" title="7點 (Lv3)"><span>3</span></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-8" title="8點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-9" title="9點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-10" title="10點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-11" title="11點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-12" title="12點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-13" title="13點"></div>
+                  <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-14" title="14點"></div>
+                  <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-faith-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -5833,7 +5985,6 @@
         </div>
       </div>
     </section>
-
   </main>
 
   
@@ -14303,12 +14454,12 @@
           preferPos: 'bottom'
         },
         {
-          targetSelector: '#player-panel .upper-grid-section',
+          targetSelector: '#player-panel .grid-side-dashboard',
           icon: '📊',
-          title: '4/5 · 四維進度條與即時戰力天秤',
+          title: '4/5 · 九宮格右側戰術儀表板',
           bullets: [
-            '<span><strong style="color:#38bdf8;">左翼 15 格階梯（⚙️技能 / ✝️信仰）：</strong>清晰顯示目前點數、等級（Lv0～Lv4）以及距離下一級仲差幾多點。</span>',
-            '<span><strong style="color:#f87171;">右翼直立條（🏆VP / ⚔️戰力）＆頂部天秤：</strong>實時比較雙方總分（達 40 VP 或放滿 9 格即觸發終局）與前線總戰力差距。</span>'
+            '<span><strong style="color:#fcd34d;">右側儀表板：</strong>位於九宮格右側，頂部為王國名與<strong>🏆VP點數</strong>；中間靠左為<strong>⚔️戰力框</strong>、靠右為<strong>💰金錢框</strong>；下方為<strong>⚙️技術 / ✝️信仰 15格點數階梯</strong>。</span>',
+            '<span><strong style="color:#38bdf8;">清晰緊湊：</strong>所有重要戰略數據集中於九宮格右側，騰出最大垂直高度令 AI 與玩家九宮格更加寬敞清晰。</span>'
           ],
           preferPos: 'right'
         },
