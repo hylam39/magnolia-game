@@ -5490,23 +5490,23 @@
 
   
     /* ===================================================
-       全新排版：右側儀表板 (戰力靠左、金錢靠右、下方技術/信仰進度條)
+       全新排版：超緊湊直向儀表板 (打直進度條下1上15，戰力靠左、金錢靠右，九宮格拉闊，橫向對稱鏡像)
        =================================================== */
     .grid-side-dashboard {
-      flex: 0 0 clamp(92px, 26.5vw, 122px) !important;
-      width: clamp(92px, 26.5vw, 122px) !important;
+      flex: 0 0 clamp(54px, 15vw, 64px) !important;
+      width: clamp(54px, 15vw, 64px) !important;
       height: 100% !important;
       min-height: 0 !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(7, 11, 22, 0.98)) !important;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(7, 11, 22, 0.99)) !important;
       border: 1px solid rgba(245, 158, 11, 0.35) !important;
-      border-radius: 7px !important;
-      padding: 2.5px 3.5px !important;
+      border-radius: 6px !important;
+      padding: 2px 2px !important;
       box-sizing: border-box !important;
       gap: 2px !important;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6) !important;
       overflow: hidden !important;
     }
     #ai-panel .grid-side-dashboard {
@@ -5517,9 +5517,9 @@
       align-items: center !important;
       justify-content: space-between !important;
       width: 100% !important;
-      height: 18px !important;
-      min-height: 18px !important;
-      padding-bottom: 1.5px !important;
+      height: 17px !important;
+      min-height: 17px !important;
+      padding-bottom: 1px !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
       box-sizing: border-box !important;
       flex-shrink: 0 !important;
@@ -5527,102 +5527,139 @@
     .side-name-vp-row .status-name-box {
       width: auto !important;
       min-width: 0 !important;
-      max-width: 58px !important;
+      max-width: 32px !important;
       flex: 0 1 auto !important;
     }
     .side-name-vp-row .status-vp-pill {
       width: auto !important;
-      min-width: 34px !important;
-      max-width: 44px !important;
+      min-width: 20px !important;
+      max-width: 28px !important;
       flex: 0 0 auto !important;
-      font-size: 8.5px !important;
-      padding: 1px 3px !important;
+      font-size: 8px !important;
+      padding: 0.5px 2px !important;
+      font-weight: 900 !important;
     }
     .side-power-gold-row {
       display: flex !important;
       align-items: center !important;
       justify-content: space-between !important;
-      gap: 3px !important;
+      gap: 2px !important;
       width: 100% !important;
-      height: 20px !important;
-      min-height: 20px !important;
+      height: 19px !important;
+      min-height: 19px !important;
       box-sizing: border-box !important;
       flex-shrink: 0 !important;
     }
-    .side-power-gold-row .status-power-pill {
-      flex: 1 1 0 !important;
-      width: auto !important;
-      min-width: 0 !important;
-      max-width: none !important;
-      justify-content: center !important;
-      padding: 1.5px 3px !important;
-      font-size: 9.5px !important;
-      border-radius: 5px !important;
-    }
+    .side-power-gold-row .status-power-pill,
     .side-power-gold-row .status-gold-pill {
       flex: 1 1 0 !important;
       width: auto !important;
       min-width: 0 !important;
       max-width: none !important;
       justify-content: center !important;
-      padding: 1.5px 3px !important;
-      font-size: 9.5px !important;
-      border-radius: 5px !important;
+      padding: 1px 1px !important;
+      font-size: 9px !important;
+      font-weight: 900 !important;
+      border-radius: 3.5px !important;
+      letter-spacing: -0.3px !important;
+      font-family: ui-monospace, Menlo, monospace !important;
+      white-space: nowrap !important;
     }
-    .grid-side-dashboard .header-tech-faith-wrap {
+    .v-tf-ladder-wrap {
       flex: 1 1 auto !important;
       width: 100% !important;
       min-height: 0 !important;
+      height: auto !important;
       margin: 0 !important;
-      padding: 2px 2px !important;
+      padding: 1px 0.5px !important;
       display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-around !important;
-      gap: 2px !important;
-      background: rgba(2, 6, 23, 0.75) !important;
-      border: 1px solid rgba(255, 255, 255, 0.06) !important;
-      border-radius: 5px !important;
-      box-sizing: border-box !important;
-    }
-    .grid-side-dashboard .header-tf-compact-row {
-      display: flex !important;
-      align-items: center !important;
+      flex-direction: row !important;
       justify-content: space-between !important;
       gap: 2px !important;
-      width: 100% !important;
-      height: auto !important;
-      min-height: 10px !important;
+      background: transparent !important;
+      border: none !important;
       box-sizing: border-box !important;
     }
-    .grid-side-dashboard .tf-compact-left {
+    .v-meter-col {
+      flex: 1 1 0 !important;
+      width: 50% !important;
+      min-width: 0 !important;
+      height: 100% !important;
       display: flex !important;
+      flex-direction: column !important;
       align-items: center !important;
       gap: 1.5px !important;
-      flex: 0 0 auto !important;
-      width: auto !important;
-      min-width: 28px !important;
-      max-width: 32px !important;
       box-sizing: border-box !important;
-      font-size: 7px !important;
+    }
+    .v-meter-head {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 1px !important;
+      width: 100% !important;
+      flex-shrink: 0 !important;
+      line-height: 1 !important;
+      font-size: 7.5px !important;
+    }
+    .v-meter-head .tf-icon {
+      font-size: 7.5px !important;
       line-height: 1 !important;
     }
-    .grid-side-dashboard .tf-compact-left .tf-icon {
-      font-size: 8px !important;
+    .v-meter-head .meter-badge {
+      font-size: 6.2px !important;
+      padding: 0.5px 1.5px !important;
+      font-weight: 800 !important;
     }
-    .grid-side-dashboard .tf-compact-left .meter-badge {
-      font-size: 6.5px !important;
-      padding: 0.5px 2px !important;
+    .v-ladder-cells {
+      display: flex !important;
+      flex-direction: column-reverse !important;
+      gap: 1.5px !important;
+      flex: 1 1 0 !important;
+      min-height: 0 !important;
+      height: 100% !important;
+      width: 100% !important;
+      background: rgba(2, 6, 23, 0.75) !important;
+      padding: 1.5px 1px !important;
+      border-radius: 3px !important;
+      box-sizing: border-box !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
-    .grid-side-dashboard .mobile-ladder-cells {
-      display: grid !important;
-      grid-template-columns: repeat(15, 1fr) !important;
-      gap: 1px !important;
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-      height: 7px !important;
-      background: rgba(2, 6, 23, 0.6) !important;
-      padding: 1px !important;
-      border-radius: 2px !important;
+    .v-ladder-cells .m-ladder-cell {
+      flex: 1 1 0 !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      height: auto !important;
+      border-radius: 1px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-family: ui-monospace, Menlo, monospace !important;
+      font-size: 6.2px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      box-sizing: border-box !important;
+      background: rgba(15, 23, 42, 0.7) !important;
+      border: 1px solid rgba(51, 65, 85, 0.35) !important;
+      color: #64748b !important;
+      padding: 0 !important;
+    }
+    .v-ladder-cells .m-ladder-cell.cell-milestone {
+      border-top: 1.5px solid rgba(251, 191, 36, 0.6) !important;
+    }
+    .v-ladder-cells .m-ladder-cell.milestone-lv4 {
+      border-top: 2px solid rgba(251, 191, 36, 0.85) !important;
+    }
+    .v-ladder-cells .m-ladder-cell.cell-tech-active {
+      background: #38bdf8 !important;
+      border-color: #7dd3fc !important;
+      box-shadow: 0 0 3px #38bdf8 !important;
+      color: #020617 !important;
+    }
+    .v-ladder-cells .m-ladder-cell.cell-faith-active {
+      background: #c084fc !important;
+      border-color: #e9d5ff !important;
+      box-shadow: 0 0 3px #c084fc !important;
+      color: #ffffff !important;
     }
     .player-grid-wrapper, .ai-grid-wrapper {
       position: relative !important;
@@ -5633,6 +5670,153 @@
       min-height: 0 !important;
       display: block !important;
       box-sizing: border-box !important;
+    }
+
+    /* 3. 王國階段公告重新排版 (左邊階段、中間上下兩行AI與玩家結算、右邊歷程與下一步按鈕) */
+    #app-banner {
+      position: relative !important;
+      width: 100% !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      background: rgba(15, 23, 42, 0.98) !important;
+      border: 1px solid rgba(245, 158, 11, 0.45) !important;
+      border-radius: 7px !important;
+      padding: 2.5px 5px !important;
+      min-height: 42px !important;
+      height: 44px !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+      flex: 0 0 44px !important;
+      z-index: 25 !important;
+    }
+    .banner-main-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      gap: 5px !important;
+      height: 100% !important;
+    }
+    .banner-left-phase {
+      display: flex !important;
+      align-items: center !important;
+      gap: 3px !important;
+      flex-shrink: 0 !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.14) !important;
+      padding-right: 5px !important;
+    }
+    .banner-round-phase-box {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      line-height: 1.15 !important;
+    }
+    .banner-round-line {
+      font-size: 8.5px !important;
+      font-weight: 800 !important;
+      color: #fbbf24 !important;
+      white-space: nowrap !important;
+    }
+    .banner-phase-line {
+      font-size: 9.5px !important;
+      font-weight: 900 !important;
+      color: #fde047 !important;
+      white-space: nowrap !important;
+    }
+    .banner-details-box {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      gap: 1.5px !important;
+      padding: 0 3px !important;
+      overflow: hidden !important;
+      cursor: pointer !important;
+    }
+    .banner-line-ai, .banner-line-player {
+      font-size: 8.5px !important;
+      line-height: 1.2 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      width: 100% !important;
+      display: block !important;
+    }
+    .banner-tag-ai {
+      color: #f87171 !important;
+      font-weight: 800 !important;
+      font-size: 8.5px !important;
+    }
+    .banner-tag-player {
+      color: #fcd34d !important;
+      font-weight: 800 !important;
+      font-size: 8.5px !important;
+    }
+    .banner-val-text {
+      color: #f1f5f9 !important;
+      font-family: ui-monospace, Menlo, monospace !important;
+      font-weight: 700 !important;
+      font-size: 8.5px !important;
+    }
+    .banner-right-controls {
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      flex-shrink: 0 !important;
+    }
+    .banner-history-btn {
+      background: rgba(245, 158, 11, 0.16) !important;
+      border: 1px solid rgba(245, 158, 11, 0.45) !important;
+      color: #fbbf24 !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      border-radius: 5px !important;
+      height: 32px !important;
+      padding: 2px 6px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 2px !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+    }
+    .banner-history-btn:hover {
+      background: rgba(245, 158, 11, 0.28) !important;
+      border-color: #fbbf24 !important;
+    }
+    #banner-actions .btn {
+      padding: 2px 8px !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      border-radius: 6px !important;
+      min-height: 32px !important;
+      height: 32px !important;
+      display: inline-flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1.15 !important;
+      white-space: nowrap !important;
+    }
+
+    /* 4. 橫向模式排版鏡像 (Mirror: AI 在右側時儀表板鏡像翻轉至靠中央) */
+    @media (orientation: landscape) {
+      #ai-panel .upper-grid-section {
+        flex-direction: row-reverse !important;
+      }
+      #ai-panel .grid-side-dashboard .side-power-gold-row {
+        flex-direction: row-reverse !important;
+      }
+      #ai-panel .grid-side-dashboard .v-tf-ladder-wrap {
+        flex-direction: row-reverse !important;
+      }
+      #ai-panel .grid-side-dashboard .side-name-vp-row {
+        flex-direction: row-reverse !important;
+      }
     }
 
   </style>
@@ -5750,47 +5934,47 @@
   <main id="battlefield">
     <!-- RIGHT: AI / Player 2 (電腦對手) -->
     <section class="board-panel" id="ai-panel" style="border-color: rgba(239, 68, 68, 0.35);">
-      <!-- 1. AI 3x3 Grid & 右邊儀表板 (九宮格調高，右側戰力靠左、金錢靠右、下方進度條) -->
+      <!-- 1. AI 3x3 Grid & 超緊湊右邊儀表板 (九宮格調高拉闊，右側戰力靠左、金錢靠右、下方打直進度條) -->
       <div class="kingdom-board-core ai-board-core-top" style="flex:1 1 auto; width:100%; height:100%; min-height:0; margin:0;">
         <div class="upper-grid-section" style="width:100%; height:100%;">
           <div class="ai-grid-wrapper" style="position:relative; width:auto; height:100%; flex:1 1 auto; min-width:0; min-height:0; display:block; box-sizing:border-box;">
             <div class="grid-3x3" id="ai-grid"></div>
           </div>
 
-          <!-- AI 九宮格右邊儀表板 -->
+          <!-- AI 九宮格右邊超緊湊儀表板 -->
           <div class="grid-side-dashboard" id="ai-side-dashboard">
             <!-- 頂部: 領主名與 VP 框 -->
             <div class="side-name-vp-row">
-              <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:44px; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" class="status-name-box" title="點擊與對手領主互動">
-                <span id="ai-lord-avatar" style="font-size:10px; background:rgba(127,29,29,0.5); border:1px solid #f87171; border-radius:50%; width:16px; height:16px; min-width:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">🤖</span>
-                <span id="ai-lord-name" style="font-size:9.5px; font-weight:800; color:#f87171; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">巴爾</span>
+              <div style="display:flex; align-items:center; gap:1.5px; flex:0 0 auto; min-width:0; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" class="status-name-box" title="點擊與對手領主互動">
+                <span id="ai-lord-avatar" style="font-size:9.5px; background:rgba(127,29,29,0.5); border:1px solid #f87171; border-radius:50%; width:14px; height:14px; min-width:14px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">🤖</span>
+                <span id="ai-lord-name" style="font-size:8px; font-weight:800; color:#f87171; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">巴爾</span>
                 <span id="ai-lord-title" style="display:none;">鐵血宰相</span>
                 <span id="ai-hand-count" style="display:none;">5/5</span>
               </div>
-              <span class="stat-pill status-vp-pill" id="ai-vp-pill" title="電腦勝利點數 (40 VP 終局)" style="background:rgba(239,68,68,0.22); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+              <span class="stat-pill status-vp-pill" id="ai-vp-pill" title="電腦勝利點數 (40 VP 終局)" style="background:rgba(239,68,68,0.22); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:8.5px; padding:1px 2px; border-radius:4px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap; font-weight:900;">
                 🏆<strong id="ai-vp-num">0</strong>
               </span>
             </div>
 
-            <!-- 進度條上方: 戰力框靠左、金錢框靠右 -->
+            <!-- 進度條上方: 戰力框靠左、金錢框靠右 (足夠空間容納雙位數) -->
             <div class="side-power-gold-row">
-              <span class="stat-pill status-power-pill" id="ai-power-pill" title="電腦即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+              <span class="stat-pill status-power-pill" id="ai-power-pill" title="電腦即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 2px; border-radius:4px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
                 ⚔️<strong id="ai-power">0</strong>
               </span>
-              <span class="stat-pill status-gold-pill" id="ai-gold-pill" title="電腦國庫金幣" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+              <span class="stat-pill status-gold-pill" id="ai-gold-pill" title="電腦國庫金幣" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:9.5px; padding:1px 2px; border-radius:4px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
                 💰<strong id="ai-gold">5</strong>
               </span>
             </div>
 
-            <!-- 下方: 電腦技術/信仰進度條 -->
-            <div class="header-tech-faith-wrap" title="AI 技術與信仰即時進度 (滿 15 點達 Lv4)">
-              <!-- AI Tech Row -->
-              <div class="header-tf-compact-row" title="AI 技術點數 (滿 15 點達 Lv4)">
-                <div class="tf-compact-left">
+            <!-- 下方: 打直技術/信仰進度條 (左:技術, 右:信仰，由下為1至上為15) -->
+            <div class="header-tech-faith-wrap v-tf-ladder-wrap" title="AI 技術與信仰即時進度 (滿 15 點達 Lv4)">
+              <!-- AI Tech Column (打直, 下1上15) -->
+              <div class="v-meter-col" id="ai-tech-vcol" title="AI 技術點數 (滿 15 點達 Lv4)">
+                <div class="v-meter-head">
                   <span class="tf-icon">⚙️</span>
                   <span class="meter-badge badge-tech" id="ai-tech-badge">Lv0</span>
                 </div>
-                <div class="mobile-ladder-cells">
+                <div class="v-ladder-cells">
                   <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
                   <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-2" title="2點"></div>
                   <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
@@ -5809,13 +5993,13 @@
                 </div>
               </div>
 
-              <!-- AI Faith Row -->
-              <div class="header-tf-compact-row" title="AI 信仰點數 (滿 15 點達 Lv4)">
-                <div class="tf-compact-left">
+              <!-- AI Faith Column (打直, 下1上15) -->
+              <div class="v-meter-col" id="ai-faith-vcol" title="AI 信仰點數 (滿 15 點達 Lv4)">
+                <div class="v-meter-head">
                   <span class="tf-icon">✝️</span>
                   <span class="meter-badge badge-faith" id="ai-faith-badge">Lv0</span>
                 </div>
-                <div class="mobile-ladder-cells">
+                <div class="v-ladder-cells">
                   <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
                   <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-2" title="2點"></div>
                   <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
@@ -5853,26 +6037,34 @@
       <div id="ai-speech-container"></div>
     </section>
 
-    <!-- CENTER: 王國階段公告與操作按鈕 (搬去原本玩家/AI狀態列位置) -->
+    <!-- CENTER: 王國階段公告 (搬落去雙方玩家範圍之間，左邊階段、中間上AI下玩家兩行結算、右邊歷程與下一步按鈕) -->
     <div id="app-banner" class="center-settlement-banner">
-      <!-- 階段篩選器 Filter Strip -->
-      <div class="banner-main-row" style="display:flex; align-items:center; justify-content:space-between; width:100%; min-width:0; gap:4px;">
-        <div id="banner-content" style="display:flex; align-items:center; gap:4px; cursor:pointer; flex:1 1 auto; min-width:0; padding:1px 2px; border-radius:6px; transition:all 0.15s ease;" title="點擊開啟階段公告歷程">
+      <div class="banner-main-row">
+        <!-- 左邊: 現時階段 -->
+        <div class="banner-left-phase" id="banner-left-phase">
           <span id="banner-icon" style="font-size:14px; flex-shrink:0; width:18px; text-align:center;">🃏</span>
           <div id="banner-round-phase" class="banner-round-phase-box">
             <div id="banner-round-text" class="banner-round-line">第 1 輪</div>
             <div id="banner-phase-text" class="banner-phase-line">抽牌階段</div>
           </div>
-          <div id="banner-msg" class="banner-details-box">
-            <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">不棄牌，保留手牌</span></div>
-            <div class="banner-line-ai"><span class="banner-tag-ai">電腦：</span><span class="banner-val-text">手牌已備妥 (5/5)</span></div>
-          </div>
-          <span id="banner-history-pill" style="font-size:12px; color:#fbbf24; background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.45); width:22px; height:22px; min-width:22px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer;" title="點擊查閱王國階段公告歷程">
-            📜<span id="history-count-badge" style="display:none;">1</span>
-          </span>
         </div>
-        <div id="banner-actions" style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
-          <!-- Action Buttons via JS -->
+
+        <!-- 中間: 上邊 AI 結算，下邊玩家結算 (可點擊開啟歷程) -->
+        <div id="banner-msg" class="banner-details-box" title="點擊查閱王國階段公告歷程">
+          <div class="banner-line-ai"><span class="banner-tag-ai">電腦：</span><span class="banner-val-text">手牌已備妥 (5/5)</span></div>
+          <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">不棄牌，保留手牌</span></div>
+        </div>
+
+        <!-- 右邊: 歷程 + 下一步/操作按鈕 -->
+        <div class="banner-right-controls" id="banner-right-controls">
+          <button type="button" id="banner-history-pill" class="banner-history-btn" title="點擊查閱王國階段公告歷程">
+            <span>📜</span>
+            <span class="history-btn-label">歷程</span>
+            <span id="history-count-badge" style="display:none;">1</span>
+          </button>
+          <div id="banner-actions">
+            <!-- Action Buttons via JS -->
+          </div>
         </div>
       </div>
     </div>
@@ -5884,7 +6076,7 @@
       <!-- Main Board Core -->
       <div class="kingdom-board-core">
         <div class="upper-grid-section">
-          <!-- Player Grid Wrapper -->
+          <!-- Player Grid Wrapper (九宮格拉闊) -->
           <div class="player-grid-wrapper" style="position:relative; width:auto; height:100%; flex:1 1 auto; min-width:0; min-height:0; display:block; box-sizing:border-box;">
             <div class="grid-3x3" id="player-grid"></div>
             <div id="player-grid-discard-overlay" class="grid-discard-overlay hidden">
@@ -5892,38 +6084,38 @@
             </div>
           </div>
 
-          <!-- Player 九宮格右邊儀表板 -->
+          <!-- Player 九宮格右邊超緊湊儀表板 -->
           <div class="grid-side-dashboard" id="player-side-dashboard">
             <!-- 頂部: 王國名與 VP 框 -->
             <div class="side-name-vp-row">
-              <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:44px; box-sizing:border-box;" id="player-header-left-box" class="status-name-box">
-                <span style="font-size:11px; flex-shrink:0;">👑</span>
-                <span style="font-size:10px; font-weight:800; color:#fcd34d; white-space:nowrap;">我的王國</span>
+              <div style="display:flex; align-items:center; gap:1.5px; flex:0 0 auto; min-width:0; box-sizing:border-box; cursor:pointer;" id="player-header-left-box" class="status-name-box">
+                <span style="font-size:10px; flex-shrink:0;">👑</span>
+                <span style="font-size:8.5px; font-weight:800; color:#fcd34d; white-space:nowrap;">王國</span>
               </div>
-              <span class="stat-pill status-vp-pill" id="p-vp-pill" title="勝利點數 (40 VP 終局)" style="background:rgba(245,158,11,0.22); color:#fde047; border:1px solid rgba(245,158,11,0.6); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+              <span class="stat-pill status-vp-pill" id="p-vp-pill" title="勝利點數 (40 VP 終局)" style="background:rgba(245,158,11,0.22); color:#fde047; border:1px solid rgba(245,158,11,0.6); font-size:8.5px; padding:1px 2px; border-radius:4px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap; font-weight:900;">
                 🏆<strong id="p-vp-num">0</strong>
               </span>
             </div>
 
-            <!-- 進度條上方: 戰力框靠左、金錢框靠右 -->
+            <!-- 進度條上方: 戰力框靠左、金錢框靠右 (足夠空間容納雙位數) -->
             <div class="side-power-gold-row">
-              <span class="stat-pill status-power-pill" id="p-power-pill" title="我的即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+              <span class="stat-pill status-power-pill" id="p-power-pill" title="我的即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 2px; border-radius:4px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
                 ⚔️<strong id="p-power">0</strong>
               </span>
-              <span class="stat-pill status-gold-pill" id="p-gold-pill" title="國庫金幣" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+              <span class="stat-pill status-gold-pill" id="p-gold-pill" title="國庫金幣" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:9.5px; padding:1px 2px; border-radius:4px; flex:1 1 0; box-sizing:border-box; justify-content:center; white-space:nowrap;">
                 💰<strong id="p-gold">5</strong>
               </span>
             </div>
 
-            <!-- 下方: 我的技術/信仰進度條 -->
-            <div class="header-tech-faith-wrap" title="技術與信仰即時進度 (滿 15 點達 Lv4)">
-              <!-- Tech Row -->
-              <div class="header-tf-compact-row" title="技術點數 (滿 15 點達 Lv4)">
-                <div class="tf-compact-left">
+            <!-- 下方: 我的打直技術/信仰進度條 (左:技術, 右:信仰，由下為1至上為15) -->
+            <div class="header-tech-faith-wrap v-tf-ladder-wrap" title="技術與信仰即時進度 (滿 15 點達 Lv4)">
+              <!-- Tech Column (打直, 下1上15) -->
+              <div class="v-meter-col" id="p-tech-vcol" title="技術點數 (滿 15 點達 Lv4)">
+                <div class="v-meter-head">
                   <span class="tf-icon">⚙️</span>
                   <span class="meter-badge badge-tech" id="p-tech-badge">Lv0</span>
                 </div>
-                <div class="mobile-ladder-cells">
+                <div class="v-ladder-cells">
                   <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
                   <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-2" title="2點"></div>
                   <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
@@ -5942,13 +6134,13 @@
                 </div>
               </div>
 
-              <!-- Faith Row -->
-              <div class="header-tf-compact-row" title="信仰點數 (滿 15 點達 Lv4)">
-                <div class="tf-compact-left">
+              <!-- Faith Column (打直, 下1上15) -->
+              <div class="v-meter-col" id="p-faith-vcol" title="信仰點數 (滿 15 點達 Lv4)">
+                <div class="v-meter-head">
                   <span class="tf-icon">✝️</span>
                   <span class="meter-badge badge-faith" id="p-faith-badge">Lv0</span>
                 </div>
-                <div class="mobile-ladder-cells">
+                <div class="v-ladder-cells">
                   <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
                   <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-2" title="2點"></div>
                   <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
@@ -10686,8 +10878,8 @@
         if (bannerPhaseText) bannerPhaseText.textContent = phaseText;
         if (bannerMsg) {
           bannerMsg.innerHTML = `
-            <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">${pResult}</span></div>
             <div class="banner-line-ai"><span class="banner-tag-ai">電腦：</span><span class="banner-val-text">${aResult}</span></div>
+            <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">${pResult}</span></div>
           `;
         }
       }
