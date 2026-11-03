@@ -5391,6 +5391,97 @@
       letter-spacing: -0.2px !important;
     }
 
+  
+    /* 🌟 狀態列精準水平對齊與兩位數空間預留 */
+    .player-status-row, .ai-status-bottom-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 3px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      padding: 1px 3px !important;
+    }
+    .status-name-box {
+      width: 66px !important;
+      min-width: 66px !important;
+      max-width: 66px !important;
+      flex: 0 0 66px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 2.5px !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+      white-space: nowrap !important;
+    }
+    .status-power-pill {
+      width: 40px !important;
+      min-width: 40px !important;
+      max-width: 40px !important;
+      flex: 0 0 40px !important;
+      box-sizing: border-box !important;
+      justify-content: center !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      font-family: ui-monospace, Menlo, monospace !important;
+      font-weight: 800 !important;
+    }
+    .status-gold-pill {
+      width: 40px !important;
+      min-width: 40px !important;
+      max-width: 40px !important;
+      flex: 0 0 40px !important;
+      box-sizing: border-box !important;
+      justify-content: center !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      font-family: ui-monospace, Menlo, monospace !important;
+      font-weight: 800 !important;
+    }
+    .status-vp-pill {
+      width: 42px !important;
+      min-width: 42px !important;
+      max-width: 42px !important;
+      flex: 0 0 42px !important;
+      box-sizing: border-box !important;
+      justify-content: center !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      font-family: ui-monospace, Menlo, monospace !important;
+      font-weight: 800 !important;
+    }
+
+  
+    /* 🌟 雙方九宮格高度完美平衡 */
+    #battlefield {
+      padding: 2px 4px !important;
+      gap: 3px !important;
+    }
+    #ai-panel {
+      flex: 1 1 0 !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      height: auto !important;
+      padding: 2px 4px !important;
+    }
+    #player-panel {
+      flex: 1.34 1 0 !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      height: auto !important;
+      padding: 2px 4px !important;
+    }
+    #player-hand-container {
+      height: 78px !important;
+      min-height: 76px !important;
+      max-height: 82px !important;
+      flex: 0 0 78px !important;
+    }
+    #ai-grid, #player-grid {
+      height: 100% !important;
+      min-height: 0 !important;
+    }
+
   </style>
 
   <!-- PeerJS SDK (WebRTC P2P for zero-config direct browser-to-browser gaming) -->
@@ -5530,7 +5621,7 @@
       <!-- 2. AI Status Row on BOTTOM (Request 3: 「名、技術/信仰進度、」嗰個ROW搬落來) -->
       <div class="panel-header mobile-header-row ai-status-bottom-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:2.5px; min-height:26px; padding:1px 2px;">
         <!-- 1. AI 領主 (移除 N/9) -->
-        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" title="點擊與對手領主互動">
+        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" class="status-name-box" title="點擊與對手領主互動">
           <span id="ai-lord-avatar" style="font-size:10px; background:rgba(127,29,29,0.5); border:1px solid #f87171; border-radius:50%; width:16px; height:16px; min-width:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">🤖</span>
           <span id="ai-lord-name" style="font-size:9.5px; font-weight:800; color:#f87171; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">巴爾</span>
           <span id="ai-lord-title" style="display:none;">鐵血宰相</span>
@@ -5538,7 +5629,7 @@
         </div>
 
         <!-- 2. 電腦戰力 -->
-        <span class="stat-pill" id="ai-power-pill" title="電腦即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+        <span class="stat-pill" id="ai-power-pill" class="stat-pill status-power-pill" title="電腦即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
           ⚔️<strong id="ai-power">0</strong>
         </span>
 
@@ -5596,12 +5687,12 @@
         </div>
 
         <!-- 4. 電腦錢 -->
-        <span class="stat-pill" id="ai-gold-pill" title="電腦國庫金幣" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+        <span class="stat-pill" id="ai-gold-pill" class="stat-pill status-gold-pill" title="電腦國庫金幣" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
           💰<strong id="ai-gold">5</strong>
         </span>
 
         <!-- 5. 電腦 VP -->
-        <span class="stat-pill" id="ai-vp-pill" title="電腦勝利點數 (40 VP 終局)" style="background:rgba(239,68,68,0.22); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+        <span class="stat-pill" id="ai-vp-pill" class="stat-pill status-vp-pill" title="電腦勝利點數 (40 VP 終局)" style="background:rgba(239,68,68,0.22); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
           🏆<strong id="ai-vp-num">0</strong>
         </span>
       </div>
@@ -5638,13 +5729,13 @@
       <!-- Header Row: [我的王國 (X/9)] ➔ [技術/信仰進度條] ➔ [💰 金幣] (技/信放喺王國同錢中間) -->
       <div class="panel-header mobile-header-row player-status-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:2.5px; min-height:26px; padding:1px 2px;">
         <!-- 1. 我的王國 (移除 N/9) -->
-        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box;" id="player-header-left-box">
+        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box;" id="player-header-left-box" class="status-name-box">
           <span style="font-size:11px; flex-shrink:0;">👑</span>
           <span style="font-size:10px; font-weight:800; color:#fcd34d; white-space:nowrap;">我的王國</span>
         </div>
 
         <!-- 2. 戰力 (簡化為數字) -->
-        <span class="stat-pill" id="p-power-pill" title="我的即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+        <span class="stat-pill" id="p-power-pill" class="stat-pill status-power-pill" title="我的即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
           ⚔️<strong id="p-power">0</strong>
         </span>
 
@@ -5702,12 +5793,12 @@
         </div>
 
         <!-- 4. 錢 -->
-        <span class="stat-pill" id="p-gold-pill" title="國庫金幣" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+        <span class="stat-pill" id="p-gold-pill" class="stat-pill status-gold-pill" title="國庫金幣" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
           💰<strong id="p-gold">5</strong>
         </span>
 
         <!-- 5. VP -->
-        <span class="stat-pill" id="p-vp-pill" title="勝利點數 (40 VP 終局)" style="background:rgba(245,158,11,0.22); color:#fde047; border:1px solid rgba(245,158,11,0.6); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+        <span class="stat-pill" id="p-vp-pill" class="stat-pill status-vp-pill" title="勝利點數 (40 VP 終局)" style="background:rgba(245,158,11,0.22); color:#fde047; border:1px solid rgba(245,158,11,0.6); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
           🏆<strong id="p-vp-num">0</strong>
         </span>
       </div>
@@ -5758,38 +5849,61 @@
   
   <!-- 🔔 每回合結束小總結彈窗 (Round End Summary Modal) -->
   <div id="round-summary-modal" class="modal-backdrop hidden" style="z-index:220;">
-    <div class="modal-box" style="max-width:440px; width:94vw; border:2px solid #fbbf24; box-shadow:0 20px 50px rgba(0,0,0,0.9), 0 0 30px rgba(245,158,11,0.35);">
-      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; align-items:center; justify-content:space-between; background:#0f172a;">
+    <div class="modal-box" style="max-width:460px; width:95vw; border:2px solid #fbbf24; box-shadow:0 20px 50px rgba(0,0,0,0.95), 0 0 35px rgba(245,158,11,0.4); max-height:92vh; display:flex; flex-direction:column; overflow:hidden;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; align-items:center; justify-content:space-between; background:#0f172a; flex-shrink:0;">
         <div style="display:flex; align-items:center; gap:6px;">
           <span style="font-size:18px;">🔔</span>
-          <h3 style="font-weight:900; color:#fde047; font-size:13.5px;" id="round-summary-title">第 1 輪結束 · 王國巡禮總結</h3>
+          <h3 style="font-weight:900; color:#fde047; font-size:13.5px; margin:0;" id="round-summary-title">第 1 輪結束 · 王國巡禮總結</h3>
         </div>
         <span style="font-size:10px; font-family:monospace; color:#94a3b8;" id="round-summary-sub">輪次結算完成</span>
       </div>
 
-      <div style="padding:12px 14px; max-height:65vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; font-size:11px;" id="round-summary-body">
-        <!-- 雙方目前總分大卡 -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#020617; border:1px solid rgba(245,158,11,0.35); border-radius:8px; padding:8px 10px; text-align:center;">
-          <div>
-            <div style="font-size:9.5px; color:#fcd34d; font-weight:700;">👑 我的王國</div>
-            <div style="font-size:20px; font-weight:900; color:#fbbf24; font-family:ui-monospace, monospace;" id="round-sum-p-vp">0 VP</div>
-            <div style="font-size:8.5px; color:#94a3b8;" id="round-sum-p-gold">國庫: 5金 · 戰力: 0</div>
+      <div style="padding:10px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; font-size:11px;" id="round-summary-body">
+        <!-- 5a: 雙方目前總分大卡與狀態列藥丸 (VP、錢、戰力) -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#020617; border:1.5px solid rgba(245,158,11,0.35); border-radius:8px; padding:8px 10px; text-align:center;">
+          <!-- 玩家 -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+            <div style="font-size:10.5px; color:#fcd34d; font-weight:800;">👑 我的王國</div>
+            <div style="font-size:22px; font-weight:900; color:#fbbf24; font-family:ui-monospace, monospace; line-height:1;" id="round-sum-p-vp">0 VP</div>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:3px;">
+              <span class="stat-pill" style="background:rgba(69,26,3,0.8); color:#fcd34d; border:1px solid rgba(245,158,11,0.6); font-size:10px; padding:1px 6px; border-radius:6px;">
+                💰<strong id="round-sum-p-gold">5</strong>
+              </span>
+              <span class="stat-pill" style="background:rgba(127,29,29,0.8); color:#fca5a5; border:1px solid rgba(239,68,68,0.6); font-size:10px; padding:1px 6px; border-radius:6px;">
+                ⚔️<strong id="round-sum-p-power">0</strong>
+              </span>
+            </div>
           </div>
-          <div style="border-left:1px solid rgba(255,255,255,0.1);">
-            <div style="font-size:9.5px; color:#fca5a5; font-weight:700;">🤖 電腦對手</div>
-            <div style="font-size:20px; font-weight:900; color:#f87171; font-family:ui-monospace, monospace;" id="round-sum-a-vp">0 VP</div>
-            <div style="font-size:8.5px; color:#94a3b8;" id="round-sum-a-gold">國庫: 5金 · 戰力: 0</div>
+
+          <!-- 電腦 -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px; border-left:1px solid rgba(255,255,255,0.1);">
+            <div style="font-size:10.5px; color:#fca5a5; font-weight:800;">🤖 電腦對手</div>
+            <div style="font-size:22px; font-weight:900; color:#f87171; font-family:ui-monospace, monospace; line-height:1;" id="round-sum-a-vp">0 VP</div>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:3px;">
+              <span class="stat-pill" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.4); font-size:10px; padding:1px 6px; border-radius:6px;">
+                💰<strong id="round-sum-a-gold">5</strong>
+              </span>
+              <span class="stat-pill" style="background:rgba(127,29,29,0.8); color:#fca5a5; border:1px solid rgba(239,68,68,0.6); font-size:10px; padding:1px 6px; border-radius:6px;">
+                ⚔️<strong id="round-sum-a-power">0</strong>
+              </span>
+            </div>
           </div>
         </div>
 
-        <!-- 本輪五大階段戰況拆解 -->
-        <div style="background:rgba(15,23,42,0.9); border:1px solid #1e293b; border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:5px;">
-          <div style="font-size:10px; font-weight:800; color:#fde047; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:3px;">
-            📋 本輪各階段成果盤點：
-          </div>
-          <div id="round-sum-breakdown-list" style="display:flex; flex-direction:column; gap:4px; font-size:10.5px;">
-            <!-- Injected via JS -->
-          </div>
+        <!-- 5b: 3個COLUMN (階段 / 玩家 / AI) × 5個ROW (部署、戰爭、發展、收入、計分) 齊整表格 -->
+        <div style="background:rgba(15,23,42,0.92); border:1px solid #1e293b; border-radius:8px; overflow:hidden;">
+          <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:left;">
+            <thead>
+              <tr style="background:#070d18; border-bottom:1px solid rgba(245,158,11,0.3); color:#94a3b8; font-size:9.5px;">
+                <th style="padding:5px 6px; width:22%;">階段</th>
+                <th style="padding:5px 6px; width:39%; color:#fcd34d;">👑 我的王國</th>
+                <th style="padding:5px 6px; width:39%; color:#fca5a5;">🤖 電腦對手</th>
+              </tr>
+            </thead>
+            <tbody id="round-summary-table-tbody">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
         </div>
 
         <div style="font-size:10px; color:#cbd5e1; text-align:center; background:rgba(245,158,11,0.1); border:1px dashed rgba(245,158,11,0.3); border-radius:6px; padding:5px 8px;">
@@ -5797,14 +5911,13 @@
         </div>
       </div>
 
-      <div style="padding:10px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:center; background:#0b1120;">
+      <div style="padding:10px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:center; background:#0b1120; flex-shrink:0;">
         <button id="btn-confirm-next-round" class="btn btn-gold" style="width:100%; justify-content:center; padding:8px 16px; font-size:12px; font-weight:900; border-radius:8px; box-shadow:0 4px 14px rgba(245,158,11,0.5);">
           🃏 準備就緒，進入第 <span id="round-sum-btn-num">2</span> 輪（抽牌/棄牌）➔
         </button>
       </div>
     </div>
   </div>
-
   <!-- Announcement History Modal (Triggered by clicking top banner) -->
   <div id="history-modal" class="modal-backdrop hidden">
     <div class="modal-box" style="max-width:650px; width:94vw;">
@@ -8781,6 +8894,53 @@
       if (currentHistoryFilter !== 'all' && !phaseName.includes(currentHistoryFilter)) {
         card.style.display = 'none';
       }
+
+      const detailItemsHtml = (details && details.length > 0)
+        ? details.map(d => {
+            const leftHtml = typeof d === 'string' ? d : d.left;
+            const rightHtml = typeof d === 'string' ? '' : (d.right || '');
+            const rightCol = (typeof d === 'object' && d.color) ? d.color : '#fbbf24';
+            const borderCol = (typeof d === 'object' && d.border) ? d.border : '#fbbf24';
+            const plainTitle = leftHtml.replace(/<[^>]*>/g, '') + (rightHtml ? ` ➔ ${rightHtml}` : '');
+            return `
+              <div class="history-detail-subbox" style="border-left-color:${borderCol};" title="${plainTitle}">
+                <div class="subbox-left">${leftHtml}</div>
+                ${rightHtml ? `<span class="subbox-right" style="color:${rightCol};">${rightHtml}</span>` : ''}
+              </div>
+            `;
+          }).join('')
+        : `<div class="history-detail-subbox" style="border-left-color:#475569;"><div class="subbox-left" style="color:#94a3b8;">本階段無額外卡牌技能或數值變動明細</div></div>`;
+
+      const countLabel = details ? details.length : 0;
+
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:4px; gap:8px;">
+          <div style="display:flex; align-items:center; gap:5px; min-width:0;">
+            <span style="font-size:13px; flex-shrink:0;">${icon}</span>
+            <span style="font-weight:800; color:#fbbf24; font-size:11.5px; white-space:nowrap;">第 ${round} 輪 · ${phaseName}</span>
+            <span style="font-size:9.5px; color:#94a3b8; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">｜${title}</span>
+          </div>
+          <span class="history-expand-pill">📋 明細 (${countLabel}) ▾</span>
+        </div>
+        <div style="font-size:10.5px; line-height:1.45; display:flex; flex-direction:column; gap:3px; margin-top:3px;">
+          <div style="color:#cbd5e1; white-space:normal; word-break:break-word;"><strong style="color:#fcd34d;">你：</strong>${playerText}</div>
+          <div style="color:#cbd5e1; white-space:normal; word-break:break-word;"><strong style="color:#f87171;">電腦：</strong>${aiText}</div>
+        </div>
+        <div class="history-subbox-list">
+          ${detailItemsHtml}
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        Sound.click();
+        const isExp = card.classList.toggle('expanded');
+        const pill = card.querySelector('.history-expand-pill');
+        if (pill) {
+          pill.textContent = isExp ? `📋 收起明細 ▴` : `📋 明細 (${countLabel}) ▾`;
+        }
+      });
+
+      historyContainer.prepend(card);
       historyRecordsCount++;
       if (historyCountBadge) historyCountBadge.textContent = historyRecordsCount;
       if (modalHistoryCount) modalHistoryCount.textContent = `共 ${historyRecordsCount} 個階段`;
@@ -8808,40 +8968,52 @@
       // 單行散裝訊息不再直接塞入主歷程列表，所有階段明細統一收納於各階段大 Box 內展開檢視
     }
 
-    function spawnResourceProjectile(fromEl, toEl, icon, color) {
-      if (!fromEl || !toEl) return;
+    function spawnResourceProjectile(fromEl, toEl, icon, color, onHit = null) {
+      if (!fromEl || !toEl) {
+        if (onHit) onHit();
+        return;
+      }
       const r1 = fromEl.getBoundingClientRect();
       const r2 = toEl.getBoundingClientRect();
-      if (r1.width === 0 || r2.width === 0) return;
+      if (r1.width === 0 || r2.width === 0) {
+        if (onHit) onHit();
+        return;
+      }
 
       const startX = r1.left + r1.width / 2;
       const startY = r1.top + r1.height / 2;
       const endX = r2.left + r2.width / 2;
       const endY = r2.top + r2.height / 2;
 
-      // Control point for curved Bezier arc
-      const ctrlX = (startX + endX) / 2 + (Math.random() * 60 - 30);
-      const ctrlY = Math.min(startY, endY) - (45 + Math.random() * 35);
+      // 弧線軌道：若由下而上 (Player)，向上拋物；若由上而下 (AI)，向下拋物
+      const isUpward = (startY > endY);
+      const ctrlX = (startX + endX) / 2 + (Math.random() * 30 - 15);
+      const ctrlY = isUpward ? Math.min(startY, endY) - 35 : Math.max(startY, endY) + 35;
 
       const orb = document.createElement('div');
       orb.className = 'flying-resource-orb';
       orb.style.color = color;
+      orb.style.background = 'rgba(6, 78, 59, 0.95)';
+      orb.style.border = '1.5px solid #34d399';
+      orb.style.borderRadius = '12px';
+      orb.style.padding = '1px 6px';
+      orb.style.fontSize = '10.5px';
+      orb.style.fontWeight = '900';
       orb.textContent = icon;
       orb.style.left = `${startX}px`;
       orb.style.top = `${startY}px`;
       document.body.appendChild(orb);
 
-      const duration = 520 + Math.random() * 140;
+      const duration = 460;
       const startTime = performance.now();
 
       function step(now) {
         const t = Math.min(1, (now - startTime) / duration);
-        // Ease out cubic
         const ease = 1 - Math.pow(1 - t, 3);
         const inv = 1 - ease;
         const x = inv * inv * startX + 2 * inv * ease * ctrlX + ease * ease * endX;
         const y = inv * inv * startY + 2 * inv * ease * ctrlY + ease * ease * endY;
-        const scale = 0.85 + Math.sin(ease * Math.PI) * 0.55;
+        const scale = 0.9 + Math.sin(ease * Math.PI) * 0.45;
 
         orb.style.left = `${x}px`;
         orb.style.top = `${y}px`;
@@ -8851,12 +9023,69 @@
           requestAnimationFrame(step);
         } else {
           orb.remove();
+          if (onHit) onHit();
           toEl.classList.remove('meter-hit-pulse');
           void toEl.offsetWidth;
           toEl.classList.add('meter-hit-pulse');
         }
       }
       requestAnimationFrame(step);
+    }
+
+    // 🌟 全局資源結算動畫統一驅動器 (Resource Gain Animation Driver)
+    function animateGainFlow({ isPlayer, goldDelta = 0, vpDelta = 0, techDelta = 0, faithDelta = 0, originSlot = null }) {
+      const prefix = isPlayer ? 'p' : 'ai';
+      const gridEl = isPlayer ? playerGridEl : aiGridEl;
+      let originEl = null;
+      if (originSlot !== null && gridEl && gridEl.children[originSlot]) {
+        originEl = gridEl.children[originSlot];
+        originEl.classList.remove('fx-settle-pulse');
+        void originEl.offsetWidth;
+        originEl.classList.add('fx-settle-pulse');
+        setTimeout(() => { if (originEl) originEl.classList.remove('fx-settle-pulse'); }, 2200);
+      } else {
+        originEl = isPlayer ? document.getElementById('player-panel') : document.getElementById('ai-panel');
+      }
+
+      // 1. 技術 / 信仰：進度條點數閃爍高亮
+      if (techDelta > 0) {
+        const endPt = isPlayer ? game.player.techPoints : game.ai.techPoints;
+        const startPt = Math.max(0, endPt - techDelta);
+        highlightGainedLadderPoints(`${prefix}-tech`, startPt, endPt);
+      }
+      if (faithDelta > 0) {
+        const endPt = isPlayer ? game.player.faithPoints : game.ai.faithPoints;
+        const startPt = Math.max(0, endPt - faithDelta);
+        highlightGainedLadderPoints(`${prefix}-faith`, startPt, endPt);
+      }
+
+      // 2. 金幣：由下而上 (Player) 或 由上而下 (AI) 飛入並在到達時數字跳增
+      if (goldDelta > 0) {
+        const goldPill = document.getElementById(`${prefix}-gold-pill`);
+        const goldNumEl = document.getElementById(`${prefix}-gold`);
+        const finalGold = isPlayer ? game.player.gold : game.ai.gold;
+        const initialGold = finalGold - goldDelta;
+
+        if (goldNumEl) goldNumEl.textContent = initialGold;
+        spawnResourceProjectile(originEl, goldPill, `+${goldDelta}💰`, '#fde047', () => {
+          if (goldNumEl) goldNumEl.textContent = finalGold;
+          Sound.coin();
+        });
+      }
+
+      // 3. VP：由下而上 (Player) 或 由上而下 (AI) 飛入並在到達時數字跳增
+      if (vpDelta > 0) {
+        const vpPill = document.getElementById(`${prefix}-vp-pill`);
+        const vpNumEl = document.getElementById(`${prefix}-vp-num`);
+        const finalVp = isPlayer ? game.player.vp : game.ai.vp;
+        const initialVp = finalVp - vpDelta;
+
+        if (vpNumEl) vpNumEl.textContent = initialVp;
+        spawnResourceProjectile(originEl, vpPill, `+${vpDelta}🏆`, '#fbbf24', () => {
+          if (vpNumEl) vpNumEl.textContent = finalVp;
+          Sound.fanfare();
+        });
+      }
     }
 
     
@@ -11153,11 +11382,22 @@
       const pNetTech = game.player.techPoints - pTechStart;
       const pNetFaith = game.player.faithPoints - pFaithStart;
 
-      // 🌟 綠色 +N 動畫與技術/信仰新增點數高亮
-      if (pNetGold > 0) floatGreenGain(document.getElementById('p-gold-pill'), `+${pNetGold} 💰!`);
-      if (pNetVp > 0) floatGreenGain(document.getElementById('p-vp-pill'), `+${pNetVp} VP!`);
-      if (pNetTech > 0) highlightGainedLadderPoints('p-tech', pTechStart, game.player.techPoints);
-      if (pNetFaith > 0) highlightGainedLadderPoints('p-faith', pFaithStart, game.player.faithPoints);
+      // 🌟 部署開牌成果結算：卡牌高亮、點數閃爍、金幣/VP飛入跳增
+      animateGainFlow({
+        isPlayer: true,
+        goldDelta: pNetGold > 0 ? pNetGold : 0,
+        vpDelta: pNetVp > 0 ? pNetVp : 0,
+        techDelta: pNetTech > 0 ? pNetTech : 0,
+        faithDelta: pNetFaith > 0 ? pNetFaith : 0
+      });
+
+      animateGainFlow({
+        isPlayer: false,
+        goldDelta: aNetGold > 0 ? aNetGold : 0,
+        vpDelta: aNetVp > 0 ? aNetVp : 0,
+        techDelta: aNetTech > 0 ? aNetTech : 0,
+        faithDelta: aNetFaith > 0 ? aNetFaith : 0
+      });
 
       // 紀錄第 N 回合部署階段得分
       const rRecDeploy = game.getRoundRecord(game.round);
@@ -11533,8 +11773,16 @@
 
       game.player.vp += pBaseVP;
       game.ai.vp += aBaseVP;
-      if (pBaseVP > 0) floatGreenGain(document.getElementById('p-vp-pill'), `+${pBaseVP} VP!`);
-      if (pWon) floatGreenGain(document.getElementById('p-power-pill'), '⚔️ 戰勝!');
+      animateGainFlow({
+        isPlayer: true,
+        vpDelta: pTotalVP,
+        goldDelta: 0
+      });
+      animateGainFlow({
+        isPlayer: false,
+        vpDelta: aTotalVP,
+        goldDelta: 0
+      });
       if (game.player.stats) {
         game.player.stats.warVp += pBaseVP;
         if (pWon && pPower > aPower) game.player.stats.warsWon++;
@@ -11833,8 +12081,16 @@
 
       const pTechDiff = game.player.techPoints - pTechStart;
       const pFaithDiff = game.player.faithPoints - pFaithStart;
-      if (pTechDiff > 0) highlightGainedLadderPoints('p-tech', pTechStart, game.player.techPoints);
-      if (pFaithDiff > 0) highlightGainedLadderPoints('p-faith', pFaithStart, game.player.faithPoints);
+      animateGainFlow({
+        isPlayer: true,
+        techDelta: pTechDiff,
+        faithDelta: pFaithDiff
+      });
+      animateGainFlow({
+        isPlayer: false,
+        techDelta: aTechDiff,
+        faithDelta: aFaithDiff
+      });
       const aTechDiff = game.ai.techPoints - aTechStart;
       const aFaithDiff = game.ai.faithPoints - aFaithStart;
 
@@ -11893,8 +12149,7 @@
         const goldEl = isPlayer ? pGold : aiGold;
 
         entity.gold += 3;
-        if (isPlayer) floatGreenGain(document.getElementById('p-gold-pill'), '+3 💰!');
-        else floatPillText(goldEl, '+3 💰', '#fbbf24');
+        // Income handled after calculating totals
         const techLv = getLevel(entity.techPoints);
 
         incomeDetails.push({
@@ -11972,6 +12227,9 @@
       const pText = `+${gains.pTotal}金 (${pDetails})`;
       const aDetails = ['基礎+3金', ...gains.ai].join(',');
       const aText = `+${gains.aTotal}金 (${aDetails})`;
+
+      animateGainFlow({ isPlayer: true, goldDelta: gains.pTotal });
+      animateGainFlow({ isPlayer: false, goldDelta: gains.aTotal });
 
       game.phaseGains = {
         phase: 'INCOME',
@@ -12234,7 +12492,8 @@
       const rRecVp = game.getRoundRecord(game.round);
       rRecVp.player.vp += gains.pTotal;
       rRecVp.ai.vp += gains.aTotal;
-      if (gains.pTotal > 0) floatGreenGain(document.getElementById('p-vp-pill'), `+${gains.pTotal} VP!`);
+      if (gains.pTotal > 0) animateGainFlow({ isPlayer: true, vpDelta: gains.pTotal });
+      if (gains.aTotal > 0) animateGainFlow({ isPlayer: false, vpDelta: gains.aTotal });
 
       const pText = gains.pTotal > 0 ? `+${gains.pTotal}VP (${gains.player.join(',')})` : `+0VP (無計分技能)`;
       const aText = gains.aTotal > 0 ? `+${gains.aTotal}VP (${gains.ai.join(',')})` : `+0VP (無計分技能)`;
@@ -12294,45 +12553,107 @@
       const aVpEl = document.getElementById('round-sum-a-vp');
       const pGoldEl = document.getElementById('round-sum-p-gold');
       const aGoldEl = document.getElementById('round-sum-a-gold');
+      const pPowEl = document.getElementById('round-sum-p-power');
+      const aPowEl = document.getElementById('round-sum-a-power');
       const nextNumEl = document.getElementById('round-sum-next-num');
       const btnNumEl = document.getElementById('round-sum-btn-num');
-      const listEl = document.getElementById('round-sum-breakdown-list');
+      const tbodyEl = document.getElementById('round-summary-table-tbody');
 
-      if (titleEl) titleEl.textContent = `第 ${game.round} 輪結束 · 王國巡禮小總結`;
+      if (titleEl) titleEl.textContent = `第 ${game.round} 輪結束 · 王國巡禮總結`;
       if (subEl) subEl.textContent = `第 ${game.round} 輪結算完成`;
       if (pVpEl) pVpEl.textContent = `${game.player.vp} VP`;
       if (aVpEl) aVpEl.textContent = `${game.ai.vp} VP`;
-      if (pGoldEl) pGoldEl.textContent = `國庫: ${game.player.gold}金 · 戰力: ${game.player.power}`;
-      if (aGoldEl) aGoldEl.textContent = `國庫: ${game.ai.gold}金 · 戰力: ${game.ai.power}`;
+      if (pGoldEl) pGoldEl.textContent = game.player.gold;
+      if (aGoldEl) aGoldEl.textContent = game.ai.gold;
+      if (pPowEl) pPowEl.textContent = game.player.power;
+      if (aPowEl) aPowEl.textContent = game.ai.power;
       if (nextNumEl) nextNumEl.textContent = game.round + 1;
       if (btnNumEl) btnNumEl.textContent = game.round + 1;
 
+      // 提取本輪各階段得分與明細
       const rec = game.getRoundRecord(game.round);
       const p = rec ? rec.player : { deploy: 0, war: 0, develop: 0, income: 0, vp: 0 };
       const a = rec ? rec.ai : { deploy: 0, war: 0, develop: 0, income: 0, vp: 0 };
 
-      if (listEl) {
-        listEl.innerHTML = `
-          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
-            <span>⚡ 部署進駐：</span>
-            <span style="font-family:monospace; color:#cbd5e1;">你 <strong>+${p.deploy}VP</strong> ｜ 電腦 <strong>+${a.deploy}VP</strong></span>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
-            <span>⚔️ 戰爭交鋒：</span>
-            <span style="font-family:monospace; color:#f87171;">你 <strong>+${p.war}VP</strong> ｜ 電腦 <strong>+${a.war}VP</strong></span>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
-            <span>⚙️ 文明發展：</span>
-            <span style="font-family:monospace; color:#38bdf8;">技術 Lv${getLevel(game.player.techPoints)} (${game.player.techPoints}點) ｜ 信仰 Lv${getLevel(game.player.faithPoints)} (${game.player.faithPoints}點)</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
-            <span>💰 國庫收入：</span>
-            <span style="font-family:monospace; color:#34d399;">你 <strong>+${p.income || 3}金</strong> ｜ 電腦 <strong>+${a.income || 3}金</strong></span>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:2.5px 0;">
-            <span>👑 王國計分：</span>
-            <span style="font-family:monospace; color:#fbbf24;">你 <strong>+${p.vp}VP</strong> ｜ 電腦 <strong>+${a.vp}VP</strong></span>
-          </div>
+      // 5b: 渲染 5 個 ROW (部署、戰爭、發展、收入、計分)
+      if (tbodyEl) {
+        // 部署階段：四層結構 (由上至下: 連線獎勵、技能/信仰、錢、VP)
+        const pDeployLines = (game.player.stats && game.player.stats.lineVp > 0) ? `+${game.player.stats.lineVp}VP` : '-';
+        const aDeployLines = (game.ai.stats && game.ai.stats.lineVp > 0) ? `+${game.ai.stats.lineVp}VP` : '-';
+
+        const pTechLv = getLevel(game.player.techPoints);
+        const pFaithLv = getLevel(game.player.faithPoints);
+        const aTechLv = getLevel(game.ai.techPoints);
+        const aFaithLv = getLevel(game.ai.faithPoints);
+
+        tbodyEl.innerHTML = `
+          <!-- Row 1: 部署 (高行, 由上至下: 連線獎勵、技能/信仰、錢、VP) -->
+          <tr style="border-bottom:1px solid #1e293b; background:rgba(245,158,11,0.06);">
+            <td style="padding:6px; font-weight:800; color:#67e8f9; vertical-align:top;">
+              <div>⚡ 部署</div>
+              <div style="font-size:7.5px; color:#94a3b8; font-weight:normal; margin-top:2px;">(進駐開牌)</div>
+            </td>
+            <td style="padding:6px; vertical-align:top; line-height:1.45;">
+              <div><span style="color:#94a3b8; font-size:8.5px;">連線獎勵:</span> <strong style="color:#fbbf24;">${pDeployLines}</strong></div>
+              <div><span style="color:#94a3b8; font-size:8.5px;">技能/信仰:</span> <strong style="color:#38bdf8;">+${pTechLv}技 / +${pFaithLv}信</strong></div>
+              <div><span style="color:#94a3b8; font-size:8.5px;">國庫金幣:</span> <strong style="color:#fde047;">${game.playerDeploymentsThisRound === 0 ? '+2金(補償)' : (game.playerDeploymentsThisRound === 1 ? '+1金(補償)' : '-')}</strong></div>
+              <div><span style="color:#94a3b8; font-size:8.5px;">即時得分:</span> <strong style="color:#34d399;">+${p.deploy} VP</strong></div>
+            </td>
+            <td style="padding:6px; vertical-align:top; line-height:1.45;">
+              <div><span style="color:#94a3b8; font-size:8.5px;">連線獎勵:</span> <strong style="color:#f87171;">${aDeployLines}</strong></div>
+              <div><span style="color:#94a3b8; font-size:8.5px;">技能/信仰:</span> <strong style="color:#38bdf8;">+${aTechLv}技 / +${aFaithLv}信</strong></div>
+              <div><span style="color:#94a3b8; font-size:8.5px;">國庫金幣:</span> <strong style="color:#fde047;">${game.ai.pendingCompensation > 0 ? `+${game.ai.pendingCompensation}金(補償)` : '-'}</strong></div>
+              <div><span style="color:#94a3b8; font-size:8.5px;">即時得分:</span> <strong style="color:#fca5a5;">+${a.deploy} VP</strong></div>
+            </td>
+          </tr>
+
+          <!-- Row 2: 戰爭 -->
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:5px 6px; font-weight:800; color:#f87171;">⚔️ 戰爭</td>
+            <td style="padding:5px 6px;">
+              <span style="color:${p.war > 0 ? '#34d399' : '#94a3b8'}; font-weight:800;">+${p.war} VP</span>
+              <span style="font-size:8.5px; color:#cbd5e1; margin-left:2px;">(戰力 ${game.player.power})</span>
+            </td>
+            <td style="padding:5px 6px;">
+              <span style="color:${a.war > 0 ? '#f87171' : '#94a3b8'}; font-weight:800;">+${a.war} VP</span>
+              <span style="font-size:8.5px; color:#cbd5e1; margin-left:2px;">(戰力 ${game.ai.power})</span>
+            </td>
+          </tr>
+
+          <!-- Row 3: 發展 -->
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:5px 6px; font-weight:800; color:#7dd3fc;">⚙️ 發展</td>
+            <td style="padding:5px 6px; color:#cbd5e1;">
+              <span style="color:#38bdf8; font-weight:700;">Lv${pTechLv}技 · Lv${pFaithLv}信</span>
+            </td>
+            <td style="padding:5px 6px; color:#cbd5e1;">
+              <span style="color:#38bdf8; font-weight:700;">Lv${aTechLv}技 · Lv${aFaithLv}信</span>
+            </td>
+          </tr>
+
+          <!-- Row 4: 收入 -->
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:5px 6px; font-weight:800; color:#34d399;">💰 收入</td>
+            <td style="padding:5px 6px;">
+              <span style="color:#fde047; font-weight:800;">+${p.income || 3} 金幣</span>
+              <span style="font-size:8px; color:#94a3b8;">(基礎+3)</span>
+            </td>
+            <td style="padding:5px 6px;">
+              <span style="color:#fde047; font-weight:800;">+${a.income || 3} 金幣</span>
+              <span style="font-size:8px; color:#94a3b8;">(基礎+3)</span>
+            </td>
+          </tr>
+
+          <!-- Row 5: 計分 -->
+          <tr>
+            <td style="padding:5px 6px; font-weight:800; color:#fbbf24;">👑 計分</td>
+            <td style="padding:5px 6px;">
+              <strong style="color:#fbbf24; font-size:11px;">+${p.vp} VP</strong>
+            </td>
+            <td style="padding:5px 6px;">
+              <strong style="color:#f87171; font-size:11px;">+${a.vp} VP</strong>
+            </td>
+          </tr>
         `;
       }
 
