@@ -2479,7 +2479,7 @@
 
     #ai-grid { width: 100% !important; height: 100% !important; gap: 2px !important; }
     #ai-grid .grid-cell { padding: 1px 2px !important; border-radius: 4px !important; }
-    #ai-grid .card-row-top { font-size: 9.5px !important; }
+    #ai-grid .card-row-top { font-size: 7px !important; }
     #ai-grid .card-art-banner { height: 13px !important; padding: 0 2px !important; }
     #ai-grid .card-art-portrait-icon { font-size: 7.5px !important; }
     #ai-grid .card-art-name-overlay { font-size: 7px !important; }
@@ -2753,7 +2753,7 @@
       border-radius: 4px !important;
     }
 
-    #player-grid .card-row-top { font-size: 10px !important; }
+    #player-grid .card-row-top { font-size: 7.5px !important; }
     #player-grid .card-art-banner { height: 16px !important; padding: 0 2.5px !important; }
     #player-grid .card-art-portrait-icon { font-size: 9px !important; }
     #player-grid .card-art-name-overlay { font-size: 8px !important; }
@@ -5197,76 +5197,153 @@
     }
 
   
-    /* 🌟 全新手遊級階段動態結算條 (Phase Settlement Toast) */
-    .phase-settle-toast {
-      position: fixed !important;
-      top: clamp(42px, 6.5vh, 60px) !important;
+    /* 🌟 綠色 +N 向上升結算動畫 (Floating Green Gain Animation) */
+    .floating-green-gain {
+      position: absolute !important;
+      top: 35% !important;
       left: 50% !important;
-      transform: translateX(-50%) !important;
-      z-index: 180 !important;
-      width: min(92vw, 480px) !important;
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98)) !important;
-      border: 1.5px solid #fbbf24 !important;
-      border-radius: 12px !important;
-      padding: 9px 13px !important;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(245, 158, 11, 0.35) !important;
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 5px !important;
-      animation: settleToastDrop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1) forwards !important;
-      cursor: pointer !important;
-      box-sizing: border-box !important;
+      transform: translate(-50%, -50%) !important;
+      background: rgba(6, 78, 59, 0.95) !important;
+      border: 1.5px solid #34d399 !important;
+      border-radius: 6px !important;
+      padding: 2px 7px !important;
+      font-size: 11px !important;
+      font-weight: 900 !important;
+      color: #6ee7b7 !important;
+      pointer-events: none !important;
+      z-index: 120 !important;
+      white-space: nowrap !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), 0 0 12px rgba(52, 211, 153, 0.6) !important;
+      animation: floatUpGreenGain 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
-    .phase-settle-toast.hidden {
-      display: none !important;
+    @keyframes floatUpGreenGain {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
+      20% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); }
+      80% { opacity: 1; transform: translate(-50%, -24px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -36px) scale(0.85); }
     }
-    @keyframes settleToastDrop {
-      0% { opacity: 0; transform: translate(-50%, -15px) scale(0.95); }
-      100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+
+    /* 🌟 本輪新增技術/信仰點數高亮閃爍 (Ladder Gained Cells Pulse) */
+    .m-ladder-cell.cell-just-gained {
+      animation: pulseGainedLadder 1.4s infinite alternate ease-in-out !important;
+      border-color: #fef08a !important;
+      box-shadow: 0 0 10px #fbbf24, inset 0 0 4px #fff !important;
+      z-index: 5 !important;
     }
-    .settle-toast-header {
+    @keyframes pulseGainedLadder {
+      0% { filter: brightness(1.2); transform: scale(1); }
+      100% { filter: brightness(2.2); transform: scale(1.25); box-shadow: 0 0 14px #fef08a; }
+    }
+
+    /* 🌟 各階段狀態列重點高亮提示 (Phase Focus Highlights on Status Bar) */
+    .fx-focus-power {
+      animation: pulseFocusPower 1.3s infinite alternate ease-in-out !important;
+      border-color: #f87171 !important;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.95), inset 0 0 6px #fca5a5 !important;
+      transform: scale(1.08) !important;
+      z-index: 10 !important;
+    }
+    @keyframes pulseFocusPower {
+      0% { box-shadow: 0 0 6px rgba(239, 68, 68, 0.6); }
+      100% { box-shadow: 0 0 18px rgba(239, 68, 68, 1), 0 0 8px #fca5a5; }
+    }
+    .fx-focus-ladder {
+      animation: pulseFocusLadder 1.4s infinite alternate ease-in-out !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.85), inset 0 0 8px rgba(192, 132, 252, 0.5) !important;
+      z-index: 10 !important;
+    }
+    @keyframes pulseFocusLadder {
+      0% { border-color: #38bdf8; box-shadow: 0 0 6px rgba(56, 189, 248, 0.6); }
+      100% { border-color: #c084fc; box-shadow: 0 0 16px rgba(192, 132, 252, 0.95); }
+    }
+    .fx-focus-gold {
+      animation: pulseFocusGold 1.3s infinite alternate ease-in-out !important;
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.95), inset 0 0 6px #fef08a !important;
+      transform: scale(1.08) !important;
+      z-index: 10 !important;
+    }
+    @keyframes pulseFocusGold {
+      0% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.6); }
+      100% { box-shadow: 0 0 18px rgba(251, 191, 36, 1), 0 0 8px #fef08a; }
+    }
+    .fx-focus-vp {
+      animation: pulseFocusVp 1.3s infinite alternate ease-in-out !important;
+      border-color: #fde047 !important;
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.95), inset 0 0 6px #fef08a !important;
+      transform: scale(1.08) !important;
+      z-index: 10 !important;
+    }
+    @keyframes pulseFocusVp {
+      0% { box-shadow: 0 0 6px rgba(251, 191, 36, 0.6); }
+      100% { box-shadow: 0 0 18px rgba(251, 191, 36, 1), 0 0 8px #fde047; }
+    }
+
+    /* 🌟 Settlement Banner 篩選按鈕條 (Filter Pills Bar) */
+    .banner-filter-strip {
       display: flex !important;
       align-items: center !important;
-      justify-content: space-between !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      padding-bottom: 3px !important;
+      gap: 3px !important;
+      width: 100% !important;
+      overflow-x: auto !important;
+      padding-bottom: 2px !important;
+      margin-bottom: 2px !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
-    .settle-toast-title {
-      font-size: 12px !important;
-      font-weight: 800 !important;
-      color: #fde047 !important;
-      display: flex !important;
-      align-items: center !important;
-      gap: 5px !important;
-    }
-    .settle-toast-body {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 3.5px !important;
-      font-size: 10.5px !important;
-      line-height: 1.35 !important;
-    }
-    .settle-row-player {
-      color: #cbd5e1 !important;
-      background: rgba(245, 158, 11, 0.12) !important;
-      border-left: 3px solid #fbbf24 !important;
-      padding: 3px 6px !important;
-      border-radius: 4px !important;
-      word-break: break-all !important;
-    }
-    .settle-row-ai {
-      color: #cbd5e1 !important;
-      background: rgba(239, 68, 68, 0.12) !important;
-      border-left: 3px solid #f87171 !important;
-      padding: 3px 6px !important;
-      border-radius: 4px !important;
-      word-break: break-all !important;
-    }
-    .settle-toast-hint {
-      font-size: 9px !important;
+    .banner-flt-pill, .modal-flt-pill {
+      background: #0f172a !important;
+      border: 1px solid #334155 !important;
       color: #94a3b8 !important;
-      text-align: right !important;
-      margin-top: 1px !important;
+      padding: 1.5px 6px !important;
+      border-radius: 4px !important;
+      font-size: 8.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      transition: all 0.15s ease !important;
+      flex-shrink: 0 !important;
+    }
+    .banner-flt-pill:hover, .modal-flt-pill:hover {
+      border-color: #fbbf24 !important;
+      color: #fef08a !important;
+    }
+    .banner-flt-pill.active, .modal-flt-pill.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+      color: #020617 !important;
+      border-color: #fef08a !important;
+      font-weight: 900 !important;
+      box-shadow: 0 0 6px rgba(251, 191, 36, 0.6) !important;
+    }
+
+    /* 🌟 15 格階梯上面數字 1/2/3/4 排版 */
+    .m-ladder-cell {
+      height: 100% !important;
+      border-radius: 1px !important;
+      background: rgba(30, 41, 59, 0.8) !important;
+      border: 1px solid rgba(51, 65, 85, 0.4) !important;
+      transition: all 0.2s ease !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-family: ui-monospace, Menlo, monospace !important;
+      font-size: 6.8px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      color: #94a3b8 !important;
+      padding: 0 !important;
+    }
+    .m-ladder-cell span {
+      pointer-events: none !important;
+      line-height: 1 !important;
+    }
+    .m-ladder-cell.cell-tech-active span {
+      color: #020617 !important;
+      font-weight: 900 !important;
+    }
+    .m-ladder-cell.cell-faith-active span {
+      color: #ffffff !important;
+      font-weight: 900 !important;
     }
 
     /* 🌟 九宮格與手牌高清晰圖標標籤系統 (Card Badge System) */
@@ -5312,17 +5389,6 @@
       flex: 1 1 auto !important;
       text-align: left !important;
       letter-spacing: -0.2px !important;
-    }
-    
-    /* 階段高亮光暈效果 */
-    .fx-settle-pulse {
-      animation: settleCardPulse 1.2s infinite alternate ease-in-out !important;
-      border-color: #fbbf24 !important;
-      z-index: 20 !important;
-    }
-    @keyframes settleCardPulse {
-      0% { box-shadow: 0 0 6px rgba(251, 191, 36, 0.6), inset 0 0 4px rgba(245, 158, 11, 0.3); border-color: #f59e0b; }
-      100% { box-shadow: 0 0 18px rgba(251, 191, 36, 1), inset 0 0 10px rgba(251, 191, 36, 0.5); border-color: #fef08a; }
     }
 
   </style>
@@ -5383,27 +5449,6 @@
     </div>
   </header>
 
-  <!-- 🌟 全屏/居中 階段動態結算浮條 (Phase Settlement Toast Banner) -->
-  <div id="phase-settlement-toast" class="phase-settle-toast hidden" title="點擊快速關閉結算浮條">
-    <div class="settle-toast-header">
-      <div class="settle-toast-title">
-        <span id="settle-toast-icon">⚙️</span>
-        <span id="settle-toast-title-text">發展階段結算 · 點數提升</span>
-      </div>
-      <span style="font-size:10px; color:#fbbf24; opacity:0.8;">點擊關閉 ✕</span>
-    </div>
-    <div class="settle-toast-body" id="settle-toast-body">
-      <div class="settle-row-player" id="settle-toast-p-row">
-        <strong style="color:#fcd34d;">👑 你：</strong><span id="settle-toast-p-text">+0</span>
-      </div>
-      <div class="settle-row-ai" id="settle-toast-a-row">
-        <strong style="color:#f87171;">🤖 電腦：</strong><span id="settle-toast-a-text">+0</span>
-      </div>
-    </div>
-    <div class="settle-toast-hint">💡 點擊任意處或按推進按鈕繼續</div>
-  </div>
-
-
   <!-- 收納式右上角選單 Popover (置於 body 頂層避免被任何容器遮擋) -->
   <div id="header-options-popover" class="header-options-popover hidden">
     <div class="options-section-label">
@@ -5459,55 +5504,161 @@
   
 
   <main id="battlefield">
-
-    <!-- 2. 中央對決軸心：雙方 VP 進度條 (戰力 BAR 上下) ＋ 即時戰力天秤 -->
-    <div class="duel-axis-container" id="duel-axis">
-      <div class="central-duel-scoreboard" id="central-duel-scoreboard">
-        <!-- 對手 VP 進度條 -->
-        <div class="duel-vp-row ai-vp-row" title="AI 勝利點數 (滿 40 VP 觸發終局)">
-          <span class="duel-vp-title"><span style="color:#f87171;">🤖 AI VP</span></span>
-          <div class="duel-vp-track">
-            <div id="ai-vp-bar" class="duel-vp-fill" style="width:0%; background:linear-gradient(90deg, #b91c1c, #f87171); box-shadow:0 0 6px rgba(239,68,68,0.7);"></div>
-            <div class="duel-vp-tick" title="20 VP 節點"></div>
+    <!-- RIGHT: AI / Player 2 (電腦對手) -->
+    <section class="board-panel" id="ai-panel" style="border-color: rgba(239, 68, 68, 0.35);">
+      <!-- 1. AI 3x3 Grid on TOP (Request 3: 將AI個九宮格搬上去) -->
+      <div class="kingdom-board-core ai-board-core-top" style="flex:1 1 auto; width:100%; min-height:0;">
+        <div class="upper-grid-section" style="width:100%; height:100%;">
+          <div class="grid-3x3" id="ai-grid"></div>
+        </div>
+        <!-- 3. AI Hand Cards Dock (橫向模式完美對稱顯示對手手牌暗面) -->
+        <div class="lower-hand-section" id="ai-hand-container" style="display:none;">
+          <div class="hand-header-bar">
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-weight:700; color:#f87171;">🤖 電腦手牌</span>
+              <span id="ai-hand-count-dock" style="font-family:monospace; font-size:9px; color:#cbd5e1; background:#020617; padding:1px 4px; border-radius:3px;">5/5</span>
+            </div>
+            <div style="color:#94a3b8; font-size:9px;">
+              對手暗牌（5張）
+            </div>
           </div>
-          <span class="duel-vp-score"><strong id="ai-vp-num" style="color:#f87171;">0</strong>/40</span>
+          <div class="hand-cards-row" id="ai-hand-grid"></div>
+        </div>
+      </div>
+      <div id="ai-speech-container"></div>
+
+      <!-- 2. AI Status Row on BOTTOM (Request 3: 「名、技術/信仰進度、」嗰個ROW搬落來) -->
+      <div class="panel-header mobile-header-row ai-status-bottom-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:2.5px; min-height:26px; padding:1px 2px;">
+        <!-- 1. AI 領主 (移除 N/9) -->
+        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" title="點擊與對手領主互動">
+          <span id="ai-lord-avatar" style="font-size:10px; background:rgba(127,29,29,0.5); border:1px solid #f87171; border-radius:50%; width:16px; height:16px; min-width:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">🤖</span>
+          <span id="ai-lord-name" style="font-size:9.5px; font-weight:800; color:#f87171; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">巴爾</span>
+          <span id="ai-lord-title" style="display:none;">鐵血宰相</span>
+          <span id="ai-hand-count" style="display:none;">5/5</span>
         </div>
 
-        <!-- 中央即時戰力天秤 -->
-        <div class="tug-of-war-wrap" id="central-tug-of-war" title="雙方即時前線與後援總戰力拉鋸天秤" style="margin: 0 !important; width: 100% !important;">
-          <span style="font-size:9.5px; font-weight:900; color:#fbbf24; font-family:monospace; display:inline-flex; align-items:center; gap:2px;">⚔️<span id="tug-p-val">0</span></span>
-          <div class="tug-bar-track">
-            <div class="tug-bar-player-fill" id="tug-bar-fill" style="width:50%;"></div>
-            <div class="tug-spark-divider" id="tug-spark-div" style="left:50%;"></div>
+        <!-- 2. 電腦戰力 -->
+        <span class="stat-pill" id="ai-power-pill" title="電腦即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+          ⚔️<strong id="ai-power">0</strong>
+        </span>
+
+        <!-- 3. 電腦技術/信仰進度條 -->
+        <div class="header-tech-faith-wrap" title="AI 技術與信仰即時進度 (滿 15 點達 Lv4)">
+          <!-- AI Tech Row -->
+          <div class="header-tf-compact-row" title="AI 技術點數 (滿 15 點達 Lv4)">
+            <div class="tf-compact-left">
+              <span class="tf-icon">⚙️</span>
+              <span class="meter-badge badge-tech" id="ai-tech-badge">Lv0</span>
+            </div>
+            <div class="mobile-ladder-cells">
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-2" title="2點"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-4" title="4點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-5" title="5點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-6" title="6點"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-tech-cell-7" title="7點 (Lv3)"><span>3</span></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-8" title="8點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-9" title="9點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-10" title="10點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-11" title="11點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-12" title="12點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-13" title="13點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-14" title="14點"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-tech-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
+            </div>
           </div>
-          <span style="font-size:9.5px; font-weight:900; color:#f87171; font-family:monospace; display:inline-flex; align-items:center; gap:2px;"><span id="tug-ai-val">0</span>⚔️</span>
+
+          <!-- AI Faith Row -->
+          <div class="header-tf-compact-row" title="AI 信仰點數 (滿 15 點達 Lv4)">
+            <div class="tf-compact-left">
+              <span class="tf-icon">✝️</span>
+              <span class="meter-badge badge-faith" id="ai-faith-badge">Lv0</span>
+            </div>
+            <div class="mobile-ladder-cells">
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-2" title="2點"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-4" title="4點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-5" title="5點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-6" title="6點"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-faith-cell-7" title="7點 (Lv3)"><span>3</span></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-8" title="8點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-9" title="9點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-10" title="10點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-11" title="11點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-12" title="12點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-13" title="13點"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-14" title="14點"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-faith-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
+            </div>
+          </div>
         </div>
 
-        <!-- 我的 VP 進度條 -->
-        <div class="duel-vp-row player-vp-row" title="我的勝利點數 (滿 40 VP 觸發終局)">
-          <span class="duel-vp-title"><span style="color:#fcd34d;">👑 我的VP</span></span>
-          <div class="duel-vp-track">
-            <div id="p-vp-bar" class="duel-vp-fill" style="width:0%; background:linear-gradient(90deg, #d97706, #fbbf24); box-shadow:0 0 6px rgba(251,191,36,0.7);"></div>
-            <div class="duel-vp-tick" title="20 VP 節點"></div>
+        <!-- 4. 電腦錢 -->
+        <span class="stat-pill" id="ai-gold-pill" title="電腦國庫金幣" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+          💰<strong id="ai-gold">5</strong>
+        </span>
+
+        <!-- 5. 電腦 VP -->
+        <span class="stat-pill" id="ai-vp-pill" title="電腦勝利點數 (40 VP 終局)" style="background:rgba(239,68,68,0.22); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+          🏆<strong id="ai-vp-num">0</strong>
+        </span>
+      </div>
+    </section>
+
+    
+    <!-- CENTER: 王國階段公告與操作按鈕 (Settlement Banner with Filters) -->
+    <div id="app-banner" class="center-settlement-banner">
+      <!-- 階段篩選器 Filter Strip -->
+      <div class="banner-filter-strip" id="banner-filter-strip" title="點擊篩選特定階段歷史紀錄">
+        <button type="button" class="banner-flt-pill active" data-filter="all">全部</button>
+        <button type="button" class="banner-flt-pill" data-filter="抽牌">🃏 抽牌</button>
+        <button type="button" class="banner-flt-pill" data-filter="部署">⚡ 部署</button>
+        <button type="button" class="banner-flt-pill" data-filter="戰爭">⚔️ 戰爭</button>
+        <button type="button" class="banner-flt-pill" data-filter="發展">⚙️ 發展</button>
+        <button type="button" class="banner-flt-pill" data-filter="收入">💰 收入</button>
+        <button type="button" class="banner-flt-pill" data-filter="計分">👑 計分</button>
+      </div>
+
+      <div class="banner-main-row" style="display:flex; align-items:center; justify-content:space-between; width:100%; min-width:0; gap:4px;">
+        <div id="banner-content" style="display:flex; align-items:center; gap:4px; cursor:pointer; flex:1 1 auto; min-width:0; padding:1px 2px; border-radius:6px; transition:all 0.15s ease;" title="點擊開啟階段公告歷程">
+          <span id="banner-icon" style="font-size:14px; flex-shrink:0; width:18px; text-align:center;">🃏</span>
+          <div id="banner-round-phase" class="banner-round-phase-box">
+            <div id="banner-round-text" class="banner-round-line">第 1 輪</div>
+            <div id="banner-phase-text" class="banner-phase-line">抽牌階段</div>
           </div>
-          <span class="duel-vp-score"><strong id="p-vp-num" style="color:#fbbf24;">0</strong>/40</span>
+          <div id="banner-msg" class="banner-details-box">
+            <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">不棄牌，保留手牌</span></div>
+            <div class="banner-line-ai"><span class="banner-tag-ai">電腦：</span><span class="banner-val-text">手牌已備妥 (5/5)</span></div>
+          </div>
+          <span id="banner-history-pill" style="font-size:12px; color:#fbbf24; background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.45); width:22px; height:22px; min-width:22px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer;" title="點擊查閱王國階段公告歷程">
+            📜<span id="history-count-badge" style="display:none;">1</span>
+          </span>
+        </div>
+        <div id="banner-actions" style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+          <!-- Action Buttons via JS -->
         </div>
       </div>
     </div>
-    
+
 
     <!-- LEFT: Player 1 (我的王國) -->
     <section class="board-panel" id="player-panel" style="border-color: rgba(245, 158, 11, 0.4);">
       <!-- Header Row: [我的王國 (X/9)] ➔ [技術/信仰進度條] ➔ [💰 金幣] (技/信放喺王國同錢中間) -->
-      <div class="panel-header mobile-header-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:3px; min-height:26px; padding:1px 2px;">
-        <!-- Left: 我的王國 (X/9) (固定寬度與 AI 領主左右平衡) -->
-        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:76px; box-sizing:border-box;" id="player-header-left-box">
+      <div class="panel-header mobile-header-row player-status-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:2.5px; min-height:26px; padding:1px 2px;">
+        <!-- 1. 我的王國 (移除 N/9) -->
+        <div style="display:flex; align-items:center; gap:2px; flex:0 0 auto; min-width:58px; box-sizing:border-box;" id="player-header-left-box">
           <span style="font-size:11px; flex-shrink:0;">👑</span>
           <span style="font-size:10px; font-weight:800; color:#fcd34d; white-space:nowrap;">我的王國</span>
-          <span id="player-status-text" style="font-size:8px; color:#94a3b8; font-family:monospace; flex-shrink:0;">(0/9)</span>
         </div>
 
-        <!-- Center: 技術/信仰進度條 (放在「我的王國」同埋「錢」嘅中間) -->
+        <!-- 2. 戰力 (簡化為數字) -->
+        <span class="stat-pill" id="p-power-pill" title="我的即時總戰力" style="background:rgba(127,29,29,0.7); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+          ⚔️<strong id="p-power">0</strong>
+        </span>
+
+        <!-- 3. 技術/信仰進度條 (第 1/3/7/15 格標記 1/2/3/4，無 N/15 文字) -->
         <div class="header-tech-faith-wrap" title="技術與信仰即時進度 (滿 15 點達 Lv4)">
           <!-- Tech Row -->
           <div class="header-tf-compact-row" title="技術點數 (滿 15 點達 Lv4)">
@@ -5516,13 +5667,13 @@
               <span class="meter-badge badge-tech" id="p-tech-badge">Lv0</span>
             </div>
             <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-1" title="1點 (Lv1)"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-1" title="1點 (Lv1)"><span>1</span></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-tech-cell-3" title="3點 (Lv2)"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-tech-cell-3" title="3點 (Lv2)"><span>2</span></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-4" title="4點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-5" title="5點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-tech-cell-7" title="7點 (Lv3)"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-tech-cell-7" title="7點 (Lv3)"><span>3</span></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-8" title="8點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-9" title="9點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-10" title="10點"></div>
@@ -5530,10 +5681,7 @@
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-12" title="12點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-13" title="13點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-tech-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-tech-cell-15" title="15點 (Lv4 MAX)"></div>
-            </div>
-            <div class="tf-compact-right">
-              <span id="p-tech-num" style="font-weight:800; color:#cbd5e1;">0</span>/15 (<span id="p-tech-next-pill" class="meter-next-pill">差1點➔Lv1</span>)
+              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-tech-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
             </div>
           </div>
 
@@ -5544,13 +5692,13 @@
               <span class="meter-badge badge-faith" id="p-faith-badge">Lv0</span>
             </div>
             <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-1" title="1點 (Lv1)"></div>
+              <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-1" title="1點 (Lv1)"><span>1</span></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-faith-cell-3" title="3點 (Lv2)"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="p-faith-cell-3" title="3點 (Lv2)"><span>2</span></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-4" title="4點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-5" title="5點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-faith-cell-7" title="7點 (Lv3)"></div>
+              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="p-faith-cell-7" title="7點 (Lv3)"><span>3</span></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-8" title="8點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-9" title="9點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-10" title="10點"></div>
@@ -5558,47 +5706,22 @@
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-12" title="12點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-13" title="13點"></div>
               <div class="m-ladder-cell cell-sub cell-inactive" id="p-faith-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-faith-cell-15" title="15點 (Lv4 MAX)"></div>
-            </div>
-            <div class="tf-compact-right">
-              <span id="p-faith-num" style="font-weight:800; color:#cbd5e1;">0</span>/15 (<span id="p-faith-next-pill" class="meter-next-pill">差1點➔Lv1</span>)
+              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="p-faith-cell-15" title="15點 (Lv4 MAX)"><span>4</span></div>
             </div>
           </div>
         </div>
 
-        <!-- Right: 💰 金幣 (固定寬度保持雙方進度條長度一致) -->
-        <span class="stat-pill" id="p-gold-pill" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:10px; padding:1px 4px; border-radius:10px; width:48px; min-width:48px; max-width:48px; flex:0 0 48px; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          💰<strong id="p-gold">5</strong> 金
+        <!-- 4. 錢 -->
+        <span class="stat-pill" id="p-gold-pill" title="國庫金幣" style="background:rgba(69,26,3,0.7); color:#fcd34d; border:1px solid rgba(245,158,11,0.5); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+          💰<strong id="p-gold">5</strong>
+        </span>
+
+        <!-- 5. VP -->
+        <span class="stat-pill" id="p-vp-pill" title="勝利點數 (40 VP 終局)" style="background:rgba(245,158,11,0.22); color:#fde047; border:1px solid rgba(245,158,11,0.6); font-size:9.5px; padding:1px 3.5px; border-radius:6px; flex:0 0 auto; box-sizing:border-box; justify-content:center; white-space:nowrap;">
+          🏆<strong id="p-vp-num">0</strong>
         </span>
       </div>
       <div id="player-speech-container"></div>
-
-      
-      <!-- 王國階段公告與操作按鈕 -->
-    <div id="app-banner">
-      <div id="banner-content" style="display:flex; align-items:center; gap:4px; cursor:pointer; flex:1 1 auto; min-width:0; padding:1px 2px; border-radius:6px; transition:all 0.15s ease;" title="點擊開啟階段公告歷程">
-        <!-- 1. ICON -->
-        <span id="banner-icon" style="font-size:15px; flex-shrink:0; width:20px; text-align:center;">🃏</span>
-        <!-- 2. 分上下兩行: 上面「第N輪」, 下面「XX階段」 -->
-        <div id="banner-round-phase" class="banner-round-phase-box">
-          <div id="banner-round-text" class="banner-round-line">第 1 輪</div>
-          <div id="banner-phase-text" class="banner-phase-line">抽牌階段</div>
-        </div>
-        <!-- 3. 玩家同AI嘅詳情 (上下兩行) -->
-        <div id="banner-msg" class="banner-details-box">
-          <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">不棄牌，保留手牌</span></div>
-          <div class="banner-line-ai"><span class="banner-tag-ai">電腦：</span><span class="banner-val-text">手牌已備妥 (5/5)</span></div>
-        </div>
-        <!-- 4. 歷程ICON制 -->
-        <span id="banner-history-pill" style="font-size:12.5px; color:#fbbf24; background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.45); width:24px; height:24px; min-width:24px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer;" title="點擊查閱王國階段公告歷程">
-          📜<span id="history-count-badge" style="display:none;">1</span>
-        </span>
-      </div>
-      <!-- 主行動推進按鈕 -->
-      <div id="banner-actions" style="display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:3px;">
-        <!-- Dynamic Buttons via JS -->
-      </div>
-    </div>
 
       <!-- Main Board Core -->
       <div class="kingdom-board-core">
@@ -5628,110 +5751,6 @@
       </div>
     </section>
 
-    <!-- RIGHT: AI / Player 2 (電腦對手) -->
-    <section class="board-panel" id="ai-panel" style="border-color: rgba(239, 68, 68, 0.35);">
-      <!-- 1. AI 3x3 Grid on TOP (Request 3: 將AI個九宮格搬上去) -->
-      <div class="kingdom-board-core ai-board-core-top" style="flex:1 1 auto; width:100%; min-height:0;">
-        <div class="upper-grid-section" style="width:100%; height:100%;">
-          <div class="grid-3x3" id="ai-grid"></div>
-        </div>
-        <!-- 3. AI Hand Cards Dock (橫向模式完美對稱顯示對手手牌暗面) -->
-        <div class="lower-hand-section" id="ai-hand-container" style="display:none;">
-          <div class="hand-header-bar">
-            <div style="display:flex; align-items:center; gap:4px;">
-              <span style="font-weight:700; color:#f87171;">🤖 電腦手牌</span>
-              <span id="ai-hand-count-dock" style="font-family:monospace; font-size:9px; color:#cbd5e1; background:#020617; padding:1px 4px; border-radius:3px;">5/5</span>
-            </div>
-            <div style="color:#94a3b8; font-size:9px;">
-              對手暗牌（5張）
-            </div>
-          </div>
-          <div class="hand-cards-row" id="ai-hand-grid"></div>
-        </div>
-      </div>
-      <div id="ai-speech-container"></div>
-
-      <!-- 2. AI Status Row on BOTTOM (Request 3: 「名、技術/信仰進度、」嗰個ROW搬落來) -->
-      <div class="panel-header mobile-header-row ai-status-bottom-row" style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:3px; min-height:26px; padding:1px 2px;">
-        <!-- Left: AI 領主 (X/9) (兩行表示: 上行稱號, 下行名字+格數, 固定寬度與玩家一致) -->
-        <div style="display:flex; align-items:center; gap:2.5px; flex:0 0 auto; min-width:76px; box-sizing:border-box; cursor:pointer;" id="ai-lord-header-box" title="點擊與對手領主互動">
-          <span id="ai-lord-avatar" style="font-size:10px; background:rgba(127,29,29,0.5); border:1px solid #f87171; border-radius:50%; width:16px; height:16px; min-width:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">🤖</span>
-          <div style="display:flex; flex-direction:column; justify-content:center; min-width:0; flex:1 1 auto; line-height:1.1;">
-            <span id="ai-lord-title" style="font-size:7.5px; font-weight:700; color:#fca5a5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.2px;">鐵血宰相</span>
-            <div style="display:flex; align-items:center; gap:1.5px; white-space:nowrap; overflow:hidden;">
-              <span id="ai-lord-name" style="font-size:9.5px; font-weight:800; color:#f87171; overflow:hidden; text-overflow:ellipsis;">巴爾</span>
-              <span id="ai-status-text" style="font-size:8px; color:#94a3b8; font-family:monospace; flex-shrink:0;">(0/9)</span>
-            </div>
-          </div>
-          <span id="ai-hand-count" style="display:none;">5/5</span>
-        </div>
-
-        <!-- Center: AI 技術/信仰進度條 (放在「AI 名」同埋「錢」嘅中間) -->
-        <div class="header-tech-faith-wrap" title="AI 技術與信仰即時進度 (滿 15 點達 Lv4)">
-          <!-- AI Tech Row -->
-          <div class="header-tf-compact-row" title="AI 技術點數 (滿 15 點達 Lv4)">
-            <div class="tf-compact-left">
-              <span class="tf-icon">⚙️</span>
-              <span class="meter-badge badge-tech" id="ai-tech-badge">Lv0</span>
-            </div>
-            <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-1" title="1點 (Lv1)"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-tech-cell-3" title="3點 (Lv2)"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-4" title="4點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-5" title="5點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-tech-cell-7" title="7點 (Lv3)"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-8" title="8點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-9" title="9點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-10" title="10點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-11" title="11點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-12" title="12點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-13" title="13點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-tech-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-tech-cell-15" title="15點 (Lv4 MAX)"></div>
-            </div>
-            <div class="tf-compact-right">
-              <span id="ai-tech-num" style="font-weight:800; color:#cbd5e1;">0</span>/15 (<span id="ai-tech-next-pill" class="meter-next-pill">差1點➔Lv1</span>)
-            </div>
-          </div>
-
-          <!-- AI Faith Row -->
-          <div class="header-tf-compact-row" title="AI 信仰點數 (滿 15 點達 Lv4)">
-            <div class="tf-compact-left">
-              <span class="tf-icon">✝️</span>
-              <span class="meter-badge badge-faith" id="ai-faith-badge">Lv0</span>
-            </div>
-            <div class="mobile-ladder-cells">
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-1" title="1點 (Lv1)"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-2" title="2點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv2 cell-inactive" id="ai-faith-cell-3" title="3點 (Lv2)"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-4" title="4點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-5" title="5點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-6" title="6點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv3 cell-inactive" id="ai-faith-cell-7" title="7點 (Lv3)"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-8" title="8點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-9" title="9點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-10" title="10點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-11" title="11點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-12" title="12點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-13" title="13點"></div>
-              <div class="m-ladder-cell cell-sub cell-inactive" id="ai-faith-cell-14" title="14點"></div>
-              <div class="m-ladder-cell cell-milestone milestone-lv4 cell-inactive" id="ai-faith-cell-15" title="15點 (Lv4 MAX)"></div>
-            </div>
-            <div class="tf-compact-right">
-              <span id="ai-faith-num" style="font-weight:800; color:#cbd5e1;">0</span>/15 (<span id="ai-faith-next-pill" class="meter-next-pill">差1點➔Lv1</span>)
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: AI 💰 金幣 (固定寬度保持雙方進度條長度一致) -->
-        <span class="stat-pill" id="ai-gold-pill" style="background:rgba(69,26,3,0.6); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); font-size:10px; padding:1px 4px; border-radius:10px; width:48px; min-width:48px; max-width:48px; flex:0 0 48px; box-sizing:border-box; justify-content:center; white-space:nowrap;">
-          💰<strong id="ai-gold">5</strong> 金
-        </span>
-      </div>
-    </section>
-
   </main>
 
   
@@ -5743,6 +5762,56 @@
       <div class="splash-main" id="splash-main">⚔️ 戰爭階段</div>
       <div class="splash-desc" id="splash-desc">前線廝殺 · 爭奪霸權</div>
       <div class="splash-hint" id="splash-hint">點擊任意位置繼續 ▸</div>
+    </div>
+  </div>
+
+  
+  <!-- 🔔 每回合結束小總結彈窗 (Round End Summary Modal) -->
+  <div id="round-summary-modal" class="modal-backdrop hidden" style="z-index:220;">
+    <div class="modal-box" style="max-width:440px; width:94vw; border:2px solid #fbbf24; box-shadow:0 20px 50px rgba(0,0,0,0.9), 0 0 30px rgba(245,158,11,0.35);">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; align-items:center; justify-content:space-between; background:#0f172a;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:18px;">🔔</span>
+          <h3 style="font-weight:900; color:#fde047; font-size:13.5px;" id="round-summary-title">第 1 輪結束 · 王國巡禮總結</h3>
+        </div>
+        <span style="font-size:10px; font-family:monospace; color:#94a3b8;" id="round-summary-sub">輪次結算完成</span>
+      </div>
+
+      <div style="padding:12px 14px; max-height:65vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; font-size:11px;" id="round-summary-body">
+        <!-- 雙方目前總分大卡 -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#020617; border:1px solid rgba(245,158,11,0.35); border-radius:8px; padding:8px 10px; text-align:center;">
+          <div>
+            <div style="font-size:9.5px; color:#fcd34d; font-weight:700;">👑 我的王國</div>
+            <div style="font-size:20px; font-weight:900; color:#fbbf24; font-family:ui-monospace, monospace;" id="round-sum-p-vp">0 VP</div>
+            <div style="font-size:8.5px; color:#94a3b8;" id="round-sum-p-gold">國庫: 5金 · 戰力: 0</div>
+          </div>
+          <div style="border-left:1px solid rgba(255,255,255,0.1);">
+            <div style="font-size:9.5px; color:#fca5a5; font-weight:700;">🤖 電腦對手</div>
+            <div style="font-size:20px; font-weight:900; color:#f87171; font-family:ui-monospace, monospace;" id="round-sum-a-vp">0 VP</div>
+            <div style="font-size:8.5px; color:#94a3b8;" id="round-sum-a-gold">國庫: 5金 · 戰力: 0</div>
+          </div>
+        </div>
+
+        <!-- 本輪五大階段戰況拆解 -->
+        <div style="background:rgba(15,23,42,0.9); border:1px solid #1e293b; border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:5px;">
+          <div style="font-size:10px; font-weight:800; color:#fde047; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:3px;">
+            📋 本輪各階段成果盤點：
+          </div>
+          <div id="round-sum-breakdown-list" style="display:flex; flex-direction:column; gap:4px; font-size:10.5px;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <div style="font-size:10px; color:#cbd5e1; text-align:center; background:rgba(245,158,11,0.1); border:1px dashed rgba(245,158,11,0.3); border-radius:6px; padding:5px 8px;">
+          💡 點擊下方按鈕後將正式進入<strong>第 <span id="round-sum-next-num">2</span> 輪【抽牌階段】</strong>，你可以仔細檢視 5 張手牌並自由挑選棄牌。
+        </div>
+      </div>
+
+      <div style="padding:10px 14px; border-top:1px solid #1e293b; display:flex; align-items:center; justify-content:center; background:#0b1120;">
+        <button id="btn-confirm-next-round" class="btn btn-gold" style="width:100%; justify-content:center; padding:8px 16px; font-size:12px; font-weight:900; border-radius:8px; box-shadow:0 4px 14px rgba(245,158,11,0.5);">
+          🃏 準備就緒，進入第 <span id="round-sum-btn-num">2</span> 輪（抽牌/棄牌）➔
+        </button>
+      </div>
     </div>
   </div>
 
@@ -5759,6 +5828,17 @@
           <button id="btn-close-history" style="background:none; border:none; color:#cbd5e1; font-size:18px; cursor:pointer;" title="關閉歷程">✕</button>
         </div>
       </div>
+      
+      <div class="modal-filter-strip" id="modal-filter-strip" style="display:flex; gap:4px; padding:6px 12px; background:#070d18; border-bottom:1px solid #1e293b; overflow-x:auto;">
+        <button type="button" class="modal-flt-pill active" data-filter="all">全部</button>
+        <button type="button" class="modal-flt-pill" data-filter="抽牌">🃏 抽牌</button>
+        <button type="button" class="modal-flt-pill" data-filter="部署">⚡ 部署</button>
+        <button type="button" class="modal-flt-pill" data-filter="戰爭">⚔️ 戰爭</button>
+        <button type="button" class="modal-flt-pill" data-filter="發展">⚙️ 發展</button>
+        <button type="button" class="modal-flt-pill" data-filter="收入">💰 收入</button>
+        <button type="button" class="modal-flt-pill" data-filter="計分">👑 計分</button>
+      </div>
+
       <div id="history-modal-body" style="padding:12px 14px; max-height:66vh; overflow-y:auto; display:flex; flex-direction:column; gap:7px; font-size:11px;">
         <div id="history-container" style="display:flex; flex-direction:column; gap:7px;"></div>
       </div>
@@ -8624,73 +8704,53 @@
 
     const pGold = document.getElementById('p-gold');
     const pVpNum = document.getElementById('p-vp-num');
-    const pVpBar = document.getElementById('p-vp-bar');
-
-    const playerStatusText = document.getElementById('player-status-text');
-
+    
+    
     const aiGold = document.getElementById('ai-gold');
     const aiVpNum = document.getElementById('ai-vp-num');
-    const aiVpBar = document.getElementById('ai-vp-bar');
-
-    const aiStatusText = document.getElementById('ai-status-text');
-
+    
+    
     const playerGridEl = document.getElementById('player-grid');
     const aiGridEl = document.getElementById('ai-grid');
     const handGridEl = document.getElementById('hand-grid');
     const handCountEl = document.getElementById('hand-count');
     const aiHandCountEl = document.getElementById('ai-hand-count');
 
+    let currentHistoryFilter = 'all';
+
+    function filterHistoryCards(filterType) {
+      currentHistoryFilter = filterType;
+      document.querySelectorAll('.banner-flt-pill, .modal-flt-pill').forEach(btn => {
+        if (btn.getAttribute('data-filter') === filterType) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+
+      const cards = document.querySelectorAll('.history-phase-card');
+      let visibleCount = 0;
+      cards.forEach(card => {
+        const pType = card.getAttribute('data-phase-type') || '';
+        if (filterType === 'all' || pType.includes(filterType)) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      if (modalHistoryCount) {
+        modalHistoryCount.textContent = (filterType === 'all')
+          ? `共 ${cards.length} 個階段`
+          : `篩選：${filterType} (${visibleCount}/${cards.length})`;
+      }
+    }
+
     function addHistoryPhaseCard({ round, phaseName, icon, title, playerText, aiText, details = [] }) {
       if (!historyContainer) return;
       const card = document.createElement('div');
       card.className = 'history-phase-card';
-
-      const detailItemsHtml = (details && details.length > 0)
-        ? details.map(d => {
-            const leftHtml = typeof d === 'string' ? d : d.left;
-            const rightHtml = typeof d === 'string' ? '' : (d.right || '');
-            const rightCol = (typeof d === 'object' && d.color) ? d.color : '#fbbf24';
-            const borderCol = (typeof d === 'object' && d.border) ? d.border : '#fbbf24';
-            const plainTitle = leftHtml.replace(/<[^>]*>/g, '') + (rightHtml ? ` ➔ ${rightHtml}` : '');
-            return `
-              <div class="history-detail-subbox" style="border-left-color:${borderCol};" title="${plainTitle}">
-                <div class="subbox-left">${leftHtml}</div>
-                ${rightHtml ? `<span class="subbox-right" style="color:${rightCol};">${rightHtml}</span>` : ''}
-              </div>
-            `;
-          }).join('')
-        : `<div class="history-detail-subbox" style="border-left-color:#475569;"><div class="subbox-left" style="color:#94a3b8;">本階段無額外卡牌技能或數值變動明細</div></div>`;
-
-      const countLabel = details ? details.length : 0;
-
-      card.innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:4px; gap:8px;">
-          <div style="display:flex; align-items:center; gap:5px; min-width:0;">
-            <span style="font-size:13px; flex-shrink:0;">${icon}</span>
-            <span style="font-weight:800; color:#fbbf24; font-size:11.5px; white-space:nowrap;">第 ${round} 輪 · ${phaseName}</span>
-            <span style="font-size:9.5px; color:#94a3b8; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">｜${title}</span>
-          </div>
-          <span class="history-expand-pill">📋 明細 (${countLabel}) ▾</span>
-        </div>
-        <div style="font-size:10.5px; line-height:1.45; display:flex; flex-direction:column; gap:3px; margin-top:3px;">
-          <div style="color:#cbd5e1; white-space:normal; word-break:break-word;"><strong style="color:#fcd34d;">你：</strong>${playerText}</div>
-          <div style="color:#cbd5e1; white-space:normal; word-break:break-word;"><strong style="color:#f87171;">電腦：</strong>${aiText}</div>
-        </div>
-        <div class="history-subbox-list">
-          ${detailItemsHtml}
-        </div>
-      `;
-
-      card.addEventListener('click', () => {
-        Sound.click();
-        const isExp = card.classList.toggle('expanded');
-        const pill = card.querySelector('.history-expand-pill');
-        if (pill) {
-          pill.textContent = isExp ? `📋 收起明細 ▴` : `📋 明細 (${countLabel}) ▾`;
-        }
-      });
-
-      historyContainer.prepend(card);
+      card.setAttribute('data-phase-type', phaseName);
+      if (currentHistoryFilter !== 'all' && !phaseName.includes(currentHistoryFilter)) {
+        card.style.display = 'none';
+      }
       historyRecordsCount++;
       if (historyCountBadge) historyCountBadge.textContent = historyRecordsCount;
       if (modalHistoryCount) modalHistoryCount.textContent = `共 ${historyRecordsCount} 個階段`;
@@ -8767,6 +8827,67 @@
         }
       }
       requestAnimationFrame(step);
+    }
+
+    
+    // 🌟 綠色 +N 向上升結算動畫 (Floating Green Gain)
+    function floatGreenGain(el, text) {
+      if (!el) return;
+      const badge = document.createElement('div');
+      badge.className = 'floating-green-gain';
+      badge.textContent = text;
+      el.style.position = 'relative';
+      el.appendChild(badge);
+      setTimeout(() => badge.remove(), 1800);
+    }
+
+    // 🌟 本輪技術/信仰新增點數高亮 (Ladder Points Gain Highlight)
+    function highlightGainedLadderPoints(prefix, startPt, endPt) {
+      if (endPt <= startPt) return;
+      for (let pt = startPt + 1; pt <= endPt; pt++) {
+        const cellEl = document.getElementById(`${prefix}-cell-${pt}`);
+        if (cellEl) {
+          cellEl.classList.remove('cell-just-gained');
+          void cellEl.offsetWidth; // reflow
+          cellEl.classList.add('cell-just-gained');
+        }
+      }
+    }
+
+    function clearGainedLadderHighlights() {
+      document.querySelectorAll('.cell-just-gained').forEach(el => el.classList.remove('cell-just-gained'));
+    }
+
+    // 🌟 各階段狀態列重點高亮提示 (Phase Focus Highlights)
+    function updatePhaseFocusHighlights() {
+      const pPowerPill = document.getElementById('p-power-pill');
+      const aiPowerPill = document.getElementById('ai-power-pill');
+      const pLadderWrap = document.querySelector('#player-panel .header-tech-faith-wrap');
+      const aiLadderWrap = document.querySelector('#ai-panel .header-tech-faith-wrap');
+      const pGoldPill = document.getElementById('p-gold-pill');
+      const aiGoldPill = document.getElementById('ai-gold-pill');
+      const pVpPill = document.getElementById('p-vp-pill');
+      const aiVpPill = document.getElementById('ai-vp-pill');
+
+      [pPowerPill, aiPowerPill, pLadderWrap, aiLadderWrap, pGoldPill, aiGoldPill, pVpPill, aiVpPill].forEach(el => {
+        if (el) el.classList.remove('fx-focus-power', 'fx-focus-ladder', 'fx-focus-gold', 'fx-focus-vp');
+      });
+
+      if (!game || !game.phase) return;
+      const phase = game.phase;
+      if (phase === 'WAR') {
+        if (pPowerPill) pPowerPill.classList.add('fx-focus-power');
+        if (aiPowerPill) aiPowerPill.classList.add('fx-focus-power');
+      } else if (phase === 'DEVELOP') {
+        if (pLadderWrap) pLadderWrap.classList.add('fx-focus-ladder');
+        if (aiLadderWrap) aiLadderWrap.classList.add('fx-focus-ladder');
+      } else if (phase === 'INCOME') {
+        if (pGoldPill) pGoldPill.classList.add('fx-focus-gold');
+        if (aiGoldPill) aiGoldPill.classList.add('fx-focus-gold');
+      } else if (phase === 'VP') {
+        if (pVpPill) pVpPill.classList.add('fx-focus-vp');
+        if (aiVpPill) aiVpPill.classList.add('fx-focus-vp');
+      }
     }
 
     function floatCardText(gridEl, slotIdx, text, color = '#fcd34d') {
@@ -8889,54 +9010,33 @@
     }
 
     function updateMeters() {
-      // In DEPLOY / DRAW, do not calculate facedown cards into visible power!
       const isDeployOrDraw = (game.phase === 'DRAW' || game.phase === 'DEPLOY');
       
-      // Player
+      // 計算並更新雙方戰力與數值
       game.calculatePower(game.player, !isDeployOrDraw);
-      pGold.textContent = game.player.gold;
-      pVpNum.textContent = game.player.vp;
-      const pVpPct = Math.min(100, Math.round((game.player.vp / 40) * 100));
-      pVpBar.style.width = `${pVpPct}%`;
+      game.calculatePower(game.ai, !isDeployOrDraw);
 
+      const pPowerEl = document.getElementById('p-power');
+      if (pPowerEl) pPowerEl.textContent = game.player.power;
+      const aiPowerEl = document.getElementById('ai-power');
+      if (aiPowerEl) aiPowerEl.textContent = game.ai.power;
 
+      if (pGold) pGold.textContent = game.player.gold;
+      if (pVpNum) pVpNum.textContent = game.player.vp;
 
+      if (aiGold) aiGold.textContent = game.ai.gold;
+      if (aiVpNum) aiVpNum.textContent = game.ai.vp;
+
+      // 更新進度條
       updateLadderMeter('p-tech', game.player.techPoints, 'tech');
       updateLadderMeter('p-faith', game.player.faithPoints, 'faith');
-
-      const pOccupied = game.player.grid.filter(c => c !== null).length;
-      playerStatusText.textContent = `(${pOccupied}/9)`;
-
-      // 電腦對手（未同時翻牌前不計算暗置卡戰力）
-      game.calculatePower(game.ai, !isDeployOrDraw);
-      aiGold.textContent = game.ai.gold;
-      aiVpNum.textContent = game.ai.vp;
-      const aiVpPct = Math.min(100, Math.round((game.ai.vp / 40) * 100));
-      aiVpBar.style.width = `${aiVpPct}%`;
-
-
-
       updateLadderMeter('ai-tech', game.ai.techPoints, 'tech');
       updateLadderMeter('ai-faith', game.ai.faithPoints, 'faith');
 
-      const aiOccupied = game.ai.grid.filter(c => c !== null).length;
-      aiStatusText.textContent = `(${aiOccupied}/9)`;
+      // 更新各階段重點提示
+      updatePhaseFocusHighlights();
 
-      // 更新中央即時戰力對決天秤 (Tug-of-War Bar)
-      const tugP = document.getElementById('tug-p-val');
-      const tugAi = document.getElementById('tug-ai-val');
-      const tugFill = document.getElementById('tug-bar-fill');
-      const tugSpark = document.getElementById('tug-spark-div');
-      if (tugP && tugAi && tugFill && tugSpark) {
-        tugP.textContent = game.player.power;
-        tugAi.textContent = game.ai.power;
-        const totalP = game.player.power + game.ai.power;
-        const pct = totalP === 0 ? 50 : Math.max(12, Math.min(88, Math.round((game.player.power / totalP) * 100)));
-        tugFill.style.width = `${pct}%`;
-        tugSpark.style.left = `${pct}%`;
-      }
-
-      // 更新頂部精簡對決比分 HUD (情況2: iPhone 橫向模式)
+      // 更新頂部精簡對決比分 HUD (橫向模式)
       const hdrPVp = document.getElementById('hdr-p-vp');
       const hdrAVp = document.getElementById('hdr-a-vp');
       const hdrPPow = document.getElementById('hdr-p-pow');
@@ -8969,29 +9069,21 @@
     function adaptBannerPosition() {
       const isLandscape = window.matchMedia('(orientation: landscape)').matches || (window.innerWidth > window.innerHeight);
       const banner = document.getElementById('app-banner');
+      const battlefield = document.getElementById('battlefield');
       const playerPanel = document.getElementById('player-panel');
       const aiPanel = document.getElementById('ai-panel');
       const aiCore = aiPanel ? aiPanel.querySelector('.kingdom-board-core') : null;
-      const playerSpeech = document.getElementById('player-speech-container');
-      const playerHeader = playerPanel ? playerPanel.querySelector('.panel-header') : null;
 
-      if (!banner || !playerPanel) return;
+      if (!banner || !battlefield) return;
 
       if (isLandscape) {
-        // 橫向模式：將王國階段公告放去 AI 九宮格下面，保持兩邊九宮格尺寸完全一致
         if (aiCore && banner.parentElement !== aiCore) {
           aiCore.appendChild(banner);
         }
       } else {
-        // 直向模式：王國階段公告放回玩家面板頂部
-        if (banner.parentElement !== playerPanel) {
-          if (playerSpeech) {
-            playerSpeech.after(banner);
-          } else if (playerHeader) {
-            playerHeader.after(banner);
-          } else {
-            playerPanel.prepend(banner);
-          }
+        // 直向模式：將 Settlement Banner 穩定置於雙方玩家中間 (AI 與 Player 之間)
+        if (banner.parentElement !== battlefield) {
+          battlefield.insertBefore(banner, playerPanel);
         }
       }
     }
@@ -9072,40 +9164,6 @@
         ribbon.style.animation = 'none';
         ribbon.offsetHeight;
         ribbon.style.animation = 'splashBannerAnim 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-      }
-    }
-
-    
-    // 🌟 階段動態結算條控制器 (Phase Settlement Toast Engine)
-    let settleToastTimer = null;
-    function showSettlementToast(icon, title, pText, aText, autoDismissMs = 4000) {
-      const toast = document.getElementById('phase-settlement-toast');
-      const iconEl = document.getElementById('settle-toast-icon');
-      const titleEl = document.getElementById('settle-toast-title-text');
-      const pTextEl = document.getElementById('settle-toast-p-text');
-      const aTextEl = document.getElementById('settle-toast-a-text');
-      if (!toast) return;
-
-      if (iconEl) iconEl.textContent = icon;
-      if (titleEl) titleEl.textContent = title;
-      if (pTextEl) pTextEl.innerHTML = pText;
-      if (aTextEl) aTextEl.innerHTML = aText;
-
-      toast.classList.remove('hidden');
-      if (settleToastTimer) clearTimeout(settleToastTimer);
-      if (autoDismissMs > 0) {
-        settleToastTimer = setTimeout(() => {
-          hideSettlementToast();
-        }, autoDismissMs);
-      }
-    }
-
-    function hideSettlementToast() {
-      const toast = document.getElementById('phase-settlement-toast');
-      if (toast) toast.classList.add('hidden');
-      if (settleToastTimer) {
-        clearTimeout(settleToastTimer);
-        settleToastTimer = null;
       }
     }
 
@@ -10944,6 +11002,7 @@
       if (placed === 0) {
         game.player.gold += 2;
         Sound.coin();
+        floatGreenGain(document.getElementById('p-gold-pill'), '+2 💰!');
         pItems.push('未放牌 (+2金補償)');
         floatPillText(pGold, '+2 💰', '#fbbf24');
         revealDetails.push({
@@ -10955,6 +11014,7 @@
       } else if (placed === 1) {
         game.player.gold += 1;
         Sound.coin();
+        floatGreenGain(document.getElementById('p-gold-pill'), '+1 💰!');
         pItems.push('放1張 (+1金補償)');
         floatPillText(pGold, '+1 💰', '#fbbf24');
         revealDetails.push({
@@ -11063,6 +11123,12 @@
       const pNetTech = game.player.techPoints - pTechStart;
       const pNetFaith = game.player.faithPoints - pFaithStart;
 
+      // 🌟 綠色 +N 動畫與技術/信仰新增點數高亮
+      if (pNetGold > 0) floatGreenGain(document.getElementById('p-gold-pill'), `+${pNetGold} 💰!`);
+      if (pNetVp > 0) floatGreenGain(document.getElementById('p-vp-pill'), `+${pNetVp} VP!`);
+      if (pNetTech > 0) highlightGainedLadderPoints('p-tech', pTechStart, game.player.techPoints);
+      if (pNetFaith > 0) highlightGainedLadderPoints('p-faith', pFaithStart, game.player.faithPoints);
+
       // 紀錄第 N 回合部署階段得分
       const rRecDeploy = game.getRoundRecord(game.round);
       rRecDeploy.player.deploy += Math.max(0, pNetVp);
@@ -11104,9 +11170,6 @@
         ai: aText
       };
 
-      
-      // 🌟 觸發部署揭曉結算條
-      showSettlementToast('⚡', `第 ${game.round} 輪 · 部署揭曉結算 (部隊進駐)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '部署揭曉',
@@ -11440,6 +11503,8 @@
 
       game.player.vp += pBaseVP;
       game.ai.vp += aBaseVP;
+      if (pBaseVP > 0) floatGreenGain(document.getElementById('p-vp-pill'), `+${pBaseVP} VP!`);
+      if (pWon) floatGreenGain(document.getElementById('p-power-pill'), '⚔️ 戰勝!');
       if (game.player.stats) {
         game.player.stats.warVp += pBaseVP;
         if (pWon && pPower > aPower) game.player.stats.warsWon++;
@@ -11738,6 +11803,8 @@
 
       const pTechDiff = game.player.techPoints - pTechStart;
       const pFaithDiff = game.player.faithPoints - pFaithStart;
+      if (pTechDiff > 0) highlightGainedLadderPoints('p-tech', pTechStart, game.player.techPoints);
+      if (pFaithDiff > 0) highlightGainedLadderPoints('p-faith', pFaithStart, game.player.faithPoints);
       const aTechDiff = game.ai.techPoints - aTechStart;
       const aFaithDiff = game.ai.faithPoints - aFaithStart;
 
@@ -11761,9 +11828,6 @@
         ai: aText
       };
 
-      
-      // 🌟 觸發發展階段專屬結算條與動效
-      showSettlementToast('⚙️', `第 ${game.round} 輪 · 發展階段結算 (點數提升)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '發展階段',
@@ -11799,7 +11863,8 @@
         const goldEl = isPlayer ? pGold : aiGold;
 
         entity.gold += 3;
-        floatPillText(goldEl, '+3 💰', '#fbbf24');
+        if (isPlayer) floatGreenGain(document.getElementById('p-gold-pill'), '+3 💰!');
+        else floatPillText(goldEl, '+3 💰', '#fbbf24');
         const techLv = getLevel(entity.techPoints);
 
         incomeDetails.push({
@@ -11888,9 +11953,6 @@
         ai: aText
       };
 
-      
-      // 🌟 觸發收入階段專屬結算條與動效
-      showSettlementToast('💰', `第 ${game.round} 輪 · 收入階段結算 (國庫稅收)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '收入階段',
@@ -12142,6 +12204,7 @@
       const rRecVp = game.getRoundRecord(game.round);
       rRecVp.player.vp += gains.pTotal;
       rRecVp.ai.vp += gains.aTotal;
+      if (gains.pTotal > 0) floatGreenGain(document.getElementById('p-vp-pill'), `+${gains.pTotal} VP!`);
 
       const pText = gains.pTotal > 0 ? `+${gains.pTotal}VP (${gains.player.join(',')})` : `+0VP (無計分技能)`;
       const aText = gains.aTotal > 0 ? `+${gains.aTotal}VP (${gains.ai.join(',')})` : `+0VP (無計分技能)`;
@@ -12156,9 +12219,6 @@
         ai: aText
       };
 
-      
-      // 🌟 觸發計分階段專屬結算條與動效
-      showSettlementToast('👑', `第 ${game.round} 輪 · 計分階段結算 (王國成就)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '計分階段',
@@ -12192,11 +12252,66 @@
       }
     }
 
+    // 🔔 回合小總結彈窗邏輯 (Round Summary Modal Logic)
+    function showRoundSummaryModal() {
+      const modal = document.getElementById('round-summary-modal');
+      if (!modal) return;
+      Sound.fanfare();
+
+      const titleEl = document.getElementById('round-summary-title');
+      const subEl = document.getElementById('round-summary-sub');
+      const pVpEl = document.getElementById('round-sum-p-vp');
+      const aVpEl = document.getElementById('round-sum-a-vp');
+      const pGoldEl = document.getElementById('round-sum-p-gold');
+      const aGoldEl = document.getElementById('round-sum-a-gold');
+      const nextNumEl = document.getElementById('round-sum-next-num');
+      const btnNumEl = document.getElementById('round-sum-btn-num');
+      const listEl = document.getElementById('round-sum-breakdown-list');
+
+      if (titleEl) titleEl.textContent = `第 ${game.round} 輪結束 · 王國巡禮小總結`;
+      if (subEl) subEl.textContent = `第 ${game.round} 輪結算完成`;
+      if (pVpEl) pVpEl.textContent = `${game.player.vp} VP`;
+      if (aVpEl) aVpEl.textContent = `${game.ai.vp} VP`;
+      if (pGoldEl) pGoldEl.textContent = `國庫: ${game.player.gold}金 · 戰力: ${game.player.power}`;
+      if (aGoldEl) aGoldEl.textContent = `國庫: ${game.ai.gold}金 · 戰力: ${game.ai.power}`;
+      if (nextNumEl) nextNumEl.textContent = game.round + 1;
+      if (btnNumEl) btnNumEl.textContent = game.round + 1;
+
+      const rec = game.getRoundRecord(game.round);
+      const p = rec ? rec.player : { deploy: 0, war: 0, develop: 0, income: 0, vp: 0 };
+      const a = rec ? rec.ai : { deploy: 0, war: 0, develop: 0, income: 0, vp: 0 };
+
+      if (listEl) {
+        listEl.innerHTML = `
+          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <span>⚡ 部署進駐：</span>
+            <span style="font-family:monospace; color:#cbd5e1;">你 <strong>+${p.deploy}VP</strong> ｜ 電腦 <strong>+${a.deploy}VP</strong></span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <span>⚔️ 戰爭交鋒：</span>
+            <span style="font-family:monospace; color:#f87171;">你 <strong>+${p.war}VP</strong> ｜ 電腦 <strong>+${a.war}VP</strong></span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <span>⚙️ 文明發展：</span>
+            <span style="font-family:monospace; color:#38bdf8;">技術 Lv${getLevel(game.player.techPoints)} (${game.player.techPoints}點) ｜ 信仰 Lv${getLevel(game.player.faithPoints)} (${game.player.faithPoints}點)</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <span>💰 國庫收入：</span>
+            <span style="font-family:monospace; color:#34d399;">你 <strong>+${p.income || 3}金</strong> ｜ 電腦 <strong>+${a.income || 3}金</strong></span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:2.5px 0;">
+            <span>👑 王國計分：</span>
+            <span style="font-family:monospace; color:#fbbf24;">你 <strong>+${p.vp}VP</strong> ｜ 電腦 <strong>+${a.vp}VP</strong></span>
+          </div>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
     function handleAdvanceToNextPhase() {
       Sound.click();
-      hideSettlementToast();
 
-      // 各自獨立依節奏查看結果，不強行拉動對方跳轉
       if (game.phase === 'REVEAL') {
         game.phase = 'WAR';
         resolveWarPhase();
@@ -12217,19 +12332,8 @@
           return;
         }
 
-        if (PvPManager.isOnline) {
-          // 【聯機模式：自己看完計分，發送 ROUND_READY 等待對手結算完成】
-          PvPManager.myReadyState.nextRound = true;
-          PvPManager.send('ROUND_READY', { round: game.round + 1 });
-          logMessage('⏳ 你已完成本輪結算，等待對手完成後進入下一輪...');
-          PvPManager.checkNextRoundBarrier();
-          renderBanner();
-          return;
-        }
-
-        game.round++;
-        game.phase = 'DRAW';
-        updateUI();
+        // 🌟 防誤觸機制：回合結束時彈出小總結，等待玩家點擊按鈕確認才進入下一回合
+        showRoundSummaryModal();
       }
     }
 
@@ -12798,11 +12902,28 @@
 
     // Top Header Buttons
     
-    const settleToastEl = document.getElementById('phase-settlement-toast');
-    if (settleToastEl) {
-      settleToastEl.addEventListener('click', () => {
+    // 綁定回合結束總結「確認進入下一輪」按鈕
+    const btnNextRoundConfirm = document.getElementById('btn-confirm-next-round');
+    if (btnNextRoundConfirm) {
+      btnNextRoundConfirm.addEventListener('click', (e) => {
+        e.stopPropagation();
         Sound.click();
-        hideSettlementToast();
+        const rModal = document.getElementById('round-summary-modal');
+        if (rModal) rModal.classList.add('hidden');
+        clearGainedLadderHighlights();
+
+        if (PvPManager.isOnline) {
+          PvPManager.myReadyState.nextRound = true;
+          PvPManager.send('ROUND_READY', { round: game.round + 1 });
+          logMessage('⏳ 你已完成本輪小總結確認，等待對手確認後進入下一輪...');
+          PvPManager.checkNextRoundBarrier();
+          renderBanner();
+          return;
+        }
+
+        game.round++;
+        game.phase = 'DRAW';
+        updateUI();
       });
     }
 
@@ -12841,6 +12962,23 @@
         if (box) box.scrollTop = 0;
       });
     }
+
+    
+    // 綁定 Settlement Banner 與 History Modal 階段篩選器
+    document.querySelectorAll('.banner-flt-pill, .modal-flt-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        Sound.click();
+        const fType = pill.getAttribute('data-filter') || 'all';
+        filterHistoryCards(fType);
+        if (pill.classList.contains('banner-flt-pill') && fType !== 'all') {
+          const histModal = document.getElementById('history-modal');
+          if (histModal) histModal.classList.remove('hidden');
+          const box = document.getElementById('history-modal-body');
+          if (box) box.scrollTop = 0;
+        }
+      });
+    });
 
     document.getElementById('btn-close-history').addEventListener('click', () => {
       document.getElementById('history-modal').classList.add('hidden');
@@ -14004,14 +14142,6 @@
       textEl.innerHTML = msg.replace(/\n/g, '<br>');
       modal.classList.remove('hidden');
     }
-    document.addEventListener('DOMContentLoaded', () => {
-      const btnOk = document.getElementById('btn-pvp-toast-ok');
-      if (btnOk) {
-        btnOk.addEventListener('click', () => {
-          document.getElementById('pvp-toast-notice').classList.add('hidden');
-        });
-      }
-    });
 
     const PvPManager = {
       isOnline: false,
@@ -14777,7 +14907,7 @@
       // 用戶從 WhatsApp / 後台切回網頁時自動喚醒處理
       handleAppResume() {
         if (!this.isOnline || !this.roomId) return;
-        // 偵測到用戶切返遊戲
+        // 用戶切返網頁
 
         // 1. 若當前通道看起來仍 open，先發一次探測 PING 並請求對齊
         if (this.conn && this.conn.open) {
