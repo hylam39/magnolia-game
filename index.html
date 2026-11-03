@@ -2458,9 +2458,9 @@
     #ai-panel {
       order: 1 !important;
       flex: 0 0 auto !important;
-      height: clamp(150px, 23vh, 260px) !important;
+      height: clamp(160px, 24vh, 215px) !important;
       min-height: 145px !important;
-      max-height: 280px !important;
+      max-height: 225px !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
@@ -2684,9 +2684,9 @@
     }
 
     #ai-panel {
-      height: clamp(150px, 23vh, 260px) !important;
+      height: clamp(160px, 24vh, 215px) !important;
       min-height: 145px !important;
-      max-height: 280px !important;
+      max-height: 225px !important;
     }
 
     .card-top-name {
@@ -5452,30 +5452,32 @@
     }
 
   
-    /* 🌟 雙方九宮格高度完美平衡 */
+    /* 🌟 雙方九宮格與手牌高度最佳分配 */
     #battlefield {
       padding: 2px 4px !important;
       gap: 3px !important;
     }
     #ai-panel {
-      flex: 1 1 0 !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      height: auto !important;
+      flex: 0 0 clamp(160px, 24vh, 215px) !important;
+      height: clamp(160px, 24vh, 215px) !important;
+      min-height: 155px !important;
+      max-height: 225px !important;
       padding: 2px 4px !important;
     }
     #player-panel {
-      flex: 1.34 1 0 !important;
+      flex: 1 1 auto !important;
       min-height: 0 !important;
       max-height: none !important;
       height: auto !important;
       padding: 2px 4px !important;
     }
     #player-hand-container {
-      height: 78px !important;
-      min-height: 76px !important;
-      max-height: 82px !important;
-      flex: 0 0 78px !important;
+      height: clamp(92px, 13.2vh, 104px) !important;
+      min-height: 90px !important;
+      max-height: 106px !important;
+      flex: 0 0 clamp(92px, 13.2vh, 104px) !important;
+      padding: 2px 3px !important;
+      gap: 2px !important;
     }
     #ai-grid, #player-grid {
       height: 100% !important;
@@ -8016,6 +8018,7 @@
         this.autoAdvanceTimer = null;
 
         this.roundScores = []; // 每回合 5 大階段得分紀錄
+        this.historyLog = []; // 完整歷史階段紀錄（支援存檔恢復）
         this.justRevealedSlots = { player: new Set(), ai: new Set() };
         this.activeLineHighlights = { player: new Set(), ai: new Set() };
         this.initDeck();
@@ -8942,6 +8945,13 @@
 
       historyContainer.prepend(card);
       historyRecordsCount++;
+      if (typeof game !== 'undefined' && game && game.historyLog) {
+        // 避免重複推入相同輪次與階段的快照
+        const exists = game.historyLog.some(h => h.round === round && h.phaseName === phaseName);
+        if (!exists) {
+          game.historyLog.push({ round, phaseName, icon, title, playerText, aiText, details });
+        }
+      }
       if (historyCountBadge) historyCountBadge.textContent = historyRecordsCount;
       if (modalHistoryCount) modalHistoryCount.textContent = `共 ${historyRecordsCount} 個階段`;
 
@@ -9111,6 +9121,13 @@
           cellEl.classList.add('cell-just-gained');
         }
       }
+      // 3秒後自動停止閃爍，絕不永久殘留
+      setTimeout(() => {
+        for (let pt = startPt + 1; pt <= endPt; pt++) {
+          const cellEl = document.getElementById(`${prefix}-cell-${pt}`);
+          if (cellEl) cellEl.classList.remove('cell-just-gained');
+        }
+      }, 3000);
     }
 
     function clearGainedLadderHighlights() {
@@ -9263,6 +9280,7 @@
           } else {
             cellEl.classList.remove(activeClass);
             cellEl.classList.add('cell-inactive');
+            cellEl.classList.remove('cell-just-gained');
           }
         }
       }
@@ -11376,13 +11394,18 @@
         triggerAiSpeech("deploy");
       }
 
-      // Net resource calculations during reveal
+      // 1. 先計算雙方淨增資源 (Net Resource Calculations)
       const pNetGold = game.player.gold - pGoldStart;
       const pNetVp = game.player.vp - pVpStart;
       const pNetTech = game.player.techPoints - pTechStart;
       const pNetFaith = game.player.faithPoints - pFaithStart;
 
-      // 🌟 部署開牌成果結算：卡牌高亮、點數閃爍、金幣/VP飛入跳增
+      const aNetGold = game.ai.gold - aGoldStart;
+      const aNetVp = game.ai.vp - aVpStart;
+      const aNetTech = game.ai.techPoints - aTechStart;
+      const aNetFaith = game.ai.faithPoints - aFaithStart;
+
+      // 2. 觸發資源結算動畫流 (由下而上 / 由上而下飛入與跳字)
       animateGainFlow({
         isPlayer: true,
         goldDelta: pNetGold > 0 ? pNetGold : 0,
@@ -11409,11 +11432,7 @@
       if (pNetTech > 0) pRes.push(`+${pNetTech}技`);
       if (pNetFaith > 0) pRes.push(`+${pNetFaith}信`);
 
-      const aNetGold = game.ai.gold - aGoldStart;
-      const aNetVp = game.ai.vp - aVpStart;
       rRecDeploy.ai.deploy += Math.max(0, aNetVp);
-      const aNetTech = game.ai.techPoints - aTechStart;
-      const aNetFaith = game.ai.faithPoints - aFaithStart;
 
       const aRes = [];
       if (aNetGold > 0) aRes.push(`+${aNetGold}金`);
@@ -13217,6 +13236,7 @@
 
 
     function resetGame() {
+      clearGainedLadderHighlights();
       Fireworks.stop();
       if (game && game.autoAdvanceTimer) {
         clearTimeout(game.autoAdvanceTimer);
@@ -13877,6 +13897,7 @@
             deck: g.deck,
             discardPile: g.discardPile,
             phaseGains: g.phaseGains,
+            historyLog: g.historyLog || [],
             timestamp: Date.now()
           };
           localStorage.setItem(this.key, JSON.stringify(snapshot));
@@ -15441,6 +15462,7 @@ window.onload = () => {
       syncAiLordUI();
       addInitialHistoryCard();
       adaptBannerPosition();
+      clearGainedLadderHighlights();
 
       // 嘗試讀取已存檔戰局 (Auto-Save Resume，若為聯機房間則略過單機舊存檔以防牌庫混亂)
       const hasRoomHash = window.location.hash.includes('room=');
@@ -15466,6 +15488,14 @@ window.onload = () => {
           game.phaseGains = saved.phaseGains;
           if (saved.roundScores) {
             game.roundScores = saved.roundScores;
+          }
+          if (saved.historyLog && saved.historyLog.length > 0) {
+            if (historyContainer) historyContainer.innerHTML = '';
+            historyRecordsCount = 0;
+            game.historyLog = [];
+            saved.historyLog.forEach(h => {
+              addHistoryPhaseCard(h);
+            });
           }
           if (game.phase === 'DEPLOY') {
             game.playerDeploymentsThisRound = game.player.facedownSlots.size;
