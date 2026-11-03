@@ -11792,16 +11792,6 @@
 
       game.player.vp += pBaseVP;
       game.ai.vp += aBaseVP;
-      animateGainFlow({
-        isPlayer: true,
-        vpDelta: pTotalVP,
-        goldDelta: 0
-      });
-      animateGainFlow({
-        isPlayer: false,
-        vpDelta: aTotalVP,
-        goldDelta: 0
-      });
       if (game.player.stats) {
         game.player.stats.warVp += pBaseVP;
         if (pWon && pPower > aPower) game.player.stats.warsWon++;
@@ -11861,6 +11851,22 @@
 
       const pTotalVP = pBaseVP + (pTriggers.total || 0);
       const aTotalVP = aBaseVP + (aTriggers.total || 0);
+
+      // 觸發資源結算動畫流 (由下而上 / 由上而下飛入與跳字)
+      if (pTotalVP > 0) {
+        animateGainFlow({
+          isPlayer: true,
+          vpDelta: pTotalVP,
+          goldDelta: 0
+        });
+      }
+      if (aTotalVP > 0) {
+        animateGainFlow({
+          isPlayer: false,
+          vpDelta: aTotalVP,
+          goldDelta: 0
+        });
+      }
 
       // 紀錄第 N 回合戰爭階段得分
       const rRecWar = game.getRoundRecord(game.round);
@@ -12100,18 +12106,23 @@
 
       const pTechDiff = game.player.techPoints - pTechStart;
       const pFaithDiff = game.player.faithPoints - pFaithStart;
-      animateGainFlow({
-        isPlayer: true,
-        techDelta: pTechDiff,
-        faithDelta: pFaithDiff
-      });
-      animateGainFlow({
-        isPlayer: false,
-        techDelta: aTechDiff,
-        faithDelta: aFaithDiff
-      });
       const aTechDiff = game.ai.techPoints - aTechStart;
       const aFaithDiff = game.ai.faithPoints - aFaithStart;
+
+      if (pTechDiff > 0 || pFaithDiff > 0) {
+        animateGainFlow({
+          isPlayer: true,
+          techDelta: pTechDiff,
+          faithDelta: pFaithDiff
+        });
+      }
+      if (aTechDiff > 0 || aFaithDiff > 0) {
+        animateGainFlow({
+          isPlayer: false,
+          techDelta: aTechDiff,
+          faithDelta: aFaithDiff
+        });
+      }
 
       const pDev = [];
       if (pTechDiff > 0) pDev.push(`+${pTechDiff} 技`);
@@ -12249,6 +12260,10 @@
 
       animateGainFlow({ isPlayer: true, goldDelta: gains.pTotal });
       animateGainFlow({ isPlayer: false, goldDelta: gains.aTotal });
+
+      const rRecIncome = game.getRoundRecord(game.round);
+      rRecIncome.player.income += gains.pTotal;
+      rRecIncome.ai.income += gains.aTotal;
 
       game.phaseGains = {
         phase: 'INCOME',
