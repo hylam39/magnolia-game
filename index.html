@@ -5611,16 +5611,6 @@
     <!-- CENTER: 王國階段公告與操作按鈕 (Settlement Banner with Filters) -->
     <div id="app-banner" class="center-settlement-banner">
       <!-- 階段篩選器 Filter Strip -->
-      <div class="banner-filter-strip" id="banner-filter-strip" title="點擊篩選特定階段歷史紀錄">
-        <button type="button" class="banner-flt-pill active" data-filter="all">全部</button>
-        <button type="button" class="banner-flt-pill" data-filter="抽牌">🃏 抽牌</button>
-        <button type="button" class="banner-flt-pill" data-filter="部署">⚡ 部署</button>
-        <button type="button" class="banner-flt-pill" data-filter="戰爭">⚔️ 戰爭</button>
-        <button type="button" class="banner-flt-pill" data-filter="發展">⚙️ 發展</button>
-        <button type="button" class="banner-flt-pill" data-filter="收入">💰 收入</button>
-        <button type="button" class="banner-flt-pill" data-filter="計分">👑 計分</button>
-      </div>
-
       <div class="banner-main-row" style="display:flex; align-items:center; justify-content:space-between; width:100%; min-width:0; gap:4px;">
         <div id="banner-content" style="display:flex; align-items:center; gap:4px; cursor:pointer; flex:1 1 auto; min-width:0; padding:1px 2px; border-radius:6px; transition:all 0.15s ease;" title="點擊開啟階段公告歷程">
           <span id="banner-icon" style="font-size:14px; flex-shrink:0; width:18px; text-align:center;">🃏</span>
@@ -7755,45 +7745,85 @@
         icon = '🌟'; col = '#e9d5ff'; borderCol = '#c084fc'; bgCol = 'rgba(192, 132, 252, 0.22)';
       }
 
+      // 嚴謹精確、絕無丟失機制的技能簡明標籤 (Accurate & Faithful Badges)
       let short = desc;
-      if (desc.includes('獲得 1 技術點 與 1 信仰點')) short = '+1技 / +1信';
-      else if (desc.includes('獲得 1 技術點')) short = '+1 技術';
-      else if (desc.includes('獲得 2 技術點')) short = '+2 技術';
-      else if (desc.includes('獲得 5 技術點')) short = '+5 技術!';
-      else if (desc.includes('獲得 1 信仰點')) short = '+1 信仰';
-      else if (desc.includes('獲得 2 信仰點')) short = '+2 信仰';
-      else if (desc.includes('獲得 5 信仰點')) short = '+5 信仰!';
-      else if (desc.includes('2 VP × 技術等級')) short = '2VP × 技Lv';
-      else if (desc.includes('1 VP × 信仰等級')) short = '1VP × 信Lv';
-      else if (desc.includes('1 VP × 技術等級')) short = '1VP × 技Lv';
-      else if (desc.includes('3 VP × 技術等級')) short = '3VP × 技Lv';
-      else if (desc.includes('2 VP × 技術等級 + 2 VP × 信仰等級')) short = '2VP×技+信';
-      else if (desc.includes('1 金 × 技術等級')) short = '1金 × 技Lv';
-      else if (desc.includes('2 金 × 技術等級')) short = '2金 × 技Lv';
-      else if (desc.includes('1 戰力 × 信仰等級')) short = '1戰 × 信Lv';
-      else if (desc.includes('2 戰力 × 信仰等級')) short = '2戰 × 信Lv';
-      else if (desc.includes('3 戰力 × 信仰等級')) short = '3戰 × 信Lv';
-      else if (desc.includes('1 戰力 × 技術等級 + 1 戰力 × 信仰等級')) short = '1戰×技+信';
-      else if (desc.includes('在戰爭中獲得VP時，額外再獲得1VP')) short = '獲勝+1VP';
-      else if (desc.includes('在戰爭中獲得VP時，額外再獲得2VP')) short = '獲勝+2VP';
-      else if (desc.includes('在戰爭中未獲得VP時，獲得3VP')) short = '失利+3VP';
-      else if (desc.includes('不位於前線也會參與戰爭')) short = '後援參戰';
-      else if (desc.includes('1 VP × 人類單位數')) short = '1VP × 人類';
-      else if (desc.includes('1 VP × 矮人單位數')) short = '1VP × 矮人';
-      else if (desc.includes('1 VP × 精靈單位數')) short = '1VP × 精靈';
-      else if (desc.includes('1 VP × 哥布林單位數')) short = '1VP × 哥布林';
-      else if (desc.includes('1 VP × 魔像單位數')) short = '1VP × 魔像';
-      else if (desc.includes('1 VP × 惡魔單位數')) short = '1VP × 惡魔';
-      else if (desc.includes('1 VP × 費用為4金及以上的單位')) short = '1VP × ≥4費';
-      else if (desc.includes('1 VP × 基礎戰力4及以上的單位')) short = '1VP × ≥4戰';
-      else if (desc.includes('1 VP × 費用在2金及以下的單位')) short = '1VP × ≤2費';
-      else if (desc.includes('固定獲得 4 VP')) short = '固定 +4VP';
-      else if (desc.includes('獲得 1 金 × 場上職業種類數')) short = '1金 × 職業';
-      else if (desc.includes('將技術點與信仰點同步至兩者中較高者')) short = '雙軌同步';
-      else if (desc.includes('所有連線獎勵翻倍')) short = '連線獎勵×2';
-      else if (desc.includes('手頭金幣換算VP翻倍')) short = '金幣換VP×2';
-      else if (desc.includes('1 金')) short = '+1 金幣';
-      else if (desc.includes('2 金')) short = '+2 金幣';
+      if (desc === '1 戰力 × 技術等級 + 1 戰力 × 信仰等級') {
+        short = '+1戰×技 + 1戰×信';
+      } else if (desc === '3 戰力 × 信仰等級；戰勝時額外獲得 1 VP × 信仰等級') {
+        short = '+3戰×信；勝+1VP×信';
+      } else if (desc === '2 VP × 技術等級 + 2 VP × 信仰等級') {
+        short = '2VP×技 + 2VP×信';
+      } else if (desc === '獲得 1 技術點 與 1 信仰點') {
+        short = '+1技 與 +1信';
+      } else if (desc === '獲得 1 技術點') {
+        short = '+1 技術點';
+      } else if (desc === '獲得 2 技術點') {
+        short = '+2 技術點';
+      } else if (desc === '獲得 5 技術點！') {
+        short = '+5 技術點!';
+      } else if (desc === '獲得 1 信仰點') {
+        short = '+1 信仰點';
+      } else if (desc === '獲得 2 信仰點') {
+        short = '+2 信仰點';
+      } else if (desc === '獲得 5 信仰點！') {
+        short = '+5 信仰點!';
+      } else if (desc === '2 VP × 技術等級') {
+        short = '2VP × 技Lv';
+      } else if (desc === '1 VP × 信仰等級') {
+        short = '1VP × 信Lv';
+      } else if (desc === '1 VP × 技術等級') {
+        short = '1VP × 技Lv';
+      } else if (desc === '3 VP × 技術等級') {
+        short = '3VP × 技Lv';
+      } else if (desc === '1 金 × 技術等級') {
+        short = '1金 × 技Lv';
+      } else if (desc === '2 金 × 技術等級') {
+        short = '2金 × 技Lv';
+      } else if (desc === '1 戰力 × 信仰等級') {
+        short = '+1戰 × 信Lv';
+      } else if (desc === '2 戰力 × 信仰等級') {
+        short = '+2戰 × 信Lv';
+      } else if (desc === '在戰爭中獲得VP時，額外再獲得1VP。') {
+        short = '獲勝額外+1VP';
+      } else if (desc === '在戰爭中獲得VP時，額外再獲得2VP。') {
+        short = '獲勝額外+2VP';
+      } else if (desc === '在戰爭中未獲得VP時，獲得3VP。') {
+        short = '失利補償+3VP';
+      } else if (desc === '不位於前線也會參與戰爭（後排基礎戰力亦計入）') {
+        short = '後援亦參戰';
+      } else if (desc === '1 VP × 人類單位數（含此卡）') {
+        short = '1VP × 人類數';
+      } else if (desc === '1 VP × 矮人單位數（含此卡）') {
+        short = '1VP × 矮人數';
+      } else if (desc === '1 VP × 精靈單位數（含此卡）') {
+        short = '1VP × 精靈數';
+      } else if (desc === '1 VP × 哥布林單位數（含此卡）') {
+        short = '1VP × 哥布林';
+      } else if (desc === '1 VP × 魔像單位數（含此卡）') {
+        short = '1VP × 魔像數';
+      } else if (desc === '1 VP × 惡魔單位數（含此卡）') {
+        short = '1VP × 惡魔數';
+      } else if (desc === '1 VP × 費用為4金及以上的單位（含此卡）') {
+        short = '1VP × ≥4費卡';
+      } else if (desc === '1 VP × 基礎戰力4及以上的單位（含此卡）') {
+        short = '1VP × ≥4戰卡';
+      } else if (desc === '1 VP × 費用在2金及以下的單位') {
+        short = '1VP × ≤2費卡';
+      } else if (desc === '固定獲得 4 VP') {
+        short = '每輪固定+4VP';
+      } else if (desc === '獲得 1 金 × 場上職業種類數（含此卡）') {
+        short = '1金 × 職業數';
+      } else if (desc === '將技術點與信仰點同步至兩者中較高者') {
+        short = '雙軌同步取高';
+      } else if (desc === '你獲得的所有連線獎勵翻倍（× 2）') {
+        short = '連線獎勵翻倍';
+      } else if (desc === '計算VP時，手頭金幣換算VP翻倍（每3金換2VP）') {
+        short = '金幣換VP翻倍';
+      } else if (desc === '1 金') {
+        short = '+1 金幣';
+      } else if (desc === '2 金') {
+        short = '+2 金幣';
+      }
 
       return {
         trigger: trig,
@@ -8720,7 +8750,7 @@
 
     function filterHistoryCards(filterType) {
       currentHistoryFilter = filterType;
-      document.querySelectorAll('.banner-flt-pill, .modal-flt-pill').forEach(btn => {
+      document.querySelectorAll('.modal-flt-pill').forEach(btn => {
         if (btn.getAttribute('data-filter') === filterType) btn.classList.add('active');
         else btn.classList.remove('active');
       });
@@ -12965,13 +12995,13 @@
 
     
     // 綁定 Settlement Banner 與 History Modal 階段篩選器
-    document.querySelectorAll('.banner-flt-pill, .modal-flt-pill').forEach(pill => {
+    document.querySelectorAll('.modal-flt-pill').forEach(pill => {
       pill.addEventListener('click', (e) => {
         e.stopPropagation();
         Sound.click();
         const fType = pill.getAttribute('data-filter') || 'all';
         filterHistoryCards(fType);
-        if (pill.classList.contains('banner-flt-pill') && fType !== 'all') {
+        if (false) {
           const histModal = document.getElementById('history-modal');
           if (histModal) histModal.classList.remove('hidden');
           const box = document.getElementById('history-modal-body');
