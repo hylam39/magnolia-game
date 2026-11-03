@@ -2479,7 +2479,7 @@
 
     #ai-grid { width: 100% !important; height: 100% !important; gap: 2px !important; }
     #ai-grid .grid-cell { padding: 1px 2px !important; border-radius: 4px !important; }
-    #ai-grid .card-row-top { font-size: 7px !important; }
+    #ai-grid .card-row-top { font-size: 9.5px !important; }
     #ai-grid .card-art-banner { height: 13px !important; padding: 0 2px !important; }
     #ai-grid .card-art-portrait-icon { font-size: 7.5px !important; }
     #ai-grid .card-art-name-overlay { font-size: 7px !important; }
@@ -2753,7 +2753,7 @@
       border-radius: 4px !important;
     }
 
-    #player-grid .card-row-top { font-size: 7.5px !important; }
+    #player-grid .card-row-top { font-size: 10px !important; }
     #player-grid .card-art-banner { height: 16px !important; padding: 0 2.5px !important; }
     #player-grid .card-art-portrait-icon { font-size: 9px !important; }
     #player-grid .card-art-name-overlay { font-size: 8px !important; }
@@ -2960,7 +2960,7 @@
       display: none !important;
     }
 
-    /* 4 States for Request 2 */
+    /* 抽牌階段拖曳棄牌/保留視覺反饋 */
     .grid-discard-overlay.overlay-discard-drag {
       background: rgba(120, 20, 20, 0.45) !important;
       border: 2px dashed rgba(248, 113, 113, 0.6) !important;
@@ -5196,6 +5196,135 @@
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
 
+  
+    /* 🌟 全新手遊級階段動態結算條 (Phase Settlement Toast) */
+    .phase-settle-toast {
+      position: fixed !important;
+      top: clamp(42px, 6.5vh, 60px) !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      z-index: 180 !important;
+      width: min(92vw, 480px) !important;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98)) !important;
+      border: 1.5px solid #fbbf24 !important;
+      border-radius: 12px !important;
+      padding: 9px 13px !important;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(245, 158, 11, 0.35) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 5px !important;
+      animation: settleToastDrop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1) forwards !important;
+      cursor: pointer !important;
+      box-sizing: border-box !important;
+    }
+    .phase-settle-toast.hidden {
+      display: none !important;
+    }
+    @keyframes settleToastDrop {
+      0% { opacity: 0; transform: translate(-50%, -15px) scale(0.95); }
+      100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+    .settle-toast-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+      padding-bottom: 3px !important;
+    }
+    .settle-toast-title {
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      color: #fde047 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+    }
+    .settle-toast-body {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 3.5px !important;
+      font-size: 10.5px !important;
+      line-height: 1.35 !important;
+    }
+    .settle-row-player {
+      color: #cbd5e1 !important;
+      background: rgba(245, 158, 11, 0.12) !important;
+      border-left: 3px solid #fbbf24 !important;
+      padding: 3px 6px !important;
+      border-radius: 4px !important;
+      word-break: break-all !important;
+    }
+    .settle-row-ai {
+      color: #cbd5e1 !important;
+      background: rgba(239, 68, 68, 0.12) !important;
+      border-left: 3px solid #f87171 !important;
+      padding: 3px 6px !important;
+      border-radius: 4px !important;
+      word-break: break-all !important;
+    }
+    .settle-toast-hint {
+      font-size: 9px !important;
+      color: #94a3b8 !important;
+      text-align: right !important;
+      margin-top: 1px !important;
+    }
+
+    /* 🌟 九宮格與手牌高清晰圖標標籤系統 (Card Badge System) */
+    .grid-eff-pill {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 3.5px !important;
+      width: 100% !important;
+      height: 17px !important;
+      min-height: 17px !important;
+      padding: 1px 4px !important;
+      border-radius: 3px !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      line-height: 1.15 !important;
+      background: rgba(2, 6, 23, 0.8) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+      white-space: nowrap !important;
+      text-overflow: ellipsis !important;
+      transition: all 0.2s ease !important;
+    }
+    .grid-eff-pill.pill-empty {
+      border-left: 2.5px solid #334155 !important;
+      justify-content: center !important;
+      opacity: 0.3 !important;
+      color: #64748b !important;
+      font-size: 8px !important;
+    }
+    .grid-eff-pill .pill-icon {
+      font-size: 9.5px !important;
+      line-height: 1 !important;
+      flex-shrink: 0 !important;
+    }
+    .grid-eff-pill .pill-label {
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      flex: 1 1 auto !important;
+      text-align: left !important;
+      letter-spacing: -0.2px !important;
+    }
+    
+    /* 階段高亮光暈效果 */
+    .fx-settle-pulse {
+      animation: settleCardPulse 1.2s infinite alternate ease-in-out !important;
+      border-color: #fbbf24 !important;
+      z-index: 20 !important;
+    }
+    @keyframes settleCardPulse {
+      0% { box-shadow: 0 0 6px rgba(251, 191, 36, 0.6), inset 0 0 4px rgba(245, 158, 11, 0.3); border-color: #f59e0b; }
+      100% { box-shadow: 0 0 18px rgba(251, 191, 36, 1), inset 0 0 10px rgba(251, 191, 36, 0.5); border-color: #fef08a; }
+    }
+
   </style>
 
   <!-- PeerJS SDK (WebRTC P2P for zero-config direct browser-to-browser gaming) -->
@@ -5253,6 +5382,27 @@
       </button>
     </div>
   </header>
+
+  <!-- 🌟 全屏/居中 階段動態結算浮條 (Phase Settlement Toast Banner) -->
+  <div id="phase-settlement-toast" class="phase-settle-toast hidden" title="點擊快速關閉結算浮條">
+    <div class="settle-toast-header">
+      <div class="settle-toast-title">
+        <span id="settle-toast-icon">⚙️</span>
+        <span id="settle-toast-title-text">發展階段結算 · 點數提升</span>
+      </div>
+      <span style="font-size:10px; color:#fbbf24; opacity:0.8;">點擊關閉 ✕</span>
+    </div>
+    <div class="settle-toast-body" id="settle-toast-body">
+      <div class="settle-row-player" id="settle-toast-p-row">
+        <strong style="color:#fcd34d;">👑 你：</strong><span id="settle-toast-p-text">+0</span>
+      </div>
+      <div class="settle-row-ai" id="settle-toast-a-row">
+        <strong style="color:#f87171;">🤖 電腦：</strong><span id="settle-toast-a-text">+0</span>
+      </div>
+    </div>
+    <div class="settle-toast-hint">💡 點擊任意處或按推進按鈕繼續</div>
+  </div>
+
 
   <!-- 收納式右上角選單 Popover (置於 body 頂層避免被任何容器遮擋) -->
   <div id="header-options-popover" class="header-options-popover hidden">
@@ -5313,7 +5463,7 @@
     <!-- 2. 中央對決軸心：雙方 VP 進度條 (戰力 BAR 上下) ＋ 即時戰力天秤 -->
     <div class="duel-axis-container" id="duel-axis">
       <div class="central-duel-scoreboard" id="central-duel-scoreboard">
-        <!-- 1. AI VP 進度條 (放喺戰力 BAR 上方) -->
+        <!-- 對手 VP 進度條 -->
         <div class="duel-vp-row ai-vp-row" title="AI 勝利點數 (滿 40 VP 觸發終局)">
           <span class="duel-vp-title"><span style="color:#f87171;">🤖 AI VP</span></span>
           <div class="duel-vp-track">
@@ -5323,7 +5473,7 @@
           <span class="duel-vp-score"><strong id="ai-vp-num" style="color:#f87171;">0</strong>/40</span>
         </div>
 
-        <!-- 2. 中央即時戰力天秤 (戰力 BAR) -->
+        <!-- 中央即時戰力天秤 -->
         <div class="tug-of-war-wrap" id="central-tug-of-war" title="雙方即時前線與後援總戰力拉鋸天秤" style="margin: 0 !important; width: 100% !important;">
           <span style="font-size:9.5px; font-weight:900; color:#fbbf24; font-family:monospace; display:inline-flex; align-items:center; gap:2px;">⚔️<span id="tug-p-val">0</span></span>
           <div class="tug-bar-track">
@@ -5333,7 +5483,7 @@
           <span style="font-size:9.5px; font-weight:900; color:#f87171; font-family:monospace; display:inline-flex; align-items:center; gap:2px;"><span id="tug-ai-val">0</span>⚔️</span>
         </div>
 
-        <!-- 3. 我的 VP 進度條 (放喺戰力 BAR 下方) -->
+        <!-- 我的 VP 進度條 -->
         <div class="duel-vp-row player-vp-row" title="我的勝利點數 (滿 40 VP 觸發終局)">
           <span class="duel-vp-title"><span style="color:#fcd34d;">👑 我的VP</span></span>
           <div class="duel-vp-track">
@@ -5423,8 +5573,8 @@
       </div>
       <div id="player-speech-container"></div>
 
-      <!-- 1. 階段公告與操作按鈕 (成行搬落去我的王國落一行嗰度) -->
-      <!-- 1. 階段公告與操作按鈕 (由左至右: 1.ICON | 2.上下兩行:上「第N輪」下「XX階段」 | 3.玩家同AI詳情 | 4.歷程ICON制 | 5.金色制) -->
+      
+      <!-- 王國階段公告與操作按鈕 -->
     <div id="app-banner">
       <div id="banner-content" style="display:flex; align-items:center; gap:4px; cursor:pointer; flex:1 1 auto; min-width:0; padding:1px 2px; border-radius:6px; transition:all 0.15s ease;" title="點擊開啟階段公告歷程">
         <!-- 1. ICON -->
@@ -5444,7 +5594,7 @@
           📜<span id="history-count-badge" style="display:none;">1</span>
         </span>
       </div>
-      <!-- 5. 金色制 -->
+      <!-- 主行動推進按鈕 -->
       <div id="banner-actions" style="display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:3px;">
         <!-- Dynamic Buttons via JS -->
       </div>
@@ -6623,7 +6773,7 @@
       {
         "trigger": "war",
         "timing_name": "⚔️ 戰爭",
-        "description": "1 戰力 × 信仰等級（勘誤修正）"
+        "description": "1 戰力 × 信仰等級"
       }
     ],
     "line_bonuses": {
@@ -7497,6 +7647,85 @@
       "君王": { badge: "badge-class-monarch", icon: "👑" },
       "特職": { badge: "badge-class-special", icon: "🗡️" }
     };
+
+    
+    // 🎨 手遊級高清晰卡牌技能標籤化引擎 (Card Compact Badges Engine)
+    function getCardCompactEffect(eff) {
+      if (!eff) return null;
+      const trig = eff.trigger || '';
+      const desc = eff.description || '';
+      const timing = eff.timing_name || '';
+
+      let icon = '✨';
+      let col = '#fbbf24';
+      let borderCol = '#f59e0b';
+      let bgCol = 'rgba(245, 158, 11, 0.2)';
+
+      if (trig.includes('war') || timing.includes('戰爭')) {
+        icon = '⚔️'; col = '#fca5a5'; borderCol = '#ef4444'; bgCol = 'rgba(239, 68, 68, 0.22)';
+      } else if (trig.includes('income') || timing.includes('收入')) {
+        icon = '💰'; col = '#6ee7b7'; borderCol = '#10b981'; bgCol = 'rgba(16, 185, 129, 0.22)';
+      } else if (trig.includes('develop') || timing.includes('發展')) {
+        icon = '⚙️'; col = '#7dd3fc'; borderCol = '#38bdf8'; bgCol = 'rgba(56, 189, 248, 0.22)';
+      } else if (trig.includes('vp') || timing.includes('計分') || timing.includes('VP')) {
+        icon = '👑'; col = '#fde047'; borderCol = '#fbbf24'; bgCol = 'rgba(251, 191, 36, 0.22)';
+      } else if (trig.includes('instant') || timing.includes('部署')) {
+        icon = '⚡'; col = '#67e8f9'; borderCol = '#06b6d4'; bgCol = 'rgba(6, 182, 212, 0.22)';
+      } else if (trig.includes('game_end') || timing.includes('終局') || trig.includes('passive')) {
+        icon = '🌟'; col = '#e9d5ff'; borderCol = '#c084fc'; bgCol = 'rgba(192, 132, 252, 0.22)';
+      }
+
+      let short = desc;
+      if (desc.includes('獲得 1 技術點 與 1 信仰點')) short = '+1技 / +1信';
+      else if (desc.includes('獲得 1 技術點')) short = '+1 技術';
+      else if (desc.includes('獲得 2 技術點')) short = '+2 技術';
+      else if (desc.includes('獲得 5 技術點')) short = '+5 技術!';
+      else if (desc.includes('獲得 1 信仰點')) short = '+1 信仰';
+      else if (desc.includes('獲得 2 信仰點')) short = '+2 信仰';
+      else if (desc.includes('獲得 5 信仰點')) short = '+5 信仰!';
+      else if (desc.includes('2 VP × 技術等級')) short = '2VP × 技Lv';
+      else if (desc.includes('1 VP × 信仰等級')) short = '1VP × 信Lv';
+      else if (desc.includes('1 VP × 技術等級')) short = '1VP × 技Lv';
+      else if (desc.includes('3 VP × 技術等級')) short = '3VP × 技Lv';
+      else if (desc.includes('2 VP × 技術等級 + 2 VP × 信仰等級')) short = '2VP×技+信';
+      else if (desc.includes('1 金 × 技術等級')) short = '1金 × 技Lv';
+      else if (desc.includes('2 金 × 技術等級')) short = '2金 × 技Lv';
+      else if (desc.includes('1 戰力 × 信仰等級')) short = '1戰 × 信Lv';
+      else if (desc.includes('2 戰力 × 信仰等級')) short = '2戰 × 信Lv';
+      else if (desc.includes('3 戰力 × 信仰等級')) short = '3戰 × 信Lv';
+      else if (desc.includes('1 戰力 × 技術等級 + 1 戰力 × 信仰等級')) short = '1戰×技+信';
+      else if (desc.includes('在戰爭中獲得VP時，額外再獲得1VP')) short = '獲勝+1VP';
+      else if (desc.includes('在戰爭中獲得VP時，額外再獲得2VP')) short = '獲勝+2VP';
+      else if (desc.includes('在戰爭中未獲得VP時，獲得3VP')) short = '失利+3VP';
+      else if (desc.includes('不位於前線也會參與戰爭')) short = '後援參戰';
+      else if (desc.includes('1 VP × 人類單位數')) short = '1VP × 人類';
+      else if (desc.includes('1 VP × 矮人單位數')) short = '1VP × 矮人';
+      else if (desc.includes('1 VP × 精靈單位數')) short = '1VP × 精靈';
+      else if (desc.includes('1 VP × 哥布林單位數')) short = '1VP × 哥布林';
+      else if (desc.includes('1 VP × 魔像單位數')) short = '1VP × 魔像';
+      else if (desc.includes('1 VP × 惡魔單位數')) short = '1VP × 惡魔';
+      else if (desc.includes('1 VP × 費用為4金及以上的單位')) short = '1VP × ≥4費';
+      else if (desc.includes('1 VP × 基礎戰力4及以上的單位')) short = '1VP × ≥4戰';
+      else if (desc.includes('1 VP × 費用在2金及以下的單位')) short = '1VP × ≤2費';
+      else if (desc.includes('固定獲得 4 VP')) short = '固定 +4VP';
+      else if (desc.includes('獲得 1 金 × 場上職業種類數')) short = '1金 × 職業';
+      else if (desc.includes('將技術點與信仰點同步至兩者中較高者')) short = '雙軌同步';
+      else if (desc.includes('所有連線獎勵翻倍')) short = '連線獎勵×2';
+      else if (desc.includes('手頭金幣換算VP翻倍')) short = '金幣換VP×2';
+      else if (desc.includes('1 金')) short = '+1 金幣';
+      else if (desc.includes('2 金')) short = '+2 金幣';
+
+      return {
+        trigger: trig,
+        timingName: timing,
+        icon,
+        short,
+        desc,
+        color: col,
+        borderColor: borderCol,
+        bgColor: bgCol
+      };
+    }
 
     function getLevel(points) {
       if (points >= 15) return 4;
@@ -8592,55 +8821,13 @@
 
     // EACH SKILL GETS ITS OWN DISTINCT SKILL BOX (分兩行: 第一行階段, 第二行詳情)
     function getCardEffectsHtml(card) {
-      const eff1 = (card.effects && card.effects.length > 0) ? card.effects[0] : null;
-      const eff2 = (card.effects && card.effects.length > 1) ? card.effects[1] : null;
+      const eff1 = (card.effects && card.effects.length > 0) ? getCardCompactEffect(card.effects[0]) : null;
+      const eff2 = (card.effects && card.effects.length > 1) ? getCardCompactEffect(card.effects[1]) : null;
 
-      function renderSingleLine(e, isFirst) {
+      function renderPill(e) {
         if (!e) {
-          return `
-            <div class="grid-eff-line eff-empty" style="border-left-color:#334155; justify-content:center; opacity:0.35;">
-              <span style="color:#64748b; font-size:6.5px;">-</span>
-            </div>
-          `;
+          return `<div class="grid-eff-pill pill-empty">-</div>`;
         }
-
-        let accentBorder = '#f59e0b';
-        let tagColor = '#fde047';
-        let tagBg = 'rgba(245, 158, 11, 0.2)';
-        let tagBorder = 'rgba(245, 158, 11, 0.4)';
-
-        if (e.trigger === 'instant') {
-          accentBorder = '#06b6d4';
-          tagColor = '#67e8f9';
-          tagBg = 'rgba(6, 182, 212, 0.22)';
-          tagBorder = 'rgba(6, 182, 212, 0.5)';
-        } else if (e.trigger === 'war' || e.trigger === 'war_passive') {
-          accentBorder = '#ef4444';
-          tagColor = '#fca5a5';
-          tagBg = 'rgba(239, 68, 68, 0.25)';
-          tagBorder = 'rgba(239, 68, 68, 0.5)';
-        } else if (e.trigger === 'develop') {
-          accentBorder = '#38bdf8';
-          tagColor = '#7dd3fc';
-          tagBg = 'rgba(56, 189, 248, 0.25)';
-          tagBorder = 'rgba(56, 189, 248, 0.5)';
-        } else if (e.trigger === 'income') {
-          accentBorder = '#10b981';
-          tagColor = '#34d399';
-          tagBg = 'rgba(16, 185, 129, 0.22)';
-          tagBorder = 'rgba(16, 185, 129, 0.5)';
-        } else if (e.trigger === 'vp') {
-          accentBorder = '#fbbf24';
-          tagColor = '#fcd34d';
-          tagBg = 'rgba(251, 191, 36, 0.25)';
-          tagBorder = 'rgba(251, 191, 36, 0.5)';
-        } else if (e.trigger === 'game_end' || e.trigger === 'passive') {
-          accentBorder = '#c084fc';
-          tagColor = '#e9d5ff';
-          tagBg = 'rgba(192, 132, 252, 0.25)';
-          tagBorder = 'rgba(192, 132, 252, 0.5)';
-        }
-
         let isActive = false;
         if (typeof game !== 'undefined' && game && game.phase) {
           if (game.phase === 'DEPLOY' || game.phase === 'REVEAL') {
@@ -8655,21 +8842,16 @@
             isActive = (e.trigger === 'vp');
           }
         }
-
-        const activeHighlightClass = isActive ? 'fx-skill-active-highlight' : '';
-
-        const icon = getEffectTimingIcon(e);
+        const activeClass = isActive ? 'fx-skill-active-highlight' : '';
         return `
-          <div class="grid-eff-line ${activeHighlightClass}" style="border-left-color: ${accentBorder};" title="[${e.timing_name}] ${e.description}">
-            <span class="grid-eff-timing">
-              ${icon}
-            </span>
-            <span class="grid-eff-desc" style="color:${tagColor}; font-weight:600;">${e.description}</span>
+          <div class="grid-eff-pill ${activeClass}" style="color:${e.color}; border-left:3px solid ${e.borderColor};" title="[${e.timingName}] ${e.desc}">
+            <span class="pill-icon">${e.icon}</span>
+            <span class="pill-label">${e.short}</span>
           </div>
         `;
       }
 
-      return renderSingleLine(eff1, true) + renderSingleLine(eff2, false);
+      return renderPill(eff1) + renderPill(eff2);
     }
 
         function updateLadderMeter(prefix, points, type) {
@@ -8890,6 +9072,40 @@
         ribbon.style.animation = 'none';
         ribbon.offsetHeight;
         ribbon.style.animation = 'splashBannerAnim 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+      }
+    }
+
+    
+    // 🌟 階段動態結算條控制器 (Phase Settlement Toast Engine)
+    let settleToastTimer = null;
+    function showSettlementToast(icon, title, pText, aText, autoDismissMs = 4000) {
+      const toast = document.getElementById('phase-settlement-toast');
+      const iconEl = document.getElementById('settle-toast-icon');
+      const titleEl = document.getElementById('settle-toast-title-text');
+      const pTextEl = document.getElementById('settle-toast-p-text');
+      const aTextEl = document.getElementById('settle-toast-a-text');
+      if (!toast) return;
+
+      if (iconEl) iconEl.textContent = icon;
+      if (titleEl) titleEl.textContent = title;
+      if (pTextEl) pTextEl.innerHTML = pText;
+      if (aTextEl) aTextEl.innerHTML = aText;
+
+      toast.classList.remove('hidden');
+      if (settleToastTimer) clearTimeout(settleToastTimer);
+      if (autoDismissMs > 0) {
+        settleToastTimer = setTimeout(() => {
+          hideSettlementToast();
+        }, autoDismissMs);
+      }
+    }
+
+    function hideSettlementToast() {
+      const toast = document.getElementById('phase-settlement-toast');
+      if (toast) toast.classList.add('hidden');
+      if (settleToastTimer) {
+        clearTimeout(settleToastTimer);
+        settleToastTimer = null;
       }
     }
 
@@ -9439,7 +9655,7 @@
               game.selectedHandIdx = handIdx;
               updateUI();
             } else if (game.phase === 'DRAW') {
-              // Request 2: 第一次拖住手牌時，九宮格先變成暗色半透明
+              // 拖曳開始：九宮格顯示暗色半透明棄牌引導
               const overlay = document.getElementById('player-grid-discard-overlay');
               const overlayText = document.getElementById('player-grid-discard-text');
               if (overlay) {
@@ -9512,7 +9728,7 @@
                 gridCell.classList.add('slot-drag-hover');
               }
             } else if (game.phase === 'DRAW') {
-              // Request 2: 拖至九宮格時，變做鮮明半透明色
+              // 懸停九宮格：顯示鮮明半透明操作提示
               const overlay = document.getElementById('player-grid-discard-overlay');
               const overlayText = document.getElementById('player-grid-discard-text');
               if (overlay && playerGridEl) {
@@ -9577,7 +9793,7 @@
               dragClone = null;
             }
 
-            // Request 2: 放手就變返普通九宮格！
+            // 釋放拖曳：恢復常態九宮格
             const overlay = document.getElementById('player-grid-discard-overlay');
             if (overlay) overlay.className = 'grid-discard-overlay hidden';
 
@@ -9601,7 +9817,7 @@
               game.selectedHandIdx = null;
               updateUI();
             } else if (game.phase === 'DRAW') {
-              // Request 2: 拖落去就棄牌，然後再拖同一張卡就變返做保留手牌
+              // 拖曳切換：未棄置則棄牌，已棄置則恢復保留
               if (playerGridEl) {
                 const gridRect = playerGridEl.getBoundingClientRect();
                 const isOverGrid = (
@@ -10888,6 +11104,9 @@
         ai: aText
       };
 
+      
+      // 🌟 觸發部署揭曉結算條
+      showSettlementToast('⚡', `第 ${game.round} 輪 · 部署揭曉結算 (部隊進駐)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '部署揭曉',
@@ -11542,6 +11761,9 @@
         ai: aText
       };
 
+      
+      // 🌟 觸發發展階段專屬結算條與動效
+      showSettlementToast('⚙️', `第 ${game.round} 輪 · 發展階段結算 (點數提升)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '發展階段',
@@ -11666,6 +11888,9 @@
         ai: aText
       };
 
+      
+      // 🌟 觸發收入階段專屬結算條與動效
+      showSettlementToast('💰', `第 ${game.round} 輪 · 收入階段結算 (國庫稅收)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '收入階段',
@@ -11931,6 +12156,9 @@
         ai: aText
       };
 
+      
+      // 🌟 觸發計分階段專屬結算條與動效
+      showSettlementToast('👑', `第 ${game.round} 輪 · 計分階段結算 (王國成就)`, game.phaseGains.player, game.phaseGains.ai);
       addHistoryPhaseCard({
         round: game.round,
         phaseName: '計分階段',
@@ -11966,6 +12194,7 @@
 
     function handleAdvanceToNextPhase() {
       Sound.click();
+      hideSettlementToast();
 
       // 各自獨立依節奏查看結果，不強行拉動對方跳轉
       if (game.phase === 'REVEAL') {
@@ -12568,6 +12797,15 @@
     }
 
     // Top Header Buttons
+    
+    const settleToastEl = document.getElementById('phase-settlement-toast');
+    if (settleToastEl) {
+      settleToastEl.addEventListener('click', () => {
+        Sound.click();
+        hideSettlementToast();
+      });
+    }
+
     document.getElementById('btn-sound').addEventListener('click', () => {
       Sound.muted = !Sound.muted;
       document.getElementById('sound-icon').textContent = Sound.muted ? '🔇' : '🔊';
@@ -13758,6 +13996,23 @@
     // =========================================================================
     // 🌐 純 PeerJS 零設定雙人實時聯機管理器 (Zero-Config PeerJS PvPManager)
     // =========================================================================
+    
+    function showInPageToast(msg) {
+      const modal = document.getElementById('pvp-toast-notice');
+      const textEl = document.getElementById('pvp-toast-msg');
+      if (!modal || !textEl) return;
+      textEl.innerHTML = msg.replace(/\n/g, '<br>');
+      modal.classList.remove('hidden');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnOk = document.getElementById('btn-pvp-toast-ok');
+      if (btnOk) {
+        btnOk.addEventListener('click', () => {
+          document.getElementById('pvp-toast-notice').classList.add('hidden');
+        });
+      }
+    });
+
     const PvPManager = {
       isOnline: false,
       hasMatchStarted: false, // 核心標記：記錄當前房間是否已開局，防止重連時重置遊戲
@@ -13815,7 +14070,7 @@
           const inp = document.getElementById('pvp-input-room-id');
           const code = inp ? inp.value.trim().toUpperCase() : '';
           if (!code) {
-            alert('請先輸入 4 位房間代號！');
+            showInPageToast('請先輸入 4 位房間代號！');
             return;
           }
           this.joinRoom(code);
@@ -13902,7 +14157,7 @@
 
       createRoom() {
         if (!window.Peer) {
-          alert('PeerJS 庫正在載入中，請稍候片刻再試！');
+          showInPageToast('PeerJS 庫正在載入中，請稍候片刻再試！');
           return;
         }
         Sound.click();
@@ -13922,13 +14177,13 @@
           this.peer = new Peer(this.fullPeerId);
         } catch (e) {
           console.error(e);
-          alert('無法初始化 Peer 連線: ' + e.message);
+          showInPageToast('無法初始化 Peer 連線: ' + e.message);
           this.isOnline = false;
           return;
         }
 
         this.peer.on('open', (id) => {
-          console.log('✅ 房主 Peer 已建立，房間 ID:', shortId);
+          // 房主 Peer 就緒
           window.location.hash = `room=${shortId}`;
           sessionStorage.setItem('magnolia_online_room', shortId);
           sessionStorage.setItem('magnolia_online_role', 'host');
@@ -13939,7 +14194,7 @@
         });
 
         this.peer.on('connection', (c) => {
-          console.log('對手連入/重連成功！');
+          // 對手連入成功
           this.conn = c;
           this.setupConnectionHandlers();
 
@@ -13970,7 +14225,7 @@
 
       joinRoom(targetRoomId) {
         if (!window.Peer) {
-          alert('PeerJS 庫正在載入中，請稍候片刻再試！');
+          showInPageToast('PeerJS 庫正在載入中，請稍候片刻再試！');
           return;
         }
         Sound.click();
@@ -13991,7 +14246,7 @@
         this.peer = new Peer();
 
         this.peer.on('open', (myId) => {
-          console.log('Guest 本地 Peer 就緒，正在連入 Host:', targetFullId);
+          // 訪客 Peer 就緒
           window.location.hash = `room=${cleanId}`;
           sessionStorage.setItem('magnolia_online_room', cleanId);
           sessionStorage.setItem('magnolia_online_role', 'guest');
@@ -14001,7 +14256,7 @@
 
         this.peer.on('error', (err) => {
           console.error('Peer join error:', err);
-          alert(`連線房間失敗: ${err.type}\n請檢查房間號碼是否正確，或由房主重新建立！`);
+          showInPageToast(`連線房間失敗: ${err.type}\n請檢查房間號碼是否正確，或由房主重新建立！`);
           this.updateLobbyStatusUI();
         });
       },
@@ -14010,7 +14265,7 @@
         if (!this.conn) return;
 
         this.conn.on('open', () => {
-          console.log('🎉 P2P 通道連線成功！');
+          // P2P 通道連線成功
           this.isReconnecting = false;
           this.lastHeartbeatTime = Date.now();
           this.startHeartbeat();
@@ -14522,7 +14777,7 @@
       // 用戶從 WhatsApp / 後台切回網頁時自動喚醒處理
       handleAppResume() {
         if (!this.isOnline || !this.roomId) return;
-        console.log('📱 偵測到用戶從 WhatsApp/後台返回，檢查聯機狀態...');
+        // 偵測到用戶切返遊戲
 
         // 1. 若當前通道看起來仍 open，先發一次探測 PING 並請求對齊
         if (this.conn && this.conn.open) {
@@ -14631,43 +14886,57 @@
         const url = window.location.origin + window.location.pathname + '#room=' + this.roomId;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(url).then(() => {
-            alert(`📋 邀請連結已複製到剪貼簿！\n傳送給好友即可直接點擊進房：\n${url}`);
+            showInPageToast(`📋 邀請連結已複製到剪貼簿！<br>傳送給好友即可直接點擊進房：<br><span style="color:#38bdf8; font-size:10px;">${url}</span>`);
           }).catch(() => {
-            prompt('請複製以下邀請連結發給好友：', url);
+            showInPageToast(`請複製以下邀請連結發給好友：<br><input type="text" value="${url}" readonly style="width:100%; background:#020617; border:1px solid #38bdf8; color:#fde047; padding:4px; font-size:10px; margin-top:6px;">`);
           });
         } else {
-          prompt('請複製以下邀請連結發給好友：', url);
+          showInPageToast(`請複製以下邀請連結發給好友：<br><input type="text" value="${url}" readonly style="width:100%; background:#020617; border:1px solid #38bdf8; color:#fde047; padding:4px; font-size:10px; margin-top:6px;">`);
         }
       },
 
       leaveRoom() {
         Sound.click();
-        if (confirm('確定要離開當前聯機房間，返回單人練習模式嗎？')) {
-          this.stopHeartbeat();
-          if (this.conn) {
-            try { this.conn.close(); } catch (e) {}
-          }
-          if (this.peer) {
-            try { this.peer.destroy(); } catch (e) {}
-          }
-          this.isOnline = false;
-          this.hasMatchStarted = false;
-          this.roomId = '';
-          this.fullPeerId = '';
-          this.conn = null;
-          this.peer = null;
-          // 徹底清除 URL Hash，防止下次刷新自動進房
-          try {
-            history.replaceState(null, '', window.location.pathname + window.location.search);
-          } catch (e) {
-            window.location.hash = '';
-          }
-          sessionStorage.removeItem('magnolia_online_room');
-          sessionStorage.removeItem('magnolia_online_role');
-          this.updateLobbyStatusUI();
-          resetGame();
-          alert('已退出網上對戰，恢復為單人 AI 練習模式。');
+        const confirmModal = document.getElementById('pvp-confirm-modal');
+        if (!confirmModal) return;
+        confirmModal.classList.remove('hidden');
+        const btnCancel = document.getElementById('btn-pvp-confirm-cancel');
+        const btnLeaveConfirm = document.getElementById('btn-pvp-confirm-leave');
+        
+        const closeConfirm = () => {
+          confirmModal.classList.add('hidden');
+        };
+        btnCancel.onclick = closeConfirm;
+        btnLeaveConfirm.onclick = () => {
+          closeConfirm();
+          PvPManager.executeLeaveRoom();
+        };
+      },
+
+      executeLeaveRoom() {
+        this.stopHeartbeat();
+        if (this.conn) {
+          try { this.conn.close(); } catch (e) {}
         }
+        if (this.peer) {
+          try { this.peer.destroy(); } catch (e) {}
+        }
+        this.isOnline = false;
+        this.hasMatchStarted = false;
+        this.roomId = '';
+        this.fullPeerId = '';
+        this.conn = null;
+        this.peer = null;
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (e) {
+          window.location.hash = '';
+        }
+        sessionStorage.removeItem('magnolia_online_room');
+        sessionStorage.removeItem('magnolia_online_role');
+        this.updateLobbyStatusUI();
+        resetGame();
+        showInPageToast('已退出網上對戰，恢復為單人 AI 練習模式。');
       },
 
       checkUrlForRoom() {
@@ -14763,18 +15032,14 @@ window.onload = () => {
     }
 
     function renderMiniEffectRow(eff) {
-      if (!eff) {
+      const e = getCardCompactEffect(eff);
+      if (!e) {
         return `<div class="mini-row-eff-line eff-empty" style="border-left: 2.5px solid #334155 !important;"><span class="eff-empty-dash">-</span></div>`;
       }
-      const icon = getEffectTimingIcon(eff);
-      const color = getEffectTimingColor(eff);
-      const desc = eff.description || eff.text || '';
-      const timingName = eff.timing_name || icon;
-
       return `
-        <div class="mini-row-eff-line" style="border-left: 2.5px solid ${color} !important;" title="[${timingName}] ${desc}">
-          <span class="mini-eff-timing-icon">${icon}</span>
-          <span class="mini-eff-desc" style="color:${color}; font-weight:600;">${desc}</span>
+        <div class="mini-row-eff-line" style="border-left: 2.5px solid ${e.borderColor} !important;" title="[${e.timingName}] ${e.desc}">
+          <span class="mini-eff-timing-icon">${e.icon}</span>
+          <span class="mini-eff-desc" style="color:${e.color}; font-size:9.5px !important; font-weight:800;">${e.short}</span>
         </div>
       `;
     }
@@ -15135,7 +15400,28 @@ window.onload = () => {
   </div>
 
 
-  <!-- ===================================================
+  
+  <!-- 訊息通知 Toast -->
+  <div id="pvp-toast-notice" class="modal-backdrop hidden" style="z-index:9999;">
+    <div class="modal-box" style="max-width:360px; text-align:center; padding:16px;">
+      <div id="pvp-toast-msg" style="font-size:12px; color:#f8fafc; line-height:1.5; margin-bottom:12px; word-break:break-all;"></div>
+      <button id="btn-pvp-toast-ok" class="btn btn-gold" style="padding:5px 20px; margin:0 auto; font-size:11px;">知道了</button>
+    </div>
+  </div>
+
+  <!-- 確認離開房間 Modal -->
+  <div id="pvp-confirm-modal" class="modal-backdrop hidden" style="z-index:9999;">
+    <div class="modal-box" style="max-width:360px; text-align:center; padding:16px;">
+      <div style="font-size:13px; font-weight:800; color:#fca5a5; margin-bottom:8px;">⚠️ 確認退出房間？</div>
+      <div style="font-size:11px; color:#cbd5e1; line-height:1.4; margin-bottom:14px;">確定要離開當前聯機房間，返回單人練習模式嗎？</div>
+      <div style="display:flex; justify-content:center; gap:10px;">
+        <button id="btn-pvp-confirm-cancel" class="btn btn-slate" style="padding:5px 16px; font-size:11px;">取消</button>
+        <button id="btn-pvp-confirm-leave" class="btn btn-red" style="padding:5px 16px; font-size:11px;">確定離開</button>
+      </div>
+    </div>
+  </div>
+
+<!-- ===================================================
        雙人實時連線對戰大廳彈窗 (PeerJS Zero-Config PvP Modal)
        =================================================== -->
   <div id="pvp-modal" class="modal-backdrop hidden" style="z-index: 250;">
