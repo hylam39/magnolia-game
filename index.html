@@ -5802,47 +5802,123 @@
       white-space: nowrap !important;
     }
 
-    /* 4. 橫向模式：雙方九宮格鏡像對稱，王國階段公告放返右下角 (AI 九宮格下方) */
+    /* 4. 橫向模式：雙方九宮格鏡像對稱，空間全部鋪滿 (唯一唔同：玩家區底部係手牌，而AI區底部係王國階段公告) */
     @media (orientation: landscape) {
       #battlefield {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         grid-template-rows: 1fr !important;
         grid-template-areas: "player ai" !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        height: calc(100dvh - clamp(36px, 4.4vh, 44px)) !important;
+        max-height: calc(100dvh - clamp(36px, 4.4vh, 44px)) !important;
+        gap: 8px !important;
+        padding: 4px 8px max(4px, env(safe-area-inset-bottom)) 8px !important;
+        box-sizing: border-box !important;
       }
-      #player-panel {
-        grid-area: player !important;
+      #player-panel, #ai-panel {
+        grid-area: unset !important;
         order: unset !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        padding: 4px 6px !important;
       }
-      #ai-panel {
-        grid-area: ai !important;
-        order: unset !important;
+      #player-panel { grid-area: player !important; }
+      #ai-panel { grid-area: ai !important; }
+
+      #player-panel .kingdom-board-core,
+      #ai-panel .kingdom-board-core {
+        height: 100% !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        gap: 4px !important;
+        width: 100% !important;
+        margin: 0 !important;
       }
+
+      #player-panel .upper-grid-section,
+      #ai-panel .upper-grid-section {
+        flex: 1 1 auto !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        display: flex !important;
+        width: 100% !important;
+        gap: 4px !important;
+      }
+
+      .player-grid-wrapper, .ai-grid-wrapper {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        position: relative !important;
+        display: block !important;
+        box-sizing: border-box !important;
+      }
+
+      #player-grid, #ai-grid {
+        width: 100% !important;
+        height: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+        gap: 3px !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* 橫向模式下 AI 側完全鏡像對稱 (儀表板靠左，九宮格靠右) */
       #ai-panel .upper-grid-section {
         flex-direction: row-reverse !important;
       }
       #ai-panel .grid-side-dashboard .side-power-gold-row {
         flex-direction: row-reverse !important;
+        order: unset !important;
       }
       #ai-panel .grid-side-dashboard .v-tf-ladder-wrap {
         flex-direction: row-reverse !important;
+        order: unset !important;
       }
       #ai-panel .grid-side-dashboard .side-name-vp-row {
         flex-direction: row-reverse !important;
+        order: unset !important;
       }
-      /* 橫向模式下，公告位於 aiCore 底部 (畫面右下角 AI 九宮格下方) */
+
+      /* 底部高度完全對稱：玩家區底部係手牌，而AI區底部係王國階段公告 (畫面右下角 AI 九宮格下方) */
+      #player-hand-container,
+      #app-banner {
+        height: clamp(84px, 18vh, 120px) !important;
+        min-height: 80px !important;
+        max-height: 130px !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+      }
+
       #app-banner {
         grid-area: unset !important;
         order: unset !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 46px !important;
-        max-height: 60px !important;
-        flex: 0 0 auto !important;
-        margin-top: 2px !important;
         display: flex !important;
-        flex-direction: row !important;
-        box-sizing: border-box !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        padding: 3px 5px !important;
+        gap: 3px !important;
       }
       #app-banner .banner-main-row {
         display: flex !important;
@@ -5897,7 +5973,9 @@
       }
     }
 
-    /* 5. 直向模式專屬防護：強制鎖定王國階段公告位於 AI 九宮格 與 玩家九宮格 之間 (順序為: AI九宮格 ➔ 公告 ➔ 玩家九宮格) */
+    /* 5. 直向模式專屬佈局：
+       - 王國階段公告鎖定置於 AI 九宮格 與 玩家九宮格 之間 (AI九宮格 ➔ 公告 ➔ 玩家九宮格)
+       - AI 儀表板：將 AI 個名、VP、戰力、金幣移去技術/信仰進度條下方 */
     @media (orientation: portrait), (max-aspect-ratio: 1/1) {
       #battlefield {
         display: flex !important;
@@ -5908,6 +5986,10 @@
       #ai-panel {
         order: 1 !important;
         grid-area: unset !important;
+        flex: 0 0 clamp(215px, 31vh, 280px) !important;
+        height: clamp(215px, 31vh, 280px) !important;
+        min-height: 205px !important;
+        max-height: 290px !important;
       }
       #app-banner {
         order: 2 !important;
@@ -5924,6 +6006,27 @@
       #player-panel {
         order: 3 !important;
         grid-area: unset !important;
+        flex: 1 1 auto !important;
+      }
+
+      /* 直向版：將AI個名、VP、戰力、金幣移去技術/信仰進度條下方 */
+      #ai-side-dashboard {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+      }
+      #ai-side-dashboard .header-tech-faith-wrap {
+        order: 1 !important;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+      }
+      #ai-side-dashboard .side-name-vp-row {
+        order: 2 !important;
+        flex: 0 0 auto !important;
+      }
+      #ai-side-dashboard .side-power-gold-row {
+        order: 3 !important;
+        flex: 0 0 auto !important;
       }
     }
 
@@ -6043,8 +6146,8 @@
     <!-- RIGHT: AI / Player 2 (電腦對手) -->
     <section class="board-panel" id="ai-panel" style="border-color: rgba(239, 68, 68, 0.35);">
       <!-- 1. AI 3x3 Grid & 超緊湊右邊儀表板 (九宮格調高拉闊，右側戰力靠左、金錢靠右、下方打直進度條) -->
-      <div class="kingdom-board-core ai-board-core-top" style="flex:1 1 auto; width:100%; height:100%; min-height:0; margin:0;">
-        <div class="upper-grid-section" style="width:100%; height:100%;">
+      <div class="kingdom-board-core ai-board-core-top">
+        <div class="upper-grid-section">
           <div class="ai-grid-wrapper" style="position:relative; width:auto; height:100%; flex:1 1 auto; min-width:0; min-height:0; display:block; box-sizing:border-box;">
             <div class="grid-3x3" id="ai-grid"></div>
           </div>
