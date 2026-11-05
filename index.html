@@ -5510,6 +5510,17 @@
     #ai-panel .grid-side-dashboard {
       border-color: rgba(239, 68, 68, 0.45) !important;
     }
+
+    /* AI 狀態列鏡像排列 (除咗技術/信仰進度條保持左技術、右信仰) */
+    #ai-side-dashboard .side-name-vp-row {
+      flex-direction: row-reverse !important;
+    }
+    #ai-side-dashboard .side-power-gold-row {
+      flex-direction: row-reverse !important;
+    }
+    #ai-side-dashboard .v-tf-ladder-wrap {
+      flex-direction: row !important;
+    }
     .side-name-vp-row {
       display: flex !important;
       align-items: center !important;
@@ -5882,16 +5893,16 @@
         padding: 0 !important;
       }
 
-      /* 橫向模式下 AI 側完全鏡像對稱 (儀表板靠左，九宮格靠右) */
+      /* 橫向模式下狀態列放於右邊，除技術/信仰進度條外鏡像排列 */
       #ai-panel .upper-grid-section {
-        flex-direction: row-reverse !important;
+        flex-direction: row !important;
       }
       #ai-panel .grid-side-dashboard .side-power-gold-row {
         flex-direction: row-reverse !important;
         order: unset !important;
       }
       #ai-panel .grid-side-dashboard .v-tf-ladder-wrap {
-        flex-direction: row-reverse !important;
+        flex-direction: row !important;
         order: unset !important;
       }
       #ai-panel .grid-side-dashboard .side-name-vp-row {
@@ -6009,7 +6020,7 @@
         flex: 1 1 auto !important;
       }
 
-      /* 直向版：將AI個名、VP、戰力、金幣移去技術/信仰進度條下方 */
+      /* 直向版：AI 狀態列垂直鏡像 (進度條在頂、戰力金幣在中、名字VP在底)，水平也鏡像 (除技術/信仰進度條) */
       #ai-side-dashboard {
         display: flex !important;
         flex-direction: column !important;
@@ -6019,14 +6030,21 @@
         order: 1 !important;
         flex: 1 1 auto !important;
         min-height: 0 !important;
-      }
-      #ai-side-dashboard .side-name-vp-row {
-        order: 2 !important;
-        flex: 0 0 auto !important;
+        flex-direction: row !important;
       }
       #ai-side-dashboard .side-power-gold-row {
+        order: 2 !important;
+        flex: 0 0 auto !important;
+        flex-direction: row-reverse !important;
+      }
+      #ai-side-dashboard .side-name-vp-row {
         order: 3 !important;
         flex: 0 0 auto !important;
+        flex-direction: row-reverse !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-bottom: none !important;
+        padding-top: 1px !important;
+        padding-bottom: 0 !important;
       }
     }
 
@@ -6610,19 +6628,13 @@
       <div style="padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:11px;">
         <!-- Detailed Breakdown Table -->
         <div style="background:#020617; border:1px solid #1e293b; border-radius:8px; padding:6px 8px; font-size:11px;">
-          <!-- 五大階段得分色例說明 -->
-          <div style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:9px; font-weight:700; margin-bottom:5px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.08); white-space:nowrap; overflow-x:auto;">
-            <span style="color:#06b6d4;">⚡部署</span>
-            <span style="color:#64748b;">+</span>
-            <span style="color:#f87171;">⚔️戰爭</span>
-            <span style="color:#64748b;">+</span>
-            <span style="color:#38bdf8;">⚙️發展</span>
-            <span style="color:#64748b;">+</span>
-            <span style="color:#34d399;">💰收入</span>
-            <span style="color:#64748b;">+</span>
-            <span style="color:#fbbf24;">👑計分</span>
-            <span style="color:#64748b;">=</span>
-            <span style="color:#fcd34d;">該回合得分</span>
+          <!-- 各階段產出分類說明 (VP / 點數 / 金幣 分開顯示) -->
+          <div style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:9px; font-weight:700; margin-bottom:5px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.08); white-space:nowrap; overflow-x:auto;">
+            <span style="color:#fcd34d;">🏆 回合VP = ⚡部署 + ⚔️戰爭 + 👑計分</span>
+            <span style="color:#64748b;">｜</span>
+            <span style="color:#38bdf8;">⚙️ 發展 = 點數</span>
+            <span style="color:#64748b;">｜</span>
+            <span style="color:#34d399;">💰 收入 = 金幣</span>
           </div>
           <table style="width:100%; border-collapse:collapse; text-align:center;">
             <thead>
@@ -8583,8 +8595,8 @@
         if (!rec) {
           rec = {
             round: r,
-            player: { deploy: 0, war: 0, develop: 0, income: 0, vp: 0 },
-            ai: { deploy: 0, war: 0, develop: 0, income: 0, vp: 0 }
+            player: { deploy: 0, deployVp: 0, war: 0, warVp: 0, develop: 0, income: 0, vp: 0, scoreVp: 0, techGain: 0, faithGain: 0, goldGain: 0 },
+            ai: { deploy: 0, deployVp: 0, war: 0, warVp: 0, develop: 0, income: 0, vp: 0, scoreVp: 0, techGain: 0, faithGain: 0, goldGain: 0 }
           };
           this.roundScores.push(rec);
         }
@@ -11980,6 +11992,7 @@
       // 紀錄第 N 回合部署階段得分
       const rRecDeploy = game.getRoundRecord(game.round);
       rRecDeploy.player.deploy += Math.max(0, pNetVp);
+      rRecDeploy.player.deployVp += Math.max(0, pNetVp);
 
       const pRes = [];
       if (pNetGold > 0) pRes.push(`+${pNetGold}金`);
@@ -11988,6 +12001,7 @@
       if (pNetFaith > 0) pRes.push(`+${pNetFaith}信`);
 
       rRecDeploy.ai.deploy += Math.max(0, aNetVp);
+      rRecDeploy.ai.deployVp += Math.max(0, aNetVp);
 
       const aRes = [];
       if (aNetGold > 0) aRes.push(`+${aNetGold}金`);
@@ -12426,7 +12440,9 @@
       // 紀錄第 N 回合戰爭階段得分
       const rRecWar = game.getRoundRecord(game.round);
       rRecWar.player.war += pTotalVP;
+      rRecWar.player.warVp += pTotalVP;
       rRecWar.ai.war += aTotalVP;
+      rRecWar.ai.warVp += aTotalVP;
 
       // 先顯示結果，再顯示詳情: 例如「你：+3VP (基礎+2VP,[XXX]+1VP)」
       let pDetailsList = [];
@@ -12679,6 +12695,13 @@
         });
       }
 
+      // 紀錄第 N 回合發展階段點數增長 (純技術/信仰點數，無 VP)
+      const rRecDevelop = game.getRoundRecord(game.round);
+      rRecDevelop.player.techGain += Math.max(0, pTechDiff);
+      rRecDevelop.player.faithGain += Math.max(0, pFaithDiff);
+      rRecDevelop.ai.techGain += Math.max(0, aTechDiff);
+      rRecDevelop.ai.faithGain += Math.max(0, aFaithDiff);
+
       const pDev = [];
       if (pTechDiff > 0) pDev.push(`+${pTechDiff} 技`);
       if (pFaithDiff > 0) pDev.push(`+${pFaithDiff} 信`);
@@ -12816,9 +12839,12 @@
       animateGainFlow({ isPlayer: true, goldDelta: gains.pTotal });
       animateGainFlow({ isPlayer: false, goldDelta: gains.aTotal });
 
+      // 紀錄第 N 回合收入階段金幣 (純金幣，無 VP)
       const rRecIncome = game.getRoundRecord(game.round);
       rRecIncome.player.income += gains.pTotal;
+      rRecIncome.player.goldGain += gains.pTotal;
       rRecIncome.ai.income += gains.aTotal;
+      rRecIncome.ai.goldGain += gains.aTotal;
 
       game.phaseGains = {
         phase: 'INCOME',
@@ -13077,10 +13103,12 @@
         });
       }
 
-      // 紀錄第 N 回合計分階段得分
+      // 紀錄第 N 回合計分階段得分 (VP)
       const rRecVp = game.getRoundRecord(game.round);
       rRecVp.player.vp += gains.pTotal;
+      rRecVp.player.scoreVp += gains.pTotal;
       rRecVp.ai.vp += gains.aTotal;
+      rRecVp.ai.scoreVp += gains.aTotal;
       if (gains.pTotal > 0) animateGainFlow({ isPlayer: true, vpDelta: gains.pTotal });
       if (gains.aTotal > 0) animateGainFlow({ isPlayer: false, vpDelta: gains.aTotal });
 
@@ -13378,30 +13406,64 @@
         endSubtitle.textContent = `雙方總分皆為 ${pTotal} VP！平分秋色！`;
       }
 
-      // 1. 渲染每輪 5 大階段得分詳情數據表
+      // 1. 渲染每輪各階段詳情數據表 (得分VP、發展點數、收入金幣 分開顯示)
       const tbody = document.getElementById('end-breakdown-tbody');
       if (tbody) {
         if (!game.roundScores || game.roundScores.length === 0) {
           game.roundScores = [{
             round: 1,
-            player: { deploy: pStats.deployVp || 0, war: pStats.warVp || 0, develop: 0, income: 0, vp: pStats.skillVp || 0 },
-            ai: { deploy: aStats.deployVp || 0, war: aStats.warVp || 0, develop: 0, income: 0, vp: aStats.skillVp || 0 }
+            player: { deploy: pStats.deployVp || 0, deployVp: pStats.deployVp || 0, war: pStats.warVp || 0, warVp: pStats.warVp || 0, develop: 0, income: 3, vp: pStats.skillVp || 0, scoreVp: pStats.skillVp || 0, techGain: 0, faithGain: 0, goldGain: 3 },
+            ai: { deploy: aStats.deployVp || 0, deployVp: aStats.deployVp || 0, war: aStats.warVp || 0, warVp: aStats.warVp || 0, develop: 0, income: 3, vp: aStats.skillVp || 0, scoreVp: aStats.skillVp || 0, techGain: 0, faithGain: 0, goldGain: 3 }
           }];
         }
 
         const roundRowsHtml = game.roundScores.map(rec => {
           const p = rec.player;
           const a = rec.ai;
-          const pRoundTotal = p.deploy + p.war + p.develop + p.income + p.vp;
-          const aRoundTotal = a.deploy + a.war + a.develop + a.income + a.vp;
+          const pDeployVp = p.deployVp !== undefined ? p.deployVp : (p.deploy || 0);
+          const pWarVp = p.warVp !== undefined ? p.warVp : (p.war || 0);
+          const pScoreVp = p.scoreVp !== undefined ? p.scoreVp : (p.vp || 0);
+          const pRoundVp = pDeployVp + pWarVp + pScoreVp;
+          const pTechGain = p.techGain || 0;
+          const pFaithGain = p.faithGain || 0;
+          const pGoldGain = p.goldGain !== undefined ? p.goldGain : (p.income || 3);
+
+          const aDeployVp = a.deployVp !== undefined ? a.deployVp : (a.deploy || 0);
+          const aWarVp = a.warVp !== undefined ? a.warVp : (a.war || 0);
+          const aScoreVp = a.scoreVp !== undefined ? a.scoreVp : (a.vp || 0);
+          const aRoundVp = aDeployVp + aWarVp + aScoreVp;
+          const aTechGain = a.techGain || 0;
+          const aFaithGain = a.faithGain || 0;
+          const aGoldGain = a.goldGain !== undefined ? a.goldGain : (a.income || 3);
+
           return `
             <tr style="border-bottom:1px solid #1e293b;">
-              <td style="padding:3.5px 2px; text-align:left; color:#fde047; font-weight:700; white-space:nowrap;">第 ${rec.round} 回合</td>
-              <td style="padding:3.5px 2px; white-space:nowrap;">
-                <span style="color:#06b6d4;">${p.deploy}</span>+<span style="color:#f87171;">${p.war}</span>+<span style="color:#38bdf8;">${p.develop}</span>+<span style="color:#34d399;">${p.income}</span>+<span style="color:#fbbf24;">${p.vp}</span>=<strong style="color:#fcd34d;">${pRoundTotal}</strong>
+              <td style="padding:4px 3px; text-align:left; color:#fde047; font-weight:800; font-size:9.5px; white-space:nowrap; vertical-align:middle;">
+                第 ${rec.round} 輪
               </td>
-              <td style="padding:3.5px 2px; white-space:nowrap;">
-                <span style="color:#06b6d4;">${a.deploy}</span>+<span style="color:#f87171;">${a.war}</span>+<span style="color:#38bdf8;">${a.develop}</span>+<span style="color:#34d399;">${a.income}</span>+<span style="color:#fbbf24;">${a.vp}</span>=<strong style="color:#f87171;">${aRoundTotal}</strong>
+              <td style="padding:4px 3px; text-align:left; vertical-align:middle;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:2px;">
+                  <span style="font-size:9px; color:#94a3b8;">🏆得分:</span>
+                  <span style="font-size:9px;">
+                    <span style="color:#06b6d4;" title="部署VP">⚡${pDeployVp}</span>+<span style="color:#f87171;" title="戰爭VP">⚔️${pWarVp}</span>+<span style="color:#fbbf24;" title="計分VP">👑${pScoreVp}</span>=<strong style="color:#fcd34d; font-size:10px;">+${pRoundVp}VP</strong>
+                  </span>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; font-size:8px; color:#cbd5e1; margin-top:1.5px; border-top:1px dashed rgba(255,255,255,0.06); padding-top:1.5px;">
+                  <span>⚙️發展: <strong style="color:#38bdf8;">+${pTechGain}技/+${pFaithGain}信</strong></span>
+                  <span>💰收入: <strong style="color:#34d399;">+${pGoldGain}金</strong></span>
+                </div>
+              </td>
+              <td style="padding:4px 3px; text-align:left; vertical-align:middle;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:2px;">
+                  <span style="font-size:9px; color:#94a3b8;">🏆得分:</span>
+                  <span style="font-size:9px;">
+                    <span style="color:#06b6d4;" title="部署VP">⚡${aDeployVp}</span>+<span style="color:#f87171;" title="戰爭VP">⚔️${aWarVp}</span>+<span style="color:#fbbf24;" title="計分VP">👑${aScoreVp}</span>=<strong style="color:#f87171; font-size:10px;">+${aRoundVp}VP</strong>
+                  </span>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; font-size:8px; color:#cbd5e1; margin-top:1.5px; border-top:1px dashed rgba(255,255,255,0.06); padding-top:1.5px;">
+                  <span>⚙️發展: <strong style="color:#38bdf8;">+${aTechGain}技/+${aFaithGain}信</strong></span>
+                  <span>💰收入: <strong style="color:#34d399;">+${aGoldGain}金</strong></span>
+                </div>
               </td>
             </tr>
           `;
@@ -13409,15 +13471,15 @@
 
         tbody.innerHTML = `
           ${roundRowsHtml}
-          <tr style="border-top:1px solid #334155; border-bottom:1px solid #1e293b;">
-            <td style="padding:4px 2px; text-align:left; color:#fbbf24; font-weight:700; white-space:nowrap;">💰 國庫金幣</td>
-            <td style="padding:4px 2px; color:#fbbf24; white-space:nowrap;">+${pGoldVP} VP <span style="font-size:8px; color:#94a3b8;">(${game.player.gold}金${pMultiplier > 1 ? '×2' : ''})</span></td>
-            <td style="padding:4px 2px; color:#cbd5e1; white-space:nowrap;">+${aGoldVP} VP <span style="font-size:8px; color:#94a3b8;">(${game.ai.gold}金${aMultiplier > 1 ? '×2' : ''})</span></td>
+          <tr style="border-top:1px solid #334155; border-bottom:1px solid #1e293b; background:rgba(245,158,11,0.05);">
+            <td style="padding:4px 3px; text-align:left; color:#fbbf24; font-weight:800; font-size:9.5px; white-space:nowrap;">💰 國庫金幣</td>
+            <td style="padding:4px 3px; color:#fbbf24; white-space:nowrap; text-align:left;">+${pGoldVP} VP <span style="font-size:8px; color:#94a3b8;">(${game.player.gold}金${pMultiplier > 1 ? '×2' : ''})</span></td>
+            <td style="padding:4px 3px; color:#cbd5e1; white-space:nowrap; text-align:left;">+${aGoldVP} VP <span style="font-size:8px; color:#94a3b8;">(${game.ai.gold}金${aMultiplier > 1 ? '×2' : ''})</span></td>
           </tr>
           <tr style="font-weight:900; font-size:11px; background:rgba(245,158,11,0.12);">
-            <td style="padding:5px 2px; text-align:left; color:#fcd34d; white-space:nowrap;">🏆 最終結算總分</td>
-            <td style="padding:5px 2px; color:#fcd34d; font-size:12px; white-space:nowrap;">${pTotal} VP</td>
-            <td style="padding:5px 2px; color:#f87171; font-size:12px; white-space:nowrap;">${aTotal} VP</td>
+            <td style="padding:5px 3px; text-align:left; color:#fcd34d; font-size:10.5px; white-space:nowrap;">🏆 最終結算總分</td>
+            <td style="padding:5px 3px; color:#fcd34d; font-size:12px; white-space:nowrap; text-align:left;">${pTotal} VP</td>
+            <td style="padding:5px 3px; color:#f87171; font-size:12px; white-space:nowrap; text-align:left;">${aTotal} VP</td>
           </tr>
         `;
       }
