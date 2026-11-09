@@ -3262,7 +3262,7 @@
 
     .mini-row-eff-line {
       display: flex !important;
-      align-items: flex-start !important;
+      align-items: center !important;
       justify-content: flex-start !important;
       gap: 2px !important;
       width: 100% !important;
@@ -3274,7 +3274,7 @@
       border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
       box-sizing: border-box !important;
       overflow: hidden !important;
-      flex-shrink: 0 !important;
+      flex-shrink: 1 !important;
       background: rgba(2, 6, 23, 0.65) !important;
       border-left: 2px solid #f59e0b;
     }
@@ -3711,6 +3711,14 @@
        iPad 平板大螢幕排版與字體流暢自適應 (Responsive Scale for iPad / Large Screens)
        ========================================================================== */
     @media (min-width: 580px) {
+      /* 平板尺寸手牌容器保證充足高度，支援雙技能完整呈現 */
+      #player-hand-container {
+        height: clamp(128px, 14vh, 145px) !important;
+        min-height: 125px !important;
+        max-height: 148px !important;
+        flex: 0 0 clamp(128px, 14vh, 145px) !important;
+      }
+
       /* 頂部 Header & 領主名稱 */
       #player-header-left-box, #ai-lord-header-box {
         width: auto !important;
@@ -3933,6 +3941,11 @@
        (Landscape / Wide Multitasking Mode: Strictly 50/50 Symmetrical Arena)
        ========================================================================== */
     @media (min-width: 768px) and (orientation: landscape) and (min-height: 501px), (min-width: 900px) and (min-aspect-ratio: 11/10) and (min-height: 501px) {
+      /* 橫向模式：AI 狀態列與九宮格排版與玩家左右鏡像對稱 (AI: [狀態列 | 九宮格] ｜ 玩家: [九宮格 | 狀態列]) */
+      #ai-panel .upper-grid-section {
+        flex-direction: row-reverse !important;
+      }
+
       /* 頂部 Header 橫向鋪滿 Window 闊度 */
       #app-header {
         width: 100% !important;
@@ -4222,6 +4235,11 @@
        (Ultra-Compact Landscape Mode for iPhone / Low-Height Landscape <= 500px)
        ========================================================================== */
     @media (orientation: landscape) and (max-height: 500px) {
+      /* 橫向模式：AI 狀態列與九宮格排版與玩家左右鏡像對稱 (AI: [狀態列 | 九宮格] ｜ 玩家: [九宮格 | 狀態列]) */
+      #ai-panel .upper-grid-section {
+        flex-direction: row-reverse !important;
+      }
+
       /* 頂部 Header 高度壓縮至 28px，左右填滿，相對定位供置中 HUD 對齊 */
       #app-header {
         height: 28px !important;
@@ -5967,9 +5985,9 @@
         padding: 0 !important;
       }
 
-      /* 橫向模式下狀態列放於右邊 */
+      /* 橫向模式下 AI 的狀態列與九宮格左右鏡像：AI 狀態列在左，九宮格在右 (與玩家九宮格在左、狀態列在右形成水平對稱鏡像) */
       #ai-panel .upper-grid-section {
-        flex-direction: row !important;
+        flex-direction: row-reverse !important;
       }
 
       /* 底部高度完全對稱：玩家區底部係手牌，而AI區底部係王國階段公告 (畫面右下角 AI 九宮格下方) */
@@ -6247,7 +6265,7 @@
        【尺寸 3】iPad mini 直向 (iPad mini Portrait: 寬 650px - 779px)
        涵蓋: iPad mini 6 / 7 (8.3 吋, 744 x 1133 pt)
        -------------------------------------------------------------------------- */
-    @media screen and (min-width: 650px) and (max-width: 779px) and (orientation: portrait) {
+    @media screen and (min-width: 580px) and (max-width: 779px) and (orientation: portrait) {
       #battlefield {
         max-width: 700px !important;
         width: 100% !important;
@@ -16864,7 +16882,7 @@ window.onload = () => {
       return `
         <div class="mini-row-eff-line" style="border-left: 2.5px solid ${e.borderColor} !important;" title="[${e.timingName}] ${e.desc}">
           <span class="mini-eff-timing-icon">${e.icon}</span>
-          <span class="mini-eff-desc" style="color:${e.color}; font-size:9.5px !important; font-weight:800;">${e.short}</span>
+          <span class="mini-eff-desc" style="color:${e.color}; font-size:8px !important; font-weight:700;">${e.short}</span>
         </div>
       `;
     }
