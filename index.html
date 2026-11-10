@@ -3941,6 +3941,13 @@
        (Landscape / Wide Multitasking Mode: Strictly 50/50 Symmetrical Arena)
        ========================================================================== */
     @media (min-width: 768px) and (orientation: landscape) and (min-height: 501px), (min-width: 900px) and (min-aspect-ratio: 11/10) and (min-height: 501px) {
+      /* 橫向模式下：AI 狀態列排列順序與玩家完全一致 (由上至下：領主名稱 -> VP -> 戰力 -> 錢 -> 技術/信仰進度條) */
+      #ai-side-dashboard #ai-lord-header-box { order: 1 !important; }
+      #ai-side-dashboard #ai-vp-pill         { order: 2 !important; }
+      #ai-side-dashboard #ai-power-pill      { order: 3 !important; }
+      #ai-side-dashboard #ai-gold-pill       { order: 4 !important; }
+      #ai-side-dashboard #ai-ladder-wrap     { order: 5 !important; }
+
       /* 橫向模式：AI 狀態列與九宮格排版與玩家左右鏡像對稱 (AI: [狀態列 | 九宮格] ｜ 玩家: [九宮格 | 狀態列]) */
       #ai-panel .upper-grid-section {
         flex-direction: row-reverse !important;
@@ -4235,6 +4242,13 @@
        (Ultra-Compact Landscape Mode for iPhone / Low-Height Landscape <= 500px)
        ========================================================================== */
     @media (orientation: landscape) and (max-height: 500px) {
+      /* 橫向模式下：AI 狀態列排列順序與玩家完全一致 (由上至下：領主名稱 -> VP -> 戰力 -> 錢 -> 技術/信仰進度條) */
+      #ai-side-dashboard #ai-lord-header-box { order: 1 !important; }
+      #ai-side-dashboard #ai-vp-pill         { order: 2 !important; }
+      #ai-side-dashboard #ai-power-pill      { order: 3 !important; }
+      #ai-side-dashboard #ai-gold-pill       { order: 4 !important; }
+      #ai-side-dashboard #ai-ladder-wrap     { order: 5 !important; }
+
       /* 橫向模式：AI 狀態列與九宮格排版與玩家左右鏡像對稱 (AI: [狀態列 | 九宮格] ｜ 玩家: [九宮格 | 狀態列]) */
       #ai-panel .upper-grid-section {
         flex-direction: row-reverse !important;
@@ -5907,6 +5921,13 @@
 
     /* 4. 橫向模式：雙方九宮格鏡像對稱，空間全部鋪滿 (唯一唔同：玩家區底部係手牌，而AI區底部係王國階段公告) */
     @media (orientation: landscape) {
+      /* 橫向模式下：AI 狀態列排列順序與玩家完全一致 (由上至下：領主名稱 -> VP -> 戰力 -> 錢 -> 技術/信仰進度條) */
+      #ai-side-dashboard #ai-lord-header-box { order: 1 !important; }
+      #ai-side-dashboard #ai-vp-pill         { order: 2 !important; }
+      #ai-side-dashboard #ai-power-pill      { order: 3 !important; }
+      #ai-side-dashboard #ai-gold-pill       { order: 4 !important; }
+      #ai-side-dashboard #ai-ladder-wrap     { order: 5 !important; }
+
       #battlefield {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
@@ -7146,9 +7167,9 @@
           <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:left;">
             <thead>
               <tr style="background:#070d18; border-bottom:1px solid rgba(245,158,11,0.3); color:#94a3b8; font-size:9.5px;">
-                <th style="padding:6px 8px; width:28%;">本輪項目</th>
-                <th style="padding:6px 8px; width:36%; color:#fcd34d;">👑 我的王國 (總獲)</th>
-                <th style="padding:6px 8px; width:36%; color:#fca5a5;">🤖 電腦對手 (總獲)</th>
+                <th style="padding:6px 8px; width:18%; text-align:center;">輪次</th>
+                <th style="padding:6px 8px; width:41%; color:#fcd34d;">👑 我的王國 (總獲)</th>
+                <th style="padding:6px 8px; width:41%; color:#fca5a5;">🤖 電腦對手 (總獲)</th>
               </tr>
             </thead>
             <tbody id="round-summary-table-tbody">
@@ -13915,36 +13936,23 @@
         const aTFStr = formatTF(aTotalTech, aTotalFaith);
 
         tbodyEl.innerHTML = `
-          <!-- Row 1: VP 得分 -->
-          <tr style="border-bottom:1px solid #1e293b; background:rgba(245,158,11,0.06);">
-            <td style="padding:7px 8px; font-weight:800; color:#fbbf24;">🏆 獲得 VP</td>
-            <td style="padding:7px 8px;">
-              <strong style="color:#fbbf24; font-size:12px;">+${pRoundVp} VP</strong>
+          <tr style="background:rgba(15,23,42,0.7);">
+            <td style="padding:8px 8px; font-weight:900; color:#fde047; text-align:center; font-size:10.5px; white-space:nowrap; background:rgba(2,6,23,0.5);">
+              第 ${game.round} 輪
             </td>
-            <td style="padding:7px 8px;">
-              <strong style="color:#f87171; font-size:12px;">+${aRoundVp} VP</strong>
+            <td style="padding:8px 8px; white-space:nowrap;">
+              <div style="display:flex; align-items:center; flex-wrap:nowrap; gap:7px; font-size:11px; line-height:1.2;">
+                <span style="color:#fbbf24; font-weight:900;">🏆+${pRoundVp}</span>
+                <span style="color:#fde047; font-weight:900;">💰+${pTotalGold}</span>
+                <span style="color:#38bdf8; font-weight:900;">⚙️${pTFStr}</span>
+              </div>
             </td>
-          </tr>
-
-          <!-- Row 2: 金幣 -->
-          <tr style="border-bottom:1px solid #1e293b;">
-            <td style="padding:7px 8px; font-weight:800; color:#fde047;">💰 獲得金幣</td>
-            <td style="padding:7px 8px;">
-              <strong style="color:#fde047; font-size:12px;">+${pTotalGold} 金</strong>
-            </td>
-            <td style="padding:7px 8px;">
-              <strong style="color:#fde047; font-size:12px;">+${aTotalGold} 金</strong>
-            </td>
-          </tr>
-
-          <!-- Row 3: 技/信點 -->
-          <tr>
-            <td style="padding:7px 8px; font-weight:800; color:#38bdf8;">⚙️ 技/信點數</td>
-            <td style="padding:7px 8px;">
-              <strong style="color:#38bdf8; font-size:11.5px;">${pTFStr}</strong>
-            </td>
-            <td style="padding:7px 8px;">
-              <strong style="color:#c084fc; font-size:11.5px;">${aTFStr}</strong>
+            <td style="padding:8px 8px; white-space:nowrap;">
+              <div style="display:flex; align-items:center; flex-wrap:nowrap; gap:7px; font-size:11px; line-height:1.2;">
+                <span style="color:#f87171; font-weight:900;">🏆+${aRoundVp}</span>
+                <span style="color:#fde047; font-weight:900;">💰+${aTotalGold}</span>
+                <span style="color:#c084fc; font-weight:900;">⚙️${aTFStr}</span>
+              </div>
             </td>
           </tr>
         `;
@@ -14136,21 +14144,21 @@
 
           return `
             <tr style="border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(15,23,42,0.65);">
-              <td style="padding:6px 4px; text-align:center; color:#fde047; font-weight:900; font-size:10px; white-space:nowrap; background:rgba(2,6,23,0.5);">
+              <td style="padding:4px 4px; text-align:center; color:#fde047; font-weight:900; font-size:9.5px; white-space:nowrap; background:rgba(2,6,23,0.5);">
                 第 ${rec.round} 輪
               </td>
-              <td style="padding:6px 8px;">
-                <div style="display:flex; flex-direction:column; gap:2px; font-size:9.5px;">
-                  <div><span style="color:#fbbf24; font-weight:800;">🏆 +${pRoundVp} VP</span></div>
-                  <div><span style="color:#fde047; font-weight:800;">💰 +${pTotalGold} 金</span></div>
-                  <div><span style="color:#38bdf8; font-weight:800;">⚙️ ${pTFStr}</span></div>
+              <td style="padding:4px 6px; white-space:nowrap;">
+                <div style="display:flex; align-items:center; flex-wrap:nowrap; gap:6px; font-size:9.5px; line-height:1.2;">
+                  <span style="color:#fbbf24; font-weight:800;">🏆+${pRoundVp}</span>
+                  <span style="color:#fde047; font-weight:800;">💰+${pTotalGold}</span>
+                  <span style="color:#38bdf8; font-weight:800;">⚙️${pTFStr}</span>
                 </div>
               </td>
-              <td style="padding:6px 8px;">
-                <div style="display:flex; flex-direction:column; gap:2px; font-size:9.5px;">
-                  <div><span style="color:#f87171; font-weight:800;">🏆 +${aRoundVp} VP</span></div>
-                  <div><span style="color:#fde047; font-weight:800;">💰 +${aTotalGold} 金</span></div>
-                  <div><span style="color:#c084fc; font-weight:800;">⚙️ ${aTFStr}</span></div>
+              <td style="padding:4px 6px; white-space:nowrap;">
+                <div style="display:flex; align-items:center; flex-wrap:nowrap; gap:6px; font-size:9.5px; line-height:1.2;">
+                  <span style="color:#f87171; font-weight:800;">🏆+${aRoundVp}</span>
+                  <span style="color:#fde047; font-weight:800;">💰+${aTotalGold}</span>
+                  <span style="color:#c084fc; font-weight:800;">⚙️${aTFStr}</span>
                 </div>
               </td>
             </tr>
