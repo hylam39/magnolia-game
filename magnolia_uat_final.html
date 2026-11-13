@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="玖陣王國">
+  <meta name="theme-color" content="#020617">
+  <title>玖陣王國 Magnolia - 跨裝置自適應全能版</title>
+  <!-- Inline SVG App Icon for iOS Home Screen -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23fde047'/%3E%3Cstop offset='100%25' stop-color='%23b45309'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='36' fill='%23020617'/%3E%3Crect x='14' y='14' width='152' height='152' rx='28' fill='url(%23g)'/%3E%3Ctext x='90' y='118' font-size='96' font-weight='900' text-anchor='middle' fill='%23020617' font-family='sans-serif'%3E玖%3C/text%3E%3C/svg%3E">
+  <!-- PeerJS SDK with defer so offline single-player never blocks rendering -->
+  <script defer src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    /* === 0. Layout CSS Custom Properties === */
+    :root {
+      --header-h: clamp(36px, 4.4vh, 44px);
+      --bottom-dock-h: clamp(90px, 12.8vh, 106px);
+      --side-dash-w: clamp(54px, 14.5vw, 66px);
+    }
+    @media (orientation: landscape) {
+      :root {
+        --bottom-dock-h: clamp(82px, 19vh, 132px);
+        --side-dash-w: clamp(58px, 7.5vw, 76px);
+      }
+    }
+    @media (orientation: landscape) and (max-height: 480px) {
+      :root {
+        --header-h: 28px;
+        --bottom-dock-h: clamp(72px, 21.5vh, 86px);
+        --side-dash-w: 52px;
+      }
+    }
+
+    /* === 1. Base & Reset === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100vw; height: 100vh; height: 100dvh;
+      max-width: 100vw; max-height: 100vh; max-height: 100dvh;
+      overflow: hidden; overscroll-behavior: none;
+      background: radial-gradient(circle at 50% 30%, #0d1527 0%, #050914 60%, #02040a 100%);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+      user-select: none; -webkit-user-select: none;
+      touch-action: manipulation;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0b1120; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .hidden { display: none !important; }
+
+    /* === 2. Top Header & Stepper HUD === */
+    #app-header {
+      height: var(--header-h); min-height: var(--header-h);
+      width: 100%; max-width: min(100vw, 880px);
+      margin: 0 auto; padding: 4px 10px; padding-top: max(4px, env(safe-area-inset-top));
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+      position: relative; z-index: 90; flex-shrink: 0;
+    }
+    .brand-box {
+      width: 24px; height: 24px;
+      background: linear-gradient(135deg, #fbbf24, #b45309);
+      border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      color: #000; font-weight: 900; font-size: 14px; flex-shrink: 0;
+    }
+    .phase-stepper-hud {
+      display: none; align-items: center; gap: 3px;
+      background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 6px; padding: 2px 6px;
+    }
+    @media (min-width: 640px) { .phase-stepper-hud { display: flex; } }
+    .phase-step-pill {
+      display: inline-flex; align-items: center; gap: 2px;
+      font-size: 9.5px; font-weight: 700; color: #64748b;
+      padding: 1.5px 5px; border-radius: 4px; transition: all 0.25s ease; white-space: nowrap;
+    }
+    .phase-step-pill.step-done { color: #94a3b8; background: rgba(30, 41, 59, 0.5); }
+    .phase-step-pill.step-active {
+      color: #020617; background: linear-gradient(135deg, #fde047, #f59e0b);
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.85); transform: scale(1.06); font-weight: 900;
+    }
+    .phase-step-arrow { font-size: 8px; color: #334155; }
+    .header-duel-compact-hud { display: none; }
+    .header-menu-wrap { position: relative; display: flex; align-items: center; gap: 5px; }
+
+    /* === 3. Buttons & Popover === */
+    .btn {
+      padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px;
+      border: 1px solid transparent; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      transition: all 0.15s ease; white-space: nowrap;
+    }
+    .btn:hover:not(:disabled) { filter: brightness(1.15); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-gold { background-color: #f59e0b; color: #020617; font-weight: 800; }
+    .btn-emerald { background-color: #059669; color: #fff; font-weight: 800; }
+    .btn-slate { background-color: #1e293b; color: #cbd5e1; border-color: #334155; }
+    .btn-red { background-color: rgba(127, 29, 29, 0.7); color: #fca5a5; border-color: rgba(239, 68, 68, 0.45); }
+    .btn-auto-active {
+      background: #059669 !important; color: #fff !important;
+      border-color: #34d399 !important; box-shadow: 0 0 8px rgba(52, 211, 153, 0.6) !important;
+    }
+
+    .header-options-popover {
+      position: fixed; top: 40px; right: 10px; width: 250px;
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.99));
+      border: 1.5px solid rgba(245, 158, 11, 0.55); border-radius: 10px; padding: 10px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.92); z-index: 300;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .options-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .options-menu-grid .btn { width: 100%; padding: 6px 8px; font-size: 11px; }
+    .options-section-label {
+      font-size: 9.5px; font-weight: 800; color: #94a3b8;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.7); padding-bottom: 3px;
+      display: flex; justify-content: space-between;
+    }
+
+    /* === 4. Battlefield Core Layout (Portrait Default) === */
+    #battlefield {
+      display: flex; flex-direction: column;
+      width: 100%; max-width: min(100vw, 880px);
+      height: calc(100dvh - var(--header-h));
+      padding: 2px 4px max(4px, env(safe-area-inset-bottom)) 4px;
+      gap: 3px; overflow: hidden; margin: 0 auto; position: relative; z-index: 10;
+    }
+    .board-panel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(10, 16, 30, 0.97) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px;
+      padding: 2px 4px; display: flex; flex-direction: column; justify-content: space-between;
+      min-height: 0; position: relative; overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    #ai-panel {
+      order: 1; flex: 0 0 clamp(210px, 30.5vh, 280px);
+      height: clamp(210px, 30.5vh, 280px); min-height: 200px; max-height: 290px;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    #app-banner {
+      order: 2; flex: 0 0 44px; height: 44px; min-height: 42px; width: 100%;
+      background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 7px; padding: 2.5px 5px;
+      display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+      z-index: 25;
+    }
+    #player-panel {
+      order: 3; flex: 1 1 auto; min-height: 0; gap: 2px;
+    }
+
+    .kingdom-board-core {
+      flex: 1 1 auto; height: 100%; min-height: 0;
+      display: flex; flex-direction: column; gap: 3px; width: 100%;
+    }
+    .upper-grid-section {
+      flex: 1 1 auto; height: 100%; min-height: 0;
+      display: flex; flex-direction: row; align-items: stretch; gap: 4px; width: 100%;
+    }
+    .player-grid-wrapper, .ai-grid-wrapper {
+      position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; height: 100%;
+    }
+    .grid-3x3 {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: 2.5px; width: 100%; height: 100%;
+    }
+    .grid-cell {
+      background-color: rgba(2, 6, 23, 0.88); border: 1px solid #334155; border-radius: 5px;
+      padding: 1.5px 2.5px; display: flex; flex-direction: column; justify-content: space-between;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .grid-cell:hover { border-color: #f59e0b; }
+    .grid-cell.valid-target {
+      border-color: #fbbf24; background-color: rgba(245, 158, 11, 0.18);
+      animation: pulse-slot 1.4s infinite;
+    }
+    @keyframes pulse-slot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.3); }
+      50% { box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.75); }
+    }
+
+    /* === 5. Side Dashboard & 15-Step Ladder === */
+    .grid-side-dashboard {
+      flex: 0 0 var(--side-dash-w); width: var(--side-dash-w);
+      height: 100%; min-height: 0;
+      display: flex; flex-direction: column; justify-content: space-between; gap: 2.5px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(7, 11, 22, 0.99));
+      border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px; padding: 2.5px 2px;
+    }
+    #ai-panel .grid-side-dashboard { border-color: rgba(239, 68, 68, 0.45); }
+    .side-item-name, .stat-pill {
+      width: 100%; height: 16px; min-height: 16px; padding: 1px 2px;
+      display: flex; align-items: center; justify-content: center; gap: 2px;
+      border-radius: 3.5px; font-family: ui-monospace, Menlo, monospace;
+      font-size: 8.5px; font-weight: 900; white-space: nowrap; overflow: hidden;
+    }
+    .side-item-name { color: #fcd34d; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(245, 158, 11, 0.45); cursor: pointer; }
+    #ai-side-dashboard .side-item-name { color: #fca5a5; border-color: rgba(239, 68, 68, 0.45); background: rgba(127, 29, 29, 0.3); }
+    .status-vp-pill { color: #fde047; background: rgba(245, 158, 11, 0.22); border: 1px solid rgba(245, 158, 11, 0.6); }
+    #ai-side-dashboard .status-vp-pill { color: #fca5a5; border-color: rgba(239, 68, 68, 0.55); background: rgba(239, 68, 68, 0.22); }
+    .status-power-pill { color: #fca5a5; background: rgba(127, 29, 29, 0.7); border: 1px solid rgba(239, 68, 68, 0.55); }
+    .status-gold-pill { color: #fcd34d; background: rgba(69, 26, 3, 0.7); border: 1px solid rgba(245, 158, 11, 0.5); }
+
+    .v-tf-ladder-wrap {
+      flex: 1 1 auto; width: 100%; min-height: 0; padding: 1.5px 1px;
+      display: flex; flex-direction: row; justify-content: space-between; gap: 2px;
+      background: rgba(2, 6, 23, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 3.5px;
+    }
+    .v-meter-col { flex: 1 1 0; width: 50%; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.5px; }
+    .v-meter-head { display: flex; align-items: center; justify-content: center; gap: 1px; width: 100%; font-size: 7.5px; }
+    .meter-badge { font-size: 6.2px; font-weight: 800; padding: 0.5px 1.5px; border-radius: 2px; }
+    .badge-tech { background: rgba(2, 132, 199, 0.3); color: #38bdf8; border: 1px solid #38bdf8; }
+    .badge-faith { background: rgba(124, 58, 237, 0.3); color: #c084fc; border: 1px solid #c084fc; }
+    .v-ladder-cells {
+      display: flex; flex-direction: column-reverse; gap: 1px;
+      flex: 1 1 0; min-height: 0; width: 100%;
+      background: rgba(2, 6, 23, 0.75); padding: 1px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .m-ladder-cell {
+      flex: 1 1 0; width: 100%; min-height: 0; border-radius: 1px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, Menlo, monospace; font-size: 6px; font-weight: 900;
+      background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(51, 65, 85, 0.35); color: #64748b;
+    }
+    .m-ladder-cell.cell-milestone { border-top: 1.5px solid rgba(251, 191, 36, 0.65); }
+    .m-ladder-cell.cell-tech-active { background: #38bdf8; border-color: #7dd3fc; color: #020617; }
+    .m-ladder-cell.cell-faith-active { background: #c084fc; border-color: #e9d5ff; color: #ffffff; }
+
+    /* === 6. Center Settlement Banner === */
+    .banner-main-row { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 100%; gap: 5px; }
+    .banner-left-phase { display: flex; align-items: center; gap: 3px; flex-shrink: 0; border-right: 1px solid rgba(255, 255, 255, 0.14); padding-right: 5px; }
+    .banner-round-phase-box { display: flex; flex-direction: column; justify-content: center; line-height: 1.15; }
+    .banner-round-line { font-size: 8.5px; font-weight: 800; color: #fbbf24; white-space: nowrap; }
+    .banner-phase-line { font-size: 9.5px; font-weight: 900; color: #fde047; white-space: nowrap; }
+    .banner-details-box { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 1.5px; cursor: pointer; }
+    .banner-line-ai, .banner-line-player { font-size: 8.5px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .banner-tag-ai { color: #f87171; font-weight: 800; }
+    .banner-tag-player { color: #fcd34d; font-weight: 800; }
+    .banner-val-text { color: #f1f5f9; font-family: ui-monospace, Menlo, monospace; font-weight: 700; }
+    .banner-right-controls { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .banner-history-btn {
+      background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.45);
+      color: #fbbf24; font-size: 9.5px; font-weight: 800; border-radius: 5px;
+      height: 32px; padding: 2px 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 2px;
+    }
+    #banner-actions .btn { height: 32px; padding: 2px 8px; font-size: 9.5px; flex-direction: column; line-height: 1.15; }
+
+    /* === 7. Hand Cards & Grid Card Internals === */
+    #player-hand-container {
+      height: var(--bottom-dock-h); min-height: var(--bottom-dock-h); max-height: var(--bottom-dock-h); flex: 0 0 var(--bottom-dock-h);
+      display: flex; flex-direction: column; gap: 2px;
+      background: rgba(11, 17, 32, 0.96); border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 7px; padding: 2px 3px; width: 100%;
+    }
+    .hand-header-bar { display: flex; align-items: center; justify-content: space-between; height: 13px; font-size: 8.5px; padding: 0 2px; }
+    #hand-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px;
+      width: 100%; height: calc(100% - 15px);
+    }
+    .hand-card {
+      width: 100%; height: 100%; border-radius: 6px; background: rgba(15, 23, 42, 0.96);
+      border: 1.5px solid #334155; display: flex; flex-direction: column; justify-content: space-between;
+      cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    }
+    .hand-card.selected { border-color: #fbbf24 !important; box-shadow: 0 0 10px rgba(251, 191, 36, 0.8) !important; transform: translateY(-2px); }
+    .hand-card.marked-discard { border-color: #ef4444 !important; }
+    .hand-card.unaffordable { opacity: 0.72; }
+
+    .mini-row-top { display: grid; grid-template-columns: 1fr 1fr; height: 13px; border-bottom: 1px solid rgba(255,255,255,0.12); flex-shrink: 0; }
+    .mini-top-cell { display: flex; align-items: center; justify-content: center; font-size: 7.8px; font-weight: 800; font-family: monospace; }
+    .mini-top-cell.cell-cost { color: #fbbf24; background: rgba(245, 158, 11, 0.22); border-right: 1px solid rgba(255,255,255,0.12); }
+    .mini-top-cell.cell-power { color: #f87171; background: rgba(239, 68, 68, 0.22); }
+    .mini-top-name { display: none; }
+    .mini-row-name {
+      display: block; width: 100%; text-align: center; font-size: 7.8px; font-weight: 800;
+      color: #f8fafc; padding: 0.5px 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      background: rgba(30, 41, 59, 0.45); flex-shrink: 0;
+    }
+    .mini-hand-skills-container { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+    .mini-row-eff-line {
+      flex: 1 1 0; display: flex; align-items: center; gap: 2px; padding: 0.5px 2px;
+      border-top: 1px solid rgba(255,255,255,0.06); background: rgba(2, 6, 23, 0.65); overflow: hidden;
+    }
+    .mini-row-eff-line.eff-empty { justify-content: center; opacity: 0.35; }
+    .mini-eff-desc {
+      font-size: 6.4px; font-weight: 700; line-height: 1.15;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .mini-row-bottom { display: grid; grid-template-columns: 1fr 1fr; height: 13.5px; border-top: 1px solid rgba(255,255,255,0.12); flex-shrink: 0; }
+    .mini-bot-cell { display: flex; align-items: center; justify-content: center; font-size: 6.8px; font-weight: 700; white-space: nowrap; }
+    .mini-bot-cell.cell-race { border-right: 1px solid rgba(255,255,255,0.12); }
+
+    /* Grid Card Internals */
+    .card-top-name { font-size: 8px; font-weight: 800; color: #f8fafc; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; margin: 0 2px; }
+    .card-badge-cost {
+      color: #1a0f00; font-family: monospace; background: linear-gradient(135deg, #fef08a, #f59e0b);
+      border: 1px solid #fde047; padding: 0 3px; border-radius: 3px; font-size: 8px; font-weight: 900;
+    }
+    .card-badge-power {
+      color: #fff; font-family: monospace; background: linear-gradient(135deg, #fca5a5, #dc2626);
+      border: 1px solid #f87171; padding: 0 3px; border-radius: 3px; font-size: 8px; font-weight: 900;
+    }
+    .grid-eff-pill {
+      display: flex; align-items: center; gap: 2.5px; width: 100%; height: 15px;
+      padding: 0 3px; border-radius: 2.5px; font-size: 7.5px; font-weight: 800;
+      background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+    .grid-eff-pill.pill-empty { justify-content: center; opacity: 0.3; border-left: 2.5px solid #334155 !important; }
+    .grid-card-bottom-strip {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 1px 3px; background: rgba(2, 6, 23, 0.85); border-top: 1px solid rgba(255,255,255,0.12);
+      font-size: 6.8px; white-space: nowrap; overflow: hidden; flex-shrink: 0;
+    }
+
+    /* Race Themes & Badges */
+    .border-human { border-color: rgba(59, 130, 246, 0.75) !important; }
+    .border-dwarf { border-color: rgba(245, 158, 11, 0.75) !important; }
+    .border-elf { border-color: rgba(16, 185, 129, 0.75) !important; }
+    .border-goblin { border-color: rgba(239, 68, 68, 0.75) !important; }
+    .border-golem { border-color: rgba(6, 182, 212, 0.75) !important; }
+    .border-demon { border-color: rgba(168, 85, 247, 0.75) !important; }
+    .card-theme-human { background: linear-gradient(155deg, #0d223f 0%, #061120 100%) !important; }
+    .card-theme-dwarf { background: linear-gradient(155deg, #2b1706 0%, #150b03 100%) !important; }
+    .card-theme-elf { background: linear-gradient(155deg, #092b1c 0%, #04140d 100%) !important; }
+    .card-theme-goblin { background: linear-gradient(155deg, #300a0a 0%, #180505 100%) !important; }
+    .card-theme-golem { background: linear-gradient(155deg, #062833 0%, #02141a 100%) !important; }
+    .card-theme-demon { background: linear-gradient(155deg, #260c38 0%, #13061c 100%) !important; }
+    .badge-human { background-color: rgba(59, 130, 246, 0.25); color: #93c5fd; }
+    .badge-dwarf { background-color: rgba(245, 158, 11, 0.25); color: #fcd34d; }
+    .badge-elf { background-color: rgba(16, 185, 129, 0.25); color: #6ee7b7; }
+    .badge-goblin { background-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+    .badge-golem { background-color: rgba(6, 182, 212, 0.25); color: #67e8f9; }
+    .badge-demon { background-color: rgba(168, 85, 247, 0.25); color: #d8b4fe; }
+    .badge-class-knight { background: rgba(148, 163, 184, 0.25); color: #f1f5f9; }
+    .badge-class-merchant { background: rgba(234, 179, 8, 0.25); color: #fef08a; }
+    .badge-class-artisan { background: rgba(249, 115, 22, 0.25); color: #fed7aa; }
+    .badge-class-mage { background: rgba(99, 102, 241, 0.25); color: #c7d2fe; }
+    .badge-class-cleric { background: rgba(253, 224, 71, 0.25); color: #fef08a; }
+    .badge-class-monarch { background: rgba(217, 70, 239, 0.3); color: #fae8ff; font-weight: 800; }
+    .badge-class-special { background: rgba(20, 184, 166, 0.25); color: #ccfbf1; }
+
+    /* === 8. Clean Unified Landscape Override (50/50 Symmetrical Split) === */
+    @media (orientation: landscape) {
+      #app-header { max-width: 100vw; }
+      #battlefield {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
+        grid-template-areas: "player ai";
+        max-width: min(100vw, 1240px);
+        gap: 8px; padding: 4px 8px max(4px, env(safe-area-inset-bottom)) 8px;
+      }
+      #player-panel { grid-area: player; order: unset; height: 100%; max-height: 100%; }
+      #ai-panel { grid-area: ai; order: unset; flex: 1 1 auto; height: 100%; max-height: 100%; }
+      #ai-panel .upper-grid-section { flex-direction: row-reverse; }
+      #ai-side-dashboard #ai-lord-header-box { order: 1; }
+      #ai-side-dashboard #ai-vp-pill { order: 2; }
+      #ai-side-dashboard #ai-power-pill { order: 3; }
+      #ai-side-dashboard #ai-gold-pill { order: 4; }
+      #ai-side-dashboard #ai-ladder-wrap { order: 5; }
+      #player-hand-container, #app-banner {
+        height: var(--bottom-dock-h); min-height: var(--bottom-dock-h); max-height: var(--bottom-dock-h); flex: 0 0 var(--bottom-dock-h);
+      }
+      #app-banner { order: unset; margin: 0; }
+    }
+
+    /* Ultra-compact iPhone Landscape (height <= 480px) */
+    @media (orientation: landscape) and (max-height: 480px) {
+      #app-header { height: 28px; min-height: 28px; padding: 1px 8px; }
+      .header-duel-compact-hud {
+        display: flex; align-items: center; gap: 6px;
+        position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+        background: rgba(2, 6, 23, 0.95); border: 1px solid rgba(245, 158, 11, 0.45);
+        border-radius: 12px; padding: 1px 10px; font-size: 10px; font-family: monospace;
+      }
+      #battlefield { height: calc(100dvh - 28px); padding: 2px max(8px, env(safe-area-inset-right)) 2px max(8px, env(safe-area-inset-left)); }
+      .mini-row-name { display: none; }
+      .mini-row-top { display: flex; justify-content: space-between; align-items: center; padding: 0 2px; }
+      .mini-top-name { display: block; font-size: 6.5px; font-weight: 800; color: #f8fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+
+    /* === 9. Modals, Overlays & VFX === */
+    .modal-backdrop, .title-screen-backdrop {
+      position: fixed; inset: 0; background: rgba(2, 6, 23, 0.86); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; padding: 14px; z-index: 200;
+    }
+    .modal-box, .title-screen-card {
+      background: linear-gradient(180deg, #0f172a 0%, #070b16 100%);
+      border: 1.5px solid #f59e0b; border-radius: 14px; width: 100%; max-width: 480px;
+      max-height: 90dvh; display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.95);
+    }
+    .title-screen-card { padding: 16px 18px; gap: 12px; overflow-y: auto; }
+    .title-emblem-inner {
+      width: 52px; height: 52px; background: linear-gradient(135deg, #fde047, #d97706);
+      border: 2px solid #fef08a; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      color: #020617; font-weight: 900; font-size: 28px; margin: 0 auto;
+    }
+    .title-menu-list { display: flex; flex-direction: column; gap: 8px; }
+    .title-menu-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+      background: #0f172a; border: 1px solid #334155; cursor: pointer; text-align: left; color: #f8fafc;
+    }
+    .title-menu-item:hover { border-color: #fbbf24; filter: brightness(1.1); }
+    .title-menu-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .title-footer-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+    .card-pending-deploy { border: 1.5px dashed #fbbf24 !important; overflow: visible !important; z-index: 35; }
+    .pending-cancel-cross {
+      position: absolute; top: -5px; right: -5px; width: 17px; height: 17px; border-radius: 50%;
+      background: #dc2626; border: 1.5px solid #fff; color: #fff; font-size: 10px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 90;
+    }
+    .card-facedown {
+      background: radial-gradient(circle at 50% 50%, #1e293b 0%, #090d16 100%) !important;
+      border: 1px solid #f59e0b !important; align-items: center; justify-content: space-between;
+    }
+    .facedown-emblem {
+      width: 22px; height: 22px; border-radius: 50%; background: #7f1d1d; border: 1px solid #f87171;
+      display: flex; align-items: center; justify-content: center; font-size: 11px; margin: auto 0;
+    }
+    .clash-frontline { border-color: #ef4444 !important; box-shadow: 0 0 12px rgba(239, 68, 68, 0.85) !important; z-index: 10; }
+    .support-dimmed { opacity: 0.45 !important; filter: grayscale(40%); }
+    .war-badge-floating {
+      position: absolute; top: 2px; right: 2px; background: #dc2626; color: #fff;
+      border: 1px solid #fca5a5; border-radius: 3px; font-size: 7.5px; font-weight: 800; padding: 0 3px; z-index: 12;
+    }
+    .valid-target-synergy { border-color: #fbbf24 !important; box-shadow: 0 0 14px rgba(251, 191, 36, 0.85) !important; }
+    .synergy-preview-pill { font-size: 7px; font-weight: 800; color: #000; background: #fbbf24; border-radius: 3px; padding: 0 3px; }
+    .hand-mini-discard-overlay {
+      position: absolute; inset: 0; background: rgba(185, 28, 28, 0.72);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; z-index: 5;
+    }
+    .grid-discard-overlay {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      z-index: 60; pointer-events: none; border-radius: 6px; font-size: 14px; font-weight: 900;
+    }
+    .overlay-discard-drag { background: rgba(120, 20, 20, 0.5); border: 2px dashed #f87171; color: #fca5a5; }
+    .overlay-discard-hover { background: rgba(220, 38, 38, 0.78); border: 2px dashed #fef08a; color: #fef08a; }
+    .overlay-keep-drag { background: rgba(6, 78, 59, 0.5); border: 2px dashed #34d399; color: #a7f3d0; }
+    .overlay-keep-hover { background: rgba(16, 185, 129, 0.8); border: 2px dashed #fff; color: #fff; }
+    .dragging-card-clone { position: fixed !important; pointer-events: none !important; z-index: 10000 !important; }
+    .is-dragging-origin { opacity: 0.35 !important; }
+    .slot-drag-hover { border-color: #fef08a !important; box-shadow: 0 0 14px rgba(251, 191, 36, 0.9) !important; }
+    .floating-card-fx {
+      position: fixed; z-index: 9999; pointer-events: none; font-size: 11px; font-weight: 900;
+      background: rgba(15, 23, 42, 0.95); border: 1px solid currentColor; border-radius: 5px; padding: 2px 6px;
+      animation: floatUpFade 1.5s ease-out forwards;
+    }
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.7); }
+      20% { opacity: 1; transform: translate(-50%, -12px) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -32px) scale(0.9); }
+    }
+    .lord-speech-bubble, .player-speech-bubble {
+      position: absolute; top: 26px; background: #0f172a; border: 1.5px solid #fbbf24;
+      color: #fef08a; padding: 4px 10px; border-radius: 10px; font-size: 10.5px; font-weight: 700; z-index: 80; pointer-events: none;
+    }
+    .lord-speech-bubble { right: 10px; }
+    .player-speech-bubble { left: 10px; border-color: #38bdf8; color: #e0f2fe; }
+    .lord-select-card { background: rgba(15, 23, 42, 0.9); border: 1.5px solid #334155; border-radius: 10px; padding: 9px 11px; cursor: pointer; }
+    .lord-select-card.active-lord { border-color: #fbbf24; background: rgba(69, 26, 3, 0.75); }
+    .comp-filter-pill, .modal-flt-pill { background: #0f172a; border: 1px solid #334155; color: #94a3b8; padding: 2px 8px; border-radius: 10px; font-size: 10px; cursor: pointer; }
+    .comp-filter-pill.active, .modal-flt-pill.active { background: #f59e0b; color: #020617; font-weight: 800; }
+    .comp-card-row, .history-phase-card { background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+    .history-subbox-list { display: none; flex-direction: column; gap: 4px; margin-top: 5px; padding-top: 5px; border-top: 1px dashed rgba(148, 163, 184, 0.25); }
+    .history-phase-card.expanded .history-subbox-list { display: flex; }
+    .history-detail-subbox { display: flex; justify-content: space-between; gap: 8px; padding: 4px 7px; border-radius: 4px; background: rgba(2, 6, 23, 0.88); border-left: 3px solid #fbbf24; font-size: 10px; }
+    .center-card-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 490; }
+    .center-card-modal-wrap { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; width: 92vw; max-width: 320px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .center-card-dialog { width: 100%; background: #0f172a; border: 2px solid #f59e0b; border-radius: 12px; padding: 8px; position: relative; }
+    .center-card-close-x { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 50%; background: #dc2626; border: 2px solid #fff; color: #fff; font-weight: 900; cursor: pointer; }
+    .tcg-card-frame { display: flex; flex-direction: column; gap: 6px; background: #090d16; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 8px; }
+    .tcg-header-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .tcg-gem-cost { background: #b45309; border: 1px solid #fbbf24; color: #fef08a; padding: 2px 7px; border-radius: 5px; font-weight: 900; font-family: monospace; }
+    .tcg-gem-power { background: #991b1b; border: 1px solid #f87171; color: #fff; padding: 2px 7px; border-radius: 5px; font-weight: 900; font-family: monospace; }
+    .tcg-name-plate { flex: 1; text-align: center; font-size: 14px; font-weight: 900; color: #fef08a; }
+    .tcg-oracle-box { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; }
+    .tcg-bottom-dual-container { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .tcg-synergy-capsule { border: 1.5px solid; border-radius: 6px; padding: 4px; text-align: center; font-size: 11px; font-weight: 800; }
+    .line-combo-overlay, .war-clash-theater { position: fixed; inset: 0; z-index: 360; display: none; align-items: center; justify-content: center; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px); cursor: pointer; }
+    .line-combo-overlay.active, .war-clash-theater.active { display: flex; }
+    .line-combo-card { background: #0f172a; border: 2px solid #fbbf24; border-radius: 14px; padding: 18px 24px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
+    .career-stat-box { background: rgba(2, 6, 23, 0.85); border: 1px solid #1e293b; border-radius: 8px; padding: 6px; }
+    .career-ach-card { background: rgba(15, 23, 42, 0.88); border: 1px solid #1e293b; border-radius: 8px; padding: 6px 8px; display: flex; align-items: center; gap: 7px; }
+    .career-ach-card.unlocked { border-color: rgba(245, 158, 11, 0.6); background: rgba(69, 26, 3, 0.4); }
+
+    /* === 10. Container Queries & iPhone Landscape HUD Collision Prevention === */
+    .grid-cell, .hand-card { container-type: size; }
+    @container (min-width: 115px) and (min-height: 95px) {
+      .card-top-name { font-size: 10.5px; }
+      .card-badge-cost, .card-badge-power { font-size: 9.5px; padding: 1px 4px; }
+      .grid-eff-pill { height: 20px; font-size: 9px; }
+      .grid-card-bottom-strip { font-size: 8.5px; padding: 2px 4px; }
+    }
+    @container (min-width: 85px) and (min-height: 105px) {
+      .mini-row-name { font-size: 10px; }
+      .mini-eff-desc { font-size: 8.2px; }
+      .mini-bot-cell { font-size: 8.5px; }
+    }
+    /* Portrait AI Grid: hide bottom line-bonus strip to keep skills readable on compact height */
+    @media (orientation: portrait) {
+      #ai-grid .grid-card-bottom-strip { display: none; }
+      #ai-grid .grid-eff-pill { height: 13.5px; font-size: 7px; }
+    }
+    /* iPhone Landscape: prevent center HUD from overlapping right buttons when room code is shown */
+    @media (orientation: landscape) and (max-height: 480px) {
+      #app-header .brand-box + span { display: none; }
+      .header-menu-wrap { gap: 3px; }
+      .header-menu-wrap .btn { padding: 2px 6px !important; font-size: 9.5px !important; }
+      .header-duel-compact-hud { padding: 1px 8px; font-size: 9.5px; gap: 4px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <header id="app-header">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="brand-box">玖</div>
+      <span style="font-size:13px; font-weight:800; color:#fcd34d;">玖陣王國 <span style="font-size:10px; color:#f59e0b; font-family:monospace;">MAGNOLIA</span></span>
+      <span style="color:#475569; font-size:12px;">|</span>
+      <span id="round-indicator" style="font-size:12px; font-weight:800; color:#fbbf24;">第 1 輪</span>
+      <div class="phase-stepper-hud" id="phase-stepper-hud">
+        <span class="phase-step-pill step-active" data-step="DRAW">🃏抽牌</span>
+        <span class="phase-step-arrow">▸</span>
+        <span class="phase-step-pill" data-step="DEPLOY">🏰部署</span>
+        <span class="phase-step-arrow">▸</span>
+        <span class="phase-step-pill" data-step="WAR">⚔️戰爭</span>
+        <span class="phase-step-arrow">▸</span>
+        <span class="phase-step-pill" data-step="DEVELOP">⚙️發展</span>
+        <span class="phase-step-arrow">▸</span>
+        <span class="phase-step-pill" data-step="INCOME">💰收入</span>
+        <span class="phase-step-arrow">▸</span>
+        <span class="phase-step-pill" data-step="VP">👑計分</span>
+      </div>
+    </div>
+
+    <div class="header-duel-compact-hud" id="header-duel-compact-hud">
+      <span><span style="color:#fbbf24;">👑</span><strong id="hdr-p-vp">0</strong></span>
+      <span style="color:#475569;">|</span>
+      <span style="color:#f87171;">⚔️<strong id="hdr-p-pow">0</strong>:<strong id="hdr-a-pow">0</strong></span>
+      <span style="color:#475569;">|</span>
+      <span><span style="color:#f87171;">🤖</span><strong id="hdr-a-vp">0</strong></span>
+    </div>
+
+    <div class="header-menu-wrap" id="header-menu-wrap">
+      <button id="btn-header-pvp" class="btn btn-slate" style="padding:3px 8px; border-color:rgba(56,189,248,0.55); color:#7dd3fc;">
+        <span>🌐</span><span id="header-pvp-label">雙人對戰</span>
+      </button>
+      <button id="btn-header-home" class="btn btn-slate" style="padding:3px 8px; border-color:rgba(245,158,11,0.5); color:#fde047;">
+        <span>🏰</span><span>主頁</span>
+      </button>
+      <button id="btn-options-menu" class="btn btn-slate" style="padding:3px 8px; border-color:rgba(245,158,11,0.5); color:#fde047;">
+        <span>⚙️</span><span>選單</span><span style="font-size:9px; color:#94a3b8;" id="menu-caret">▾</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Options Popover -->
+  <div id="header-options-popover" class="header-options-popover hidden">
+    <div class="options-section-label"><span>⚙️ 戰局設定與資訊</span><span>點擊切換</span></div>
+    <div class="options-menu-grid">
+      <button id="btn-popover-pvp" class="btn btn-slate" style="border-color:rgba(56,189,248,0.5); color:#7dd3fc;">🌐 雙人對戰</button>
+      <button id="btn-title-menu" class="btn btn-slate" style="border-color:rgba(245,158,11,0.45); color:#fde047;">🏰 主頁</button>
+      <button id="btn-difficulty" class="btn btn-slate"><span id="diff-icon">🤖</span><span id="diff-text">平衡</span></button>
+      <button id="btn-deck-viewer" class="btn btn-slate">🃏 牌庫 <span id="header-deck-count" style="color:#fbbf24;">92</span></button>
+      <button id="btn-auto-advance" class="btn btn-slate">⚡ <span id="auto-text">快轉: 關</span></button>
+      <button id="btn-bgm" class="btn btn-slate">🎵 <span id="bgm-text">音樂: 關</span></button>
+      <button id="btn-sound" class="btn btn-slate"><span id="sound-icon">🔊</span><span id="sound-text">音效</span></button>
+    </div>
+    <div class="options-section-label"><span>📖 教學指南與重新開局</span></div>
+    <div class="options-menu-grid">
+      <button id="btn-popover-compendium" class="btn btn-slate" style="color:#fde047;">🃏 圖鑑</button>
+      <button id="btn-popover-career" class="btn btn-slate" style="color:#fde047;">🏆 戰績</button>
+      <button id="btn-rules" class="btn btn-slate">📖 規則</button>
+      <button id="btn-restart" class="btn btn-red">🔄 重開</button>
+    </div>
+  </div>
+
+  <main id="battlefield">
+    <!-- AI / Opponent Panel -->
+    <section class="board-panel" id="ai-panel">
+      <div class="kingdom-board-core">
+        <div class="upper-grid-section">
+          <div class="ai-grid-wrapper">
+            <div class="grid-3x3" id="ai-grid"></div>
+          </div>
+          <div class="grid-side-dashboard" id="ai-side-dashboard">
+            <div class="header-tech-faith-wrap v-tf-ladder-wrap" id="ai-ladder-wrap">
+              <div class="v-meter-col">
+                <div class="v-meter-head"><span>⚙️</span><span class="meter-badge badge-tech" id="ai-tech-badge">Lv0</span></div>
+                <div class="v-ladder-cells" id="ai-tech-cells"></div>
+              </div>
+              <div class="v-meter-col">
+                <div class="v-meter-head"><span>✝️</span><span class="meter-badge badge-faith" id="ai-faith-badge">Lv0</span></div>
+                <div class="v-ladder-cells" id="ai-faith-cells"></div>
+              </div>
+            </div>
+            <div class="stat-pill status-gold-pill" id="ai-gold-pill"><span>💰</span><strong id="ai-gold">5</strong></div>
+            <div class="stat-pill status-power-pill" id="ai-power-pill"><span>⚔️</span><strong id="ai-power">0</strong></div>
+            <div class="stat-pill status-vp-pill" id="ai-vp-pill"><span>🏆</span><strong id="ai-vp-num">0</strong><span style="font-size:7px;">VP</span></div>
+            <div class="side-item-name" id="ai-lord-header-box">
+              <span id="ai-lord-avatar">🤖</span>
+              <span id="ai-lord-name" style="color:#f87171;">巴爾</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="ai-speech-container"></div>
+    </section>
+
+    <!-- Center Settlement Banner -->
+    <div id="app-banner">
+      <div class="banner-main-row">
+        <div class="banner-left-phase">
+          <span id="banner-icon" style="font-size:14px;">🃏</span>
+          <div class="banner-round-phase-box">
+            <div id="banner-round-text" class="banner-round-line">第 1 輪</div>
+            <div id="banner-phase-text" class="banner-phase-line">抽牌階段</div>
+          </div>
+        </div>
+        <div id="banner-msg" class="banner-details-box" title="點擊查閱王國階段公告歷程">
+          <div class="banner-line-ai"><span class="banner-tag-ai">電腦：</span><span class="banner-val-text">手牌已備妥 (5/5)</span></div>
+          <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">保留 5 張手牌</span></div>
+        </div>
+        <div class="banner-right-controls">
+          <button type="button" id="banner-history-pill" class="banner-history-btn">📜 歷程</button>
+          <div id="banner-actions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player Panel -->
+    <section class="board-panel" id="player-panel">
+      <div id="player-speech-container"></div>
+      <div class="kingdom-board-core">
+        <div class="upper-grid-section">
+          <div class="player-grid-wrapper">
+            <div class="grid-3x3" id="player-grid"></div>
+            <div id="player-grid-discard-overlay" class="grid-discard-overlay hidden">
+              <span id="player-grid-discard-text">🗑️ 拖曳手牌至此處棄牌</span>
+            </div>
+          </div>
+          <div class="grid-side-dashboard" id="player-side-dashboard">
+            <div class="side-item-name" id="player-header-left-box"><span>👑</span><span>我的王國</span></div>
+            <div class="stat-pill status-vp-pill" id="p-vp-pill"><span>🏆</span><strong id="p-vp-num">0</strong><span style="font-size:7px;">VP</span></div>
+            <div class="stat-pill status-power-pill" id="p-power-pill"><span>⚔️</span><strong id="p-power">0</strong></div>
+            <div class="stat-pill status-gold-pill" id="p-gold-pill"><span>💰</span><strong id="p-gold">5</strong></div>
+            <div class="header-tech-faith-wrap v-tf-ladder-wrap" id="p-ladder-wrap">
+              <div class="v-meter-col">
+                <div class="v-meter-head"><span>⚙️</span><span class="meter-badge badge-tech" id="p-tech-badge">Lv0</span></div>
+                <div class="v-ladder-cells" id="p-tech-cells"></div>
+              </div>
+              <div class="v-meter-col">
+                <div class="v-meter-head"><span>✝️</span><span class="meter-badge badge-faith" id="p-faith-badge">Lv0</span></div>
+                <div class="v-ladder-cells" id="p-faith-cells"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lower-hand-section" id="player-hand-container">
+          <div class="hand-header-bar">
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-weight:800; color:#fbbf24;">👑 我的手牌</span>
+              <span id="hand-count" style="font-family:monospace; color:#cbd5e1; background:#020617; padding:0 4px; border-radius:3px;">5/5</span>
+            </div>
+            <div id="hand-action-hint" style="color:#fde047;">點選或拖曳手牌操作</div>
+          </div>
+          <div class="hand-cards-row" id="hand-grid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Title Screen Modal -->
+  <div id="title-screen-modal" class="title-screen-backdrop">
+    <div class="title-screen-card">
+      <div style="text-align:center; display:flex; flex-direction:column; gap:6px; border-bottom:1px solid rgba(245,158,11,0.25); padding-bottom:10px;">
+        <div class="title-emblem-inner">玖</div>
+        <div style="font-size:20px; font-weight:900; color:#fef08a;">玖陣王國 <span style="font-size:13px; color:#f59e0b; font-family:monospace;">MAGNOLIA</span></div>
+        <div id="title-status-text" style="font-size:10.5px; color:#fde047; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.35); border-radius:12px; padding:3px 10px;">戰局就緒 · 點擊「開始新征途」或「繼續遊戲」</div>
+      </div>
+      <div class="title-menu-list">
+        <button id="btn-main-pvp" class="title-menu-item" style="border-color:#38bdf8; background:rgba(6,182,212,0.18);">
+          <span style="font-size:22px;">🌐</span>
+          <div style="flex:1;"><div style="font-weight:900; color:#7dd3fc;">雙人網上對戰 (零設定 P2P)</div><div style="font-size:9.5px; color:#94a3b8;">創建房間或輸入 4 位房間號即時連線</div></div>
+          <span style="color:#38bdf8;">▶</span>
+        </button>
+        <button id="btn-main-start" class="title-menu-item" style="border-color:#f59e0b; background:rgba(245,158,11,0.2);">
+          <span style="font-size:22px;">⚔️</span>
+          <div style="flex:1;"><div style="font-weight:900; color:#fef08a;">開始新征途 (選擇難度)</div><div style="font-size:9.5px; color:#94a3b8;">挑選 AI 領主（休閒 / 平衡 / 大師）</div></div>
+          <span style="color:#fbbf24;">▶</span>
+        </button>
+        <button id="btn-main-continue" class="title-menu-item">
+          <span style="font-size:22px;">🛡️</span>
+          <div style="flex:1;"><div id="title-continue-title" style="font-weight:800; color:#f8fafc;">繼續遊戲</div><div id="title-continue-sub" style="font-size:9.5px; color:#94a3b8;">返回當前棋盤</div></div>
+          <span>▶</span>
+        </button>
+        <div class="title-menu-grid-2">
+          <button id="btn-main-compendium" class="title-menu-item"><span style="font-size:18px;">🃏</span><div><div style="font-weight:800; color:#fde047;">王國圖鑑</div><div style="font-size:9px; color:#94a3b8;">41張卡牌全解析</div></div></button>
+          <button id="btn-main-career" class="title-menu-item"><span style="font-size:18px;">🏆</span><div><div style="font-weight:800; color:#fde047;">生涯戰績</div><div style="font-size:9px; color:#94a3b8;">勝率與成就館</div></div></button>
+        </div>
+      </div>
+      <div class="title-footer-row">
+        <button id="btn-title-bgm" class="btn btn-slate">🎵 <span id="title-bgm-txt">音樂: 關</span></button>
+        <button id="btn-title-sfx" class="btn btn-slate"><span id="title-sfx-icon">🔊</span><span id="title-sfx-txt">音效: 開</span></button>
+        <button id="btn-title-rules" class="btn btn-slate">📖 規則說明</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Difficulty Modal -->
+  <div id="difficulty-modal" class="modal-backdrop hidden" style="z-index:220;">
+    <div class="modal-box" style="max-width:420px;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <h3 style="color:#fcd34d; font-size:13px;">⚔️ 選擇挑戰難度與 AI 領主</h3>
+        <button id="btn-close-diff-modal" style="background:none; border:none; color:#cbd5e1; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:12px; display:flex; flex-direction:column; gap:8px; font-size:11px;">
+        <div class="lord-select-card" data-diff="casual">
+          <div style="font-weight:800; color:#86efac;">🛡️ 見習領主・艾爾（休閒難度）</div>
+          <div style="font-size:9.5px; color:#94a3b8; margin-top:2px;">直覺出兵鋪場，適合輕鬆體驗與摸索卡牌配合。</div>
+        </div>
+        <div class="lord-select-card active-lord" data-diff="balanced">
+          <div style="font-weight:800; color:#fde047;">⚖️ 鐵血宰相・巴爾（平衡難度）</div>
+          <div style="font-size:9.5px; color:#94a3b8; margin-top:2px;">懂得蓄力打大牌，並積極構築 3×3 同種族與同職業連線。</div>
+        </div>
+        <div class="lord-select-card" data-diff="master">
+          <div style="font-weight:800; color:#fca5a5;">🔮 深淵大公・瑪格諾（大師難度）</div>
+          <div style="font-size:9.5px; color:#94a3b8; margin-top:2px;">精通流派專精、前線算血讓步、雙重連線與終局斬殺精算！</div>
+        </div>
+      </div>
+      <div style="padding:10px 14px; border-top:1px solid #1e293b; display:flex; justify-content:flex-end;">
+        <button id="btn-confirm-start-game" class="btn btn-gold" style="padding:6px 16px;">⚔️ 開啟征途！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PvP Modal -->
+  <div id="pvp-modal" class="modal-backdrop hidden" style="z-index:250;">
+    <div class="modal-box" style="max-width:440px; border-color:#38bdf8;">
+      <div style="padding:10px 14px; border-bottom:1px solid rgba(56,189,248,0.3); display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="color:#7dd3fc; font-size:13.5px;">🌐 雙人網上對戰大廳 (P2P)</h3>
+        <button id="btn-close-pvp-modal" style="background:none; border:none; color:#cbd5e1; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px; font-size:11px;">
+        <div style="background:#020617; border:1px solid #334155; border-radius:8px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span id="pvp-status-dot" style="width:8px; height:8px; border-radius:50%; background:#94a3b8;"></span>
+            <span id="pvp-status-text" style="font-weight:700;">未進入房間 (單機練習模式)</span>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button id="btn-pvp-restart-match" class="btn btn-emerald hidden" style="padding:2px 8px; font-size:10px;">🔄 洗牌再戰</button>
+            <button id="btn-pvp-reconnect" class="btn btn-gold hidden" style="padding:2px 8px; font-size:10px;">⚡ 重連</button>
+            <button id="btn-pvp-leave-room" class="btn btn-red hidden" style="padding:2px 8px; font-size:10px;">離開</button>
+          </div>
+        </div>
+        <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(56,189,248,0.35); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-weight:800; color:#fde047;">👑 創建房間 (成為房主)</div>
+          <div style="display:flex; gap:8px;">
+            <button id="btn-pvp-create" class="btn btn-gold" style="flex:1;">🏰 創建全新房間</button>
+            <button id="btn-pvp-copy-link" class="btn btn-slate hidden" style="border-color:#38bdf8; color:#7dd3fc;">📋 複製連結</button>
+          </div>
+          <div id="pvp-created-room-box" class="hidden" style="background:#020617; border:1px dashed #f59e0b; border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#94a3b8;">4 位房間號：</span>
+            <span id="pvp-display-room-id" style="font-size:18px; font-weight:900; color:#fde047; font-family:monospace;">-</span>
+            <span id="pvp-waiting-opponent-text" style="color:#34d399;">⏳ 等待好友加入...</span>
+          </div>
+        </div>
+        <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(245,158,11,0.35); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-weight:800; color:#7dd3fc;">⚔️ 加入已有房間 (成為訪客)</div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="pvp-input-room-id" placeholder="4位房間碼" maxlength="10" style="background:#020617; border:1px solid #334155; border-radius:6px; padding:6px; color:#fde047; font-size:14px; font-weight:900; text-align:center; width:120px; text-transform:uppercase;">
+            <button id="btn-pvp-join" class="btn btn-emerald" style="flex:1;">🚀 立即加入房間</button>
+          </div>
+        </div>
+      </div>
+      <div style="padding:8px 14px; border-top:1px solid #1e293b; text-align:right;">
+        <button id="btn-pvp-close-bottom" class="btn btn-slate">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Round Summary Modal -->
+  <div id="round-summary-modal" class="modal-backdrop hidden" style="z-index:220;">
+    <div class="modal-box" style="max-width:440px;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <h3 id="round-summary-title" style="color:#fde047; font-size:13.5px;">🔔 第 1 輪結束 · 王國巡禮總結</h3>
+      </div>
+      <div style="padding:12px; display:flex; flex-direction:column; gap:8px; font-size:11px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#020617; border:1px solid rgba(245,158,11,0.35); border-radius:8px; padding:8px; text-align:center;">
+          <div>
+            <div style="color:#fcd34d; font-weight:800;">👑 我的王國</div>
+            <div id="round-sum-p-vp" style="font-size:20px; font-weight:900; color:#fbbf24;">0 VP</div>
+            <div style="font-size:10px; color:#cbd5e1;">💰<strong id="round-sum-p-gold">5</strong> ｜ ⚔️<strong id="round-sum-p-power">0</strong></div>
+          </div>
+          <div style="border-left:1px solid rgba(255,255,255,0.1);">
+            <div style="color:#fca5a5; font-weight:800;">🤖 對手王國</div>
+            <div id="round-sum-a-vp" style="font-size:20px; font-weight:900; color:#f87171;">0 VP</div>
+            <div style="font-size:10px; color:#cbd5e1;">💰<strong id="round-sum-a-gold">5</strong> ｜ ⚔️<strong id="round-sum-a-power">0</strong></div>
+          </div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:10.5px; background:#0f172a; border-radius:6px; overflow:hidden;">
+          <thead>
+            <tr style="background:#070d18; color:#94a3b8;"><th style="padding:5px;">輪次</th><th style="padding:5px; color:#fcd34d;">👑 我的總獲</th><th style="padding:5px; color:#fca5a5;">🤖 對手總獲</th></tr>
+          </thead>
+          <tbody id="round-summary-table-tbody"></tbody>
+        </table>
+      </div>
+      <div style="padding:10px 14px; border-top:1px solid #1e293b;">
+        <button id="btn-confirm-next-round" class="btn btn-gold" style="width:100%; padding:8px;">🃏 準備就緒，進入第 <span id="round-sum-btn-num">2</span> 輪 ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="history-modal" class="modal-backdrop hidden" style="z-index:230;">
+    <div class="modal-box" style="max-width:600px;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <h3 style="color:#fcd34d; font-size:13px;">📜 王國階段公告歷程 (<span id="modal-history-count">共 1 個階段</span>)</h3>
+        <button id="btn-close-history" style="background:none; border:none; color:#cbd5e1; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="display:flex; gap:4px; padding:6px 12px; background:#070d18; overflow-x:auto;">
+        <button class="modal-flt-pill active" data-filter="all">全部</button>
+        <button class="modal-flt-pill" data-filter="抽牌">🃏 抽牌</button>
+        <button class="modal-flt-pill" data-filter="部署">⚡ 部署</button>
+        <button class="modal-flt-pill" data-filter="戰爭">⚔️ 戰爭</button>
+        <button class="modal-flt-pill" data-filter="發展">⚙️ 發展</button>
+        <button class="modal-flt-pill" data-filter="收入">💰 收入</button>
+        <button class="modal-flt-pill" data-filter="計分">👑 計分</button>
+      </div>
+      <div id="history-modal-body" style="padding:10px; overflow-y:auto; max-height:62vh;">
+        <div id="history-container" style="display:flex; flex-direction:column; gap:6px;"></div>
+      </div>
+      <div style="padding:8px 14px; border-top:1px solid #1e293b; text-align:right;">
+        <button id="btn-confirm-history" class="btn btn-gold">關閉歷程</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules Modal -->
+  <div id="rules-modal" class="modal-backdrop hidden" style="z-index:240;">
+    <div class="modal-box">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <h3 style="color:#fcd34d; font-size:13px;">📖 《玖陣王國》規則說明</h3>
+        <button id="btn-close-rules" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:12px 14px; overflow-y:auto; font-size:11px; color:#cbd5e1; line-height:1.5; display:flex; flex-direction:column; gap:8px;">
+        <div><strong style="color:#fbbf24;">獲勝與終局：</strong>任意一方達到 40 VP 或領地放滿 9 張卡觸發終局。剩餘金幣每 3 金折算 1 VP（人類君王每 3 金換 2 VP）。</div>
+        <div><strong style="color:#fbbf24;">每輪六大階段：</strong>1.抽牌（換牌補滿5張）➔ 2.部署（首張任意格，後續須上下左右邊對邊相鄰；最多暗置2張，放1張補1金，不放補2金）➔ 3.戰爭（每直欄最前排參戰，勝者+4VP，平手各+2VP）➔ 4.發展 ➔ 5.收入（基礎3金+技能）➔ 6.計分。</div>
+        <div><strong style="color:#fbbf24;">連線獎勵（橫列或直欄3張同種族/職業）：</strong>人類+5VP | 矮人+2技 | 精靈+2信 | 哥布林+3金 | 魔像+2技+2信 | 惡魔+7VP；騎士+3金 | 商人+3VP | 工匠+2技 | 咒術師+1金+3VP | 聖職者+2信 | 君王+5VP。</div>
+        <div><strong style="color:#fbbf24;">等級對照：</strong>0點=Lv0 / 1~2點=Lv1 / 3~6點=Lv2 / 7~14點=Lv3 / 15點=Lv4</div>
+      </div>
+      <div style="padding:8px 14px; border-top:1px solid #1e293b; text-align:right;">
+        <button id="btn-confirm-rules" class="btn btn-gold">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compendium Modal -->
+  <div id="compendium-modal" class="modal-backdrop hidden" style="z-index:235;">
+    <div class="modal-box" style="max-width:520px;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <h3 style="color:#fcd34d; font-size:13px;">🃏 王國卡牌全圖鑑 (<span id="compendium-card-count">41</span> 種)</h3>
+        <button id="btn-close-compendium" style="background:none; border:none; color:#cbd5e1; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:8px 12px; background:#0b1120; display:flex; flex-direction:column; gap:6px;">
+        <input type="text" id="compendium-search" placeholder="🔍 搜尋部隊名稱、種族、職業或技能..." style="background:#020617; border:1px solid #334155; border-radius:6px; padding:5px 8px; color:#f1f5f9; font-size:11px;">
+        <div id="compendium-race-filters" style="display:flex; flex-wrap:wrap; gap:4px;">
+          <button class="comp-filter-pill active" data-race="all">全部</button>
+          <button class="comp-filter-pill" data-race="人類">👑人類</button>
+          <button class="comp-filter-pill" data-race="矮人">⚒️矮人</button>
+          <button class="comp-filter-pill" data-race="精靈">🍃精靈</button>
+          <button class="comp-filter-pill" data-race="哥布林">👺哥布林</button>
+          <button class="comp-filter-pill" data-race="魔像">💎魔像</button>
+          <button class="comp-filter-pill" data-race="惡魔">🔮惡魔</button>
+        </div>
+      </div>
+      <div id="compendium-cards-container" style="padding:10px; overflow-y:auto; max-height:58vh; display:flex; flex-direction:column; gap:6px;"></div>
+      <div style="padding:8px 14px; border-top:1px solid #1e293b; text-align:right;">
+        <button id="btn-close-compendium-bottom" class="btn btn-gold">返回</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Career Modal -->
+  <div id="career-modal" class="modal-backdrop hidden" style="z-index:235;">
+    <div class="modal-box" style="max-width:520px;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <h3 style="color:#fcd34d; font-size:13px;">🏆 君王生涯戰績與榮譽館</h3>
+        <button id="btn-close-career" style="background:none; border:none; color:#cbd5e1; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:12px; overflow-y:auto; max-height:68vh; display:flex; flex-direction:column; gap:10px; font-size:11px;">
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; text-align:center;">
+          <div class="career-stat-box"><div style="font-size:8.5px; color:#94a3b8;">總對局</div><div id="career-modal-games" style="font-size:14px; font-weight:900;">0</div></div>
+          <div class="career-stat-box"><div style="font-size:8.5px; color:#94a3b8;">勝場</div><div id="career-modal-wins" style="font-size:14px; font-weight:900; color:#34d399;">0</div></div>
+          <div class="career-stat-box"><div style="font-size:8.5px; color:#94a3b8;">勝率</div><div id="career-modal-winrate" style="font-size:14px; font-weight:900; color:#38bdf8;">0%</div></div>
+          <div class="career-stat-box"><div style="font-size:8.5px; color:#94a3b8;">最高分</div><div id="career-modal-high-vp" style="font-size:14px; font-weight:900; color:#fbbf24;">0 VP</div></div>
+          <div class="career-stat-box"><div style="font-size:8.5px; color:#94a3b8;">最高連勝</div><div id="career-modal-streak" style="font-size:14px; font-weight:900; color:#c084fc;">0</div></div>
+        </div>
+        <div style="font-weight:800; color:#fbbf24;">🎖️ 成就館 (<span id="career-ach-count">0</span>/12)</div>
+        <div id="career-achievements-list" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;"></div>
+      </div>
+      <div style="padding:8px 14px; border-top:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <button id="btn-career-reset" style="background:none; border:none; color:#ef4444; font-size:10px; cursor:pointer;">重置數據</button>
+        <button id="btn-close-career-bottom" class="btn btn-gold">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deck Modal -->
+  <div id="deck-modal" class="modal-backdrop hidden" style="z-index:235;">
+    <div class="modal-box" style="max-width:520px;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <h3 style="color:#fcd34d; font-size:13px;">🃏 牌庫情報與棄牌堆統計</h3>
+        <button id="btn-close-deck-modal" style="background:none; border:none; color:#cbd5e1; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="display:flex; border-bottom:1px solid #1e293b; background:#0b1120; padding:0 8px; gap:8px;">
+        <button id="tab-btn-discard" class="btn btn-slate" style="border-radius:0;">棄牌堆 (<span id="deck-tab-discard-count">0</span>)</button>
+        <button id="tab-btn-deck" class="btn btn-slate" style="border-radius:0;">未知牌池 (<span id="deck-tab-deck-count">0</span>)</button>
+      </div>
+      <div id="deck-modal-body" style="padding:12px; max-height:58vh; overflow-y:auto; font-size:11px;"></div>
+      <div style="padding:8px 14px; border-top:1px solid #1e293b; text-align:right;">
+        <button id="btn-confirm-deck-modal" class="btn btn-gold">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="game-over-modal" class="modal-backdrop hidden" style="z-index:250;">
+    <div class="modal-box" style="max-width:540px;">
+      <div style="padding:10px 14px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3 id="end-title" style="color:#fcd34d; font-size:14px;">👑 王國大捷！</h3>
+          <div id="end-subtitle" style="font-size:10px; color:#94a3b8;">終局結算報表</div>
+        </div>
+        <button id="btn-close-game-over" style="background:none; border:none; color:#cbd5e1; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:12px; overflow-y:auto; max-height:66vh; display:flex; flex-direction:column; gap:10px; font-size:11px;">
+        <table style="width:100%; border-collapse:collapse; background:#020617; border:1px solid #1e293b; border-radius:6px; overflow:hidden;">
+          <thead><tr style="background:#070d18; color:#94a3b8;"><th style="padding:5px;">輪次</th><th style="padding:5px; color:#fcd34d;">👑 我的王國</th><th style="padding:5px; color:#fca5a5;">🤖 對手王國</th></tr></thead>
+          <tbody id="end-breakdown-tbody"></tbody>
+        </table>
+        <div id="end-lineup-summary" style="background:#020617; border:1px solid #334155; border-radius:6px; padding:8px; display:flex; flex-direction:column; gap:3px; font-size:10.5px;"></div>
+      </div>
+      <div style="padding:10px 14px; border-top:1px solid #1e293b; display:flex; justify-content:space-between;">
+        <button id="btn-review-board" class="btn btn-slate">🔍 自由覆盤</button>
+        <button id="btn-play-again" class="btn btn-gold">🔄 再來一局</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center Card Enlarged Modal -->
+  <div id="center-card-backdrop" class="center-card-backdrop hidden"></div>
+  <div id="center-card-modal" class="center-card-modal-wrap hidden">
+    <div class="center-card-dialog">
+      <button class="center-card-close-x" id="btn-close-center-card">✕</button>
+      <div id="center-card-render-box"></div>
+    </div>
+    <div id="center-card-actions" style="display:flex; gap:8px; justify-content:center;"></div>
+  </div>
+
+  <!-- Toast & Confirm Modals -->
+  <div id="pvp-toast-notice" class="modal-backdrop hidden" style="z-index:9999;">
+    <div class="modal-box" style="max-width:340px; text-align:center; padding:16px;">
+      <div id="pvp-toast-msg" style="font-size:12px; margin-bottom:12px; line-height:1.45;"></div>
+      <button id="btn-pvp-toast-ok" class="btn btn-gold" style="margin:0 auto;">知道了</button>
+    </div>
+  </div>
+  <div id="pvp-confirm-modal" class="modal-backdrop hidden" style="z-index:9999;">
+    <div class="modal-box" style="max-width:340px; text-align:center; padding:16px;">
+      <div style="font-weight:800; color:#fca5a5; margin-bottom:8px;">⚠️ 確認退出房間？</div>
+      <div style="font-size:11px; color:#cbd5e1; margin-bottom:14px;">確定要離開當前聯機房間，返回單人練習模式嗎？</div>
+      <div style="display:flex; justify-content:center; gap:10px;">
+        <button id="btn-pvp-confirm-cancel" class="btn btn-slate">取消</button>
+        <button id="btn-pvp-confirm-leave" class="btn btn-red">確定離開</button>
+      </div>
+    </div>
+  </div>
+  <div id="restart-confirm-modal" class="modal-backdrop hidden" style="z-index:260;">
+    <div class="modal-box" style="max-width:340px; padding:14px; text-align:center;">
+      <div style="font-weight:800; color:#fca5a5; margin-bottom:8px;">⚠️ 確認重新開局？</div>
+      <div style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">確定要放棄目前進度並重新洗牌開局嗎？</div>
+      <div style="display:flex; justify-content:center; gap:8px;">
+        <button id="btn-cancel-restart" class="btn btn-slate">取消</button>
+        <button id="btn-confirm-restart" class="btn btn-red">確定重開</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line Combo & War Clash Overlays -->
+  <div id="line-combo-overlay" class="line-combo-overlay">
+    <div class="line-combo-card">
+      <div style="font-size:11px; color:#93c5fd; font-weight:800;">⚡ 陣列共鳴 · LINE SYNERGY ⚡</div>
+      <div id="line-combo-title-main" style="font-size:20px; font-weight:900; color:#fef08a;">達成連線！</div>
+      <div id="line-combo-reward-text" style="font-size:14px; font-weight:800; color:#34d399;">✨ +5 VP</div>
+      <div style="font-size:10px; color:#94a3b8;">點擊任意處繼續 ▸</div>
+    </div>
+  </div>
+  <div id="war-clash-theater" class="war-clash-theater">
+    <div class="line-combo-card" style="border-color:#ef4444; min-width:280px;">
+      <div style="font-size:11px; color:#f87171; font-weight:800;">⚔️ 兩軍前線交鋒 ⚔️</div>
+      <div style="display:flex; justify-content:space-around; align-items:center; gap:16px; margin:6px 0;">
+        <div><div style="font-size:10px; color:#fcd34d;">👑 我的戰力</div><div id="war-clash-p-power" style="font-size:26px; font-weight:900; color:#fbbf24;">0</div></div>
+        <div style="font-weight:900; color:#fde047;">VS</div>
+        <div><div style="font-size:10px; color:#fca5a5;">🤖 對手戰力</div><div id="war-clash-a-power" style="font-size:26px; font-weight:900; color:#f87171;">0</div></div>
+      </div>
+      <div id="war-clash-stamp-box" style="font-size:16px; font-weight:900; color:#fef08a;"></div>
+      <div style="font-size:10px; color:#94a3b8;">點擊任意處繼續 ▸</div>
+    </div>
+  </div>
+  <div id="drag-proxy-layer" style="position:fixed; inset:0; pointer-events:none; z-index:9999;"></div>
+
+  <script>
+    /* =========================================================================
+       MODULE 1: CARD DATABASE & RULES HELPERS (cards-data.js)
+       ========================================================================= */
+    const CARD_DB = [
+      { id: "01-01", name: "人類騎士", race: "人類", class: "騎士", cost: 3, power: 6, copies: 3, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "在戰爭中獲得VP時，額外再獲得1VP。" }], line_bonuses: { race: "5 VP", class: "3 金" } },
+      { id: "01-02", name: "人類小販", race: "人類", class: "商人", cost: 1, power: 3, copies: 3, effects: [{ trigger: "income", timing_name: "💰 收入", description: "1 金" }], line_bonuses: { race: "5 VP", class: "3 VP" } },
+      { id: "01-03", name: "人類木匠", race: "人類", class: "工匠", cost: 5, power: 2, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 技術點" }, { trigger: "vp", timing_name: "👑 VP", description: "2 VP × 技術等級" }], line_bonuses: { race: "5 VP", class: "2 技術點" } },
+      { id: "01-04", name: "人類咒術師", race: "人類", class: "咒術師", cost: 3, power: 4, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 信仰點" }, { trigger: "war", timing_name: "⚔️ 戰爭", description: "1 戰力 × 信仰等級" }], line_bonuses: { race: "5 VP", class: "1 金 3 VP" } },
+      { id: "01-05", name: "人類聖職者", race: "人類", class: "聖職者", cost: 3, power: 2, copies: 3, effects: [{ trigger: "develop", timing_name: "⚙️ 發展", description: "獲得 1 信仰點" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 信仰等級" }], line_bonuses: { race: "5 VP", class: "2 信仰點" } },
+      { id: "01-06", name: "人類大富商", race: "人類", class: "商人", cost: 2, power: 2, copies: 2, effects: [{ trigger: "income", timing_name: "💰 收入", description: "2 金" }], line_bonuses: { race: "5 VP", class: "3 VP" } },
+      { id: "01-07", name: "人類入殮師", race: "人類", class: "工匠", cost: 3, power: 2, copies: 2, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 技術點" }, { trigger: "war", timing_name: "⚔️ 戰爭", description: "在戰爭中未獲得VP時，獲得3VP。" }], line_bonuses: { race: "5 VP", class: "2 技術點" } },
+      { id: "01-08", name: "人類君王", race: "人類", class: "君王", cost: 6, power: 6, copies: 1, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "1 VP × 人類單位數（含此卡）" }, { trigger: "game_end", timing_name: "🏁 終局", description: "計算VP時，手頭金幣換算VP翻倍（每3金換2VP）" }], line_bonuses: { race: "5 VP", class: "5 VP" } },
+      { id: "01-09", name: "矮人拳鬥士", race: "矮人", class: "騎士", cost: 2, power: 5, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 技術點" }], line_bonuses: { race: "2 技術點", class: "3 金" } },
+      { id: "01-10", name: "矮人礦石商", race: "矮人", class: "商人", cost: 3, power: 4, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 技術點" }, { trigger: "income", timing_name: "💰 收入", description: "1 金 × 技術等級" }], line_bonuses: { race: "2 技術點", class: "3 VP" } },
+      { id: "01-11", name: "矮人廚師", race: "矮人", class: "工匠", cost: 2, power: 1, copies: 3, effects: [{ trigger: "develop", timing_name: "⚙️ 發展", description: "獲得 1 技術點" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 技術等級" }], line_bonuses: { race: "2 技術點", class: "2 技術點" } },
+      { id: "01-12", name: "矮人鍊金術師", race: "矮人", class: "咒術師", cost: 2, power: 2, copies: 3, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "2 戰力 × 信仰等級" }, { trigger: "income", timing_name: "💰 收入", description: "1 金" }], line_bonuses: { race: "2 技術點", class: "1 金 3 VP" } },
+      { id: "01-13", name: "矮人神官", race: "矮人", class: "聖職者", cost: 4, power: 6, copies: 3, effects: [{ trigger: "develop", timing_name: "⚙️ 發展", description: "獲得 1 技術點 與 1 信仰點" }], line_bonuses: { race: "2 技術點", class: "2 信仰點" } },
+      { id: "01-14", name: "矮人釀酒師", race: "矮人", class: "工匠", cost: 6, power: 2, copies: 2, effects: [{ trigger: "vp", timing_name: "👑 VP", description: "3 VP × 技術等級" }], line_bonuses: { race: "2 技術點", class: "2 技術點" } },
+      { id: "01-15", name: "矮人聖堂守衛", race: "矮人", class: "聖職者", cost: 4, power: 5, copies: 2, effects: [{ trigger: "income", timing_name: "💰 收入", description: "1 金" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 費用為4金及以上的單位（含此卡）" }], line_bonuses: { race: "2 技術點", class: "2 信仰點" } },
+      { id: "01-16", name: "矮人國王", race: "矮人", class: "君王", cost: 7, power: 7, copies: 1, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 5 技術點！" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 矮人單位數（含此卡）" }], line_bonuses: { race: "2 技術點", class: "5 VP" } },
+      { id: "01-17", name: "精靈弓箭手", race: "精靈", class: "騎士", cost: 2, power: 3, copies: 3, effects: [{ trigger: "war_passive", timing_name: "⚔️ 戰爭常駐", description: "不位於前線也會參與戰爭（後排基礎戰力亦計入）" }], line_bonuses: { race: "2 信仰點", class: "3 金" } },
+      { id: "01-18", name: "精靈貿易商", race: "精靈", class: "商人", cost: 1, power: 2, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 信仰點" }, { trigger: "income", timing_name: "💰 收入", description: "1 金" }], line_bonuses: { race: "2 信仰點", class: "3 VP" } },
+      { id: "01-19", name: "精靈藝術家", race: "精靈", class: "工匠", cost: 3, power: 1, copies: 3, effects: [{ trigger: "vp", timing_name: "👑 VP", description: "2 VP × 技術等級" }], line_bonuses: { race: "2 信仰點", class: "2 技術點" } },
+      { id: "01-20", name: "精靈神秘學家", race: "精靈", class: "咒術師", cost: 2, power: 2, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 信仰點" }, { trigger: "war", timing_name: "⚔️ 戰爭", description: "2 戰力 × 信仰等級" }], line_bonuses: { race: "2 信仰點", class: "1 金 3 VP" } },
+      { id: "01-21", name: "精靈祈願師", race: "精靈", class: "聖職者", cost: 1, power: 2, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "1 VP × 信仰等級" }, { trigger: "develop", timing_name: "⚙️ 發展", description: "獲得 1 信仰點" }], line_bonuses: { race: "2 信仰點", class: "2 信仰點" } },
+      { id: "01-22", name: "精靈魔術師", race: "精靈", class: "咒術師", cost: 6, power: 3, copies: 2, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "3 戰力 × 信仰等級；戰勝時額外獲得 1 VP × 信仰等級" }], line_bonuses: { race: "2 信仰點", class: "1 金 3 VP" } },
+      { id: "01-23", name: "精靈潛行者", race: "精靈", class: "工匠", cost: 3, power: 3, copies: 2, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 2 信仰點" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 信仰等級" }], line_bonuses: { race: "2 信仰點", class: "2 技術點" } },
+      { id: "01-24", name: "精靈女王", race: "精靈", class: "君王", cost: 7, power: 7, copies: 1, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 5 信仰點！" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 精靈單位數（含此卡）" }], line_bonuses: { race: "2 信仰點", class: "5 VP" } },
+      { id: "01-25", name: "哥布林士兵", race: "哥布林", class: "騎士", cost: 1, power: 4, copies: 3, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "在戰爭中獲得VP時，額外再獲得1VP。" }], line_bonuses: { race: "3 金", class: "3 金" } },
+      { id: "01-26", name: "哥布林廢品商人", race: "哥布林", class: "商人", cost: 2, power: 3, copies: 3, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "在戰爭中獲得VP時，額外再獲得1VP。" }, { trigger: "income", timing_name: "💰 收入", description: "1 金" }], line_bonuses: { race: "3 金", class: "3 VP" } },
+      { id: "01-27", name: "哥布林拾荒者", race: "哥布林", class: "工匠", cost: 2, power: 4, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 技術點" }, { trigger: "war", timing_name: "⚔️ 戰爭", description: "在戰爭中獲得VP時，額外再獲得1VP。" }], line_bonuses: { race: "3 金", class: "2 技術點" } },
+      { id: "01-28", name: "哥布林薩滿", race: "哥布林", class: "咒術師", cost: 1, power: 3, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 信仰點" }, { trigger: "war", timing_name: "⚔️ 戰爭", description: "1 戰力 × 信仰等級" }], line_bonuses: { race: "3 金", class: "1 金 3 VP" } },
+      { id: "01-29", name: "哥布林狂熱信徒", race: "哥布林", class: "聖職者", cost: 2, power: 2, copies: 3, effects: [{ trigger: "develop", timing_name: "⚙️ 發展", description: "獲得 1 信仰點" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 信仰等級" }], line_bonuses: { race: "3 金", class: "2 信仰點" } },
+      { id: "01-30", name: "哥布林百夫長", race: "哥布林", class: "騎士", cost: 2, power: 5, copies: 2, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "在戰爭中獲得VP時，額外再獲得2VP。" }], line_bonuses: { race: "3 金", class: "3 金" } },
+      { id: "01-31", name: "哥布林戰術專家", race: "哥布林", class: "咒術師", cost: 4, power: 4, copies: 2, effects: [{ trigger: "vp", timing_name: "👑 VP", description: "1 VP × 基礎戰力4及以上的單位（含此卡）" }], line_bonuses: { race: "3 金", class: "1 金 3 VP" } },
+      { id: "01-32", name: "哥布林族長", race: "哥布林", class: "君王", cost: 8, power: 2, copies: 1, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "1 VP × 哥布林單位數（含此卡）" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 費用在2金及以下的單位" }], line_bonuses: { race: "3 金", class: "5 VP" } },
+      { id: "01-33", name: "鋼鐵魔像", race: "魔像", class: "騎士", cost: 2, power: 4, copies: 3, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "1 戰力 × 技術等級 + 1 戰力 × 信仰等級" }], line_bonuses: { race: "2 技術點 與 2 信仰點", class: "3 金" } },
+      { id: "01-34", name: "黃金魔像", race: "魔像", class: "商人", cost: 2, power: 4, copies: 3, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "獲得 1 金 × 場上職業種類數（含此卡）" }], line_bonuses: { race: "2 技術點 與 2 信仰點", class: "3 VP" } },
+      { id: "01-35", name: "稻草魔像", race: "魔像", class: "咒術師", cost: 5, power: 4, copies: 3, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "2 戰力 × 信仰等級" }, { trigger: "income", timing_name: "💰 收入", description: "2 金 × 技術等級" }], line_bonuses: { race: "2 技術點 與 2 信仰點", class: "1 金 3 VP" } },
+      { id: "01-36", name: "水晶魔像", race: "魔像", class: "聖職者", cost: 6, power: 1, copies: 2, effects: [{ trigger: "vp", timing_name: "👑 VP", description: "2 VP × 技術等級 + 2 VP × 信仰等級" }], line_bonuses: { race: "2 技術點 與 2 信仰點", class: "2 信仰點" } },
+      { id: "01-37", name: "魔像之王", race: "魔像", class: "君王", cost: 6, power: 8, copies: 1, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "將技術點與信仰點同步至兩者中較高者" }, { trigger: "vp", timing_name: "👑 VP", description: "1 VP × 魔像單位數（含此卡）" }], line_bonuses: { race: "2 技術點 與 2 信仰點", class: "5 VP" } },
+      { id: "01-38", name: "破壞之惡魔", race: "惡魔", class: "騎士", cost: 5, power: 8, copies: 3, effects: [{ trigger: "war", timing_name: "⚔️ 戰爭", description: "在戰爭中獲得VP時，額外再獲得1VP。" }], line_bonuses: { race: "7 VP", class: "3 金" } },
+      { id: "01-39", name: "眼球之惡魔", race: "惡魔", class: "商人", cost: 5, power: 6, copies: 3, effects: [{ trigger: "income", timing_name: "💰 收入", description: "2 金" }], line_bonuses: { race: "7 VP", class: "3 VP" } },
+      { id: "01-40", name: "瘟疫之惡魔", race: "惡魔", class: "工匠", cost: 5, power: 4, copies: 3, effects: [{ trigger: "vp", timing_name: "👑 VP", description: "固定獲得 4 VP" }], line_bonuses: { race: "7 VP", class: "2 技術點" } },
+      { id: "01-41", name: "風暴之惡魔", race: "惡魔", class: "君王", cost: 9, power: 13, copies: 1, effects: [{ trigger: "instant", timing_name: "⚡ 部署", description: "1 VP × 惡魔單位數（含此卡）" }, { trigger: "passive", timing_name: "🌟 常駐加成", description: "你獲得的所有連線獎勵翻倍（× 2）" }], line_bonuses: { race: "7 VP", class: "5 VP" } }
+    ];
+
+    const RACE_CONFIG = {
+      "人類": { border: "border-human", badge: "badge-human", icon: "👑", text: "#93c5fd" },
+      "矮人": { border: "border-dwarf", badge: "badge-dwarf", icon: "⚒️", text: "#fcd34d" },
+      "精靈": { border: "border-elf", badge: "badge-elf", icon: "🍃", text: "#6ee7b7" },
+      "哥布林": { border: "border-goblin", badge: "badge-goblin", icon: "👺", text: "#fca5a5" },
+      "魔像": { border: "border-golem", badge: "badge-golem", icon: "💎", text: "#67e8f9" },
+      "惡魔": { border: "border-demon", badge: "badge-demon", icon: "🔮", text: "#d8b4fe" }
+    };
+
+    const CLASS_CONFIG = {
+      "騎士": { badge: "badge-class-knight", icon: "🛡️" },
+      "商人": { badge: "badge-class-merchant", icon: "⚖️" },
+      "工匠": { badge: "badge-class-artisan", icon: "🔨" },
+      "咒術師": { badge: "badge-class-mage", icon: "📜" },
+      "聖職者": { badge: "badge-class-cleric", icon: "✝️" },
+      "君王": { badge: "badge-class-monarch", icon: "👑" },
+      "特職": { badge: "badge-class-special", icon: "🗡️" }
+    };
+
+    function getLevel(points) {
+      if (points >= 15) return 4;
+      if (points >= 7) return 3;
+      if (points >= 3) return 2;
+      if (points >= 1) return 1;
+      return 0;
+    }
+
+    function formatBonusValue(val) {
+      if (!val) return '-';
+      const map = {
+        '2 技術點 與 2 信仰點': '+2技/+2信', '1 金 3 VP': '+1金/+3VP', '1 金 與 3 VP': '+1金/+3VP',
+        '1 技術點': '+1技', '2 技術點': '+2技', '1 信仰點': '+1信', '2 信仰點': '+2信',
+        '3 金': '+3金', '3 VP': '+3VP', '5 VP': '+5VP', '7 VP': '+7VP'
+      };
+      return map[val] || val;
+    }
+
+    function getCardCompactEffect(eff) {
+      if (!eff) return null;
+      const trig = eff.trigger || '';
+      const desc = eff.description || '';
+      const timing = eff.timing_name || '';
+      let icon = '✨', col = '#fbbf24', borderCol = '#f59e0b';
+      if (trig.includes('war') || timing.includes('戰爭')) { icon = '⚔️'; col = '#fca5a5'; borderCol = '#ef4444'; }
+      else if (trig.includes('income') || timing.includes('收入')) { icon = '💰'; col = '#6ee7b7'; borderCol = '#10b981'; }
+      else if (trig.includes('develop') || timing.includes('發展')) { icon = '⚙️'; col = '#7dd3fc'; borderCol = '#38bdf8'; }
+      else if (trig.includes('vp') || timing.includes('計分') || timing.includes('VP')) { icon = '👑'; col = '#fde047'; borderCol = '#fbbf24'; }
+      else if (trig.includes('instant') || timing.includes('部署')) { icon = '⚡'; col = '#67e8f9'; borderCol = '#06b6d4'; }
+      else if (trig.includes('game_end') || trig.includes('passive')) { icon = '🌟'; col = '#e9d5ff'; borderCol = '#c084fc'; }
+
+      const shortMap = {
+        '1 戰力 × 技術等級 + 1 戰力 × 信仰等級': '+1戰×技 + 1戰×信',
+        '3 戰力 × 信仰等級；戰勝時額外獲得 1 VP × 信仰等級': '+3戰×信；勝+1VP×信',
+        '2 VP × 技術等級 + 2 VP × 信仰等級': '2VP×技 + 2VP×信',
+        '獲得 1 技術點 與 1 信仰點': '+1技 與 +1信',
+        '獲得 1 技術點': '+1 技術點', '獲得 5 技術點！': '+5 技術點!',
+        '獲得 1 信仰點': '+1 信仰點', '獲得 2 信仰點': '+2 信仰點', '獲得 5 信仰點！': '+5 信仰點!',
+        '2 VP × 技術等級': '2VP × 技Lv', '1 VP × 信仰等級': '1VP × 信Lv',
+        '1 VP × 技術等級': '1VP × 技Lv', '3 VP × 技術等級': '3VP × 技Lv',
+        '1 金 × 技術等級': '1金 × 技Lv', '2 金 × 技術等級': '2金 × 技Lv',
+        '1 戰力 × 信仰等級': '+1戰 × 信Lv', '2 戰力 × 信仰等級': '+2戰 × 信Lv',
+        '在戰爭中獲得VP時，額外再獲得1VP。': '獲勝額外+1VP',
+        '在戰爭中獲得VP時，額外再獲得2VP。': '獲勝額外+2VP',
+        '在戰爭中未獲得VP時，獲得3VP。': '失利補償+3VP',
+        '不位於前線也會參與戰爭（後排基礎戰力亦計入）': '後援亦參戰',
+        '1 VP × 人類單位數（含此卡）': '1VP × 人類數',
+        '1 VP × 矮人單位數（含此卡）': '1VP × 矮人數',
+        '1 VP × 精靈單位數（含此卡）': '1VP × 精靈數',
+        '1 VP × 哥布林單位數（含此卡）': '1VP × 哥布林',
+        '1 VP × 魔像單位數（含此卡）': '1VP × 魔像數',
+        '1 VP × 惡魔單位數（含此卡）': '1VP × 惡魔數',
+        '1 VP × 費用為4金及以上的單位（含此卡）': '1VP × ≥4費卡',
+        '1 VP × 基礎戰力4及以上的單位（含此卡）': '1VP × ≥4戰卡',
+        '1 VP × 費用在2金及以下的單位': '1VP × ≤2費卡',
+        '固定獲得 4 VP': '每輪固定+4VP',
+        '獲得 1 金 × 場上職業種類數（含此卡）': '1金 × 職業數',
+        '將技術點與信仰點同步至兩者中較高者': '雙軌同步取高',
+        '你獲得的所有連線獎勵翻倍（× 2）': '連線獎勵翻倍',
+        '計算VP時，手頭金幣換算VP翻倍（每3金換2VP）': '金幣換VP翻倍',
+        '1 金': '+1 金幣', '2 金': '+2 金幣'
+      };
+      return { trigger: trig, timingName: timing, icon, short: shortMap[desc] || desc, desc, color: col, borderColor: borderCol };
+    }
+
+    /* =========================================================================
+       MODULE 2: AUDIO, STORAGE & SAFE UI HELPERS
+       ========================================================================= */
+    const Sound = {
+      ctx: null, muted: false,
+      init() {
+        if (!this.ctx || this.ctx.state === 'closed') {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+      },
+      playTone(freq, type, duration, delay = 0, gain = 0.08) {
+        if (this.muted) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+          osc.type = type; const t = this.ctx.currentTime + delay;
+          osc.frequency.setValueAtTime(freq, t);
+          g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(t); osc.stop(t + duration);
+        } catch (e) {}
+      },
+      click() { this.playTone(600, 'sine', 0.04, 0, 0.06); },
+      place() { this.playTone(320, 'triangle', 0.08, 0, 0.1); this.playTone(520, 'sine', 0.12, 0.03, 0.08); },
+      flip() { this.playTone(380, 'sine', 0.07, 0, 0.08); this.playTone(650, 'triangle', 0.12, 0.05, 0.1); },
+      coin() { this.playTone(987.77, 'sine', 0.08, 0, 0.09); this.playTone(1318.51, 'sine', 0.18, 0.06, 0.1); },
+      war() { this.playTone(140, 'sawtooth', 0.18, 0, 0.12); this.playTone(100, 'triangle', 0.25, 0.08, 0.15); },
+      fanfare() { [440, 554.37, 659.25, 880].forEach((f, i) => this.playTone(f, 'triangle', 0.2, i * 0.08, 0.1)); },
+      victory() { [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => this.playTone(f, 'triangle', 0.22, i * 0.09, 0.12)); }
+    };
+
+    const BGM = {
+      playing: false, timer: null, stepIdx: 0,
+      notes: [293.66, 349.23, 440.00, 523.25, 440.00, 349.23, 196.00, 246.94, 293.66, 392.00],
+      toggle() { this.playing ? this.stop() : this.start(); },
+      start() {
+        Sound.init(); if (this.playing) return;
+        this.playing = true; this.schedule(); this.syncUI();
+      },
+      stop() {
+        this.playing = false; if (this.timer) clearTimeout(this.timer); this.timer = null; this.syncUI();
+      },
+      syncUI() {
+        const txt = this.playing ? '音樂: 開' : '音樂: 關';
+        const el1 = document.getElementById('bgm-text'); if (el1) el1.textContent = txt;
+        const el2 = document.getElementById('title-bgm-txt'); if (el2) el2.textContent = txt;
+      },
+      schedule() {
+        if (!this.playing) return;
+        Sound.playTone(this.notes[this.stepIdx++ % this.notes.length], 'triangle', 0.35, 0, 0.025);
+        this.timer = setTimeout(() => this.schedule(), 420);
+      }
+    };
+
+    const GameSave = {
+      key: 'magnolia_saved_game_v2',
+      save(g) {
+        if (!g || g.phase === 'END' || (typeof PvPManager !== 'undefined' && PvPManager.isOnline)) {
+          if (g && g.phase === 'END') this.clear();
+          return;
+        }
+        try {
+          localStorage.setItem(this.key, JSON.stringify({
+            mode: 'single', round: g.round, phase: g.phase, aiDifficulty: g.aiDifficulty,
+            player: { ...g.player, awardedLines: [...g.player.awardedLines], facedownSlots: [...g.player.facedownSlots] },
+            ai: { ...g.ai, awardedLines: [...g.ai.awardedLines], facedownSlots: [...g.ai.facedownSlots] },
+            deck: g.deck, discardPile: g.discardPile, roundScores: g.roundScores, phaseGains: g.phaseGains
+          }));
+        } catch (e) {}
+      },
+      load() {
+        try {
+          const data = JSON.parse(localStorage.getItem(this.key));
+          return (data && data.mode === 'single') ? data : null;
+        } catch (e) { return null; }
+      },
+      clear() { try { localStorage.removeItem(this.key); } catch (e) {} }
+    };
+
+    const CareerStore = {
+      key: 'magnolia_ipad_career_v1',
+      load() {
+        try { return JSON.parse(localStorage.getItem(this.key)) || { games: 0, wins: 0, highVp: 0, bestStreak: 0, curStreak: 0, achievements: [] }; }
+        catch (e) { return { games: 0, wins: 0, highVp: 0, bestStreak: 0, curStreak: 0, achievements: [] }; }
+      },
+      recordMatch(vp, isWin) {
+        const d = this.load();
+        d.games++; if (isWin) { d.wins++; d.curStreak++; d.bestStreak = Math.max(d.bestStreak, d.curStreak); } else { d.curStreak = 0; }
+        d.highVp = Math.max(d.highVp, vp);
+        try { localStorage.setItem(this.key, JSON.stringify(d)); } catch (e) {}
+        this.render();
+      },
+      render() {
+        const d = this.load();
+        const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+        setTxt('career-modal-games', d.games);
+        setTxt('career-modal-wins', d.wins);
+        setTxt('career-modal-winrate', d.games ? Math.round(d.wins / d.games * 100) + '%' : '0%');
+        setTxt('career-modal-high-vp', d.highVp + ' VP');
+        setTxt('career-modal-streak', d.bestStreak);
+      }
+    };
+
+    function showInPageToast(msg) {
+      const m = document.getElementById('pvp-toast-notice'), t = document.getElementById('pvp-toast-msg');
+      if (m && t) { t.innerHTML = msg.replace(/\n/g, '<br>'); m.classList.remove('hidden'); }
+    }
+
+    function floatTextAt(el, text, color = '#fbbf24') {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const b = document.createElement('div');
+      b.className = 'floating-card-fx'; b.style.color = color;
+      b.style.left = (r.left + r.width / 2) + 'px'; b.style.top = (r.top + r.height / 2) + 'px';
+      b.textContent = text; document.body.appendChild(b);
+      setTimeout(() => b.remove(), 1500);
+    }
+
+    /* =========================================================================
+       MODULE 3: CORE GAME ENGINE & AI (game-engine.js)
+       ========================================================================= */
+    class MagnoliaGame {
+      constructor() {
+        this.round = 1; this.phase = 'DRAW';
+        this.deck = []; this.discardPile = [];
+        this.selectedHandIdx = null; this.discardSelections = new Set();
+        this.playerDeploymentsThisRound = 0;
+        this.aiDifficulty = 'balanced'; this.autoAdvance = false; this.autoAdvanceTimer = null;
+        this.roundScores = []; this.historyLog = []; this.phaseGains = null;
+        this.player = this.createEntity();
+        this.ai = this.createEntity();
+        this.initDeck();
+      }
+      createEntity() {
+        return {
+          gold: 5, vp: 0, power: 0, techPoints: 0, faithPoints: 0,
+          hand: [], grid: Array(9).fill(null), awardedLines: new Set(), facedownSlots: new Set(),
+          pendingCompensation: 0, stats: { warVp: 0, lineVp: 0, skillVp: 0, deployVp: 0, goldVp: 0, warsWon: 0, linesCount: 0 }
+        };
+      }
+      getRoundRecord(r) {
+        let rec = this.roundScores.find(x => x.round === r);
+        if (!rec) {
+          rec = { round: r, player: { deployVp: 0, warVp: 0, scoreVp: 0, deployGold: 0, incomeGold: 0, tech: 0, faith: 0 }, ai: { deployVp: 0, warVp: 0, scoreVp: 0, deployGold: 0, incomeGold: 0, tech: 0, faith: 0 } };
+          this.roundScores.push(rec);
+        }
+        return rec;
+      }
+      initDeck() {
+        this.deck = []; this.discardPile = [];
+        CARD_DB.forEach(def => {
+          for (let i = 0; i < def.copies; i++) this.deck.push({ ...def, uid: `${def.id}-${i}-${Math.random()}` });
+        });
+        for (let i = this.deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+        }
+        this.player.hand = this.drawCards(5);
+        this.ai.hand = this.drawCards(5);
+      }
+      drawCards(n) {
+        const res = [];
+        for (let i = 0; i < n; i++) {
+          if (this.deck.length === 0) {
+            if (this.discardPile.length === 0) break;
+            this.deck = [...this.discardPile]; this.discardPile = [];
+            for (let k = this.deck.length - 1; k > 0; k--) {
+              const j = Math.floor(Math.random() * (k + 1));
+              [this.deck[k], this.deck[j]] = [this.deck[j], this.deck[k]];
+            }
+          }
+          res.push(this.deck.pop());
+        }
+        return res;
+      }
+      getValidSlots(grid) {
+        if (grid.every(c => c === null)) return [0,1,2,3,4,5,6,7,8];
+        const valid = [], dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+        for (let i = 0; i < 9; i++) {
+          if (grid[i] !== null) continue;
+          const r = Math.floor(i / 3), c = i % 3;
+          if (dirs.some(([dr, dc]) => {
+            const nr = r + dr, nc = c + dc;
+            return nr >= 0 && nr < 3 && nc >= 0 && nc < 3 && grid[nr * 3 + nc] !== null;
+          })) valid.push(i);
+        }
+        return valid;
+      }
+      calculatePower(entity, includeFacedown = false) {
+        let sum = 0; const active = new Set();
+        for (let col = 0; col < 3; col++) {
+          for (let row = 0; row < 3; row++) {
+            const idx = row * 3 + col;
+            if (!includeFacedown && entity.facedownSlots.has(idx)) continue;
+            if (entity.grid[idx]) { sum += entity.grid[idx].power; active.add(idx); break; }
+          }
+        }
+        entity.grid.forEach((c, idx) => {
+          if (!c || (!includeFacedown && entity.facedownSlots.has(idx))) return;
+          if (c.id === '01-17') {
+            const col = idx % 3, row = Math.floor(idx / 3);
+            for (let r = 0; r < row; r++) {
+              const fIdx = r * 3 + col;
+              if (entity.grid[fIdx] && (includeFacedown || !entity.facedownSlots.has(fIdx))) {
+                sum += c.power; active.add(idx); break;
+              }
+            }
+          }
+        });
+        const tLv = getLevel(entity.techPoints), fLv = getLevel(entity.faithPoints);
+        entity.grid.forEach((c, idx) => {
+          if (!c || !active.has(idx)) return;
+          if (c.id === '01-04' || c.id === '01-28') sum += fLv;
+          if (c.id === '01-12' || c.id === '01-20' || c.id === '01-35') sum += 2 * fLv;
+          if (c.id === '01-22') sum += 3 * fLv;
+          if (c.id === '01-33') sum += tLv + fLv;
+        });
+        entity.power = sum;
+        return sum;
+      }
+      triggerDeployEffects(entity, card, isPlayer, slot) {
+        const fLv = getLevel(entity.faithPoints);
+        const rec = this.getRoundRecord(this.round)[isPlayer ? 'player' : 'ai'];
+        if (['01-03','01-07','01-09','01-10','01-27'].includes(card.id)) { entity.techPoints = Math.min(15, entity.techPoints + 1); rec.tech += 1; return `+1技`; }
+        if (['01-04','01-18','01-20','01-28'].includes(card.id)) { entity.faithPoints = Math.min(15, entity.faithPoints + 1); rec.faith += 1; return `+1信`; }
+        if (card.id === '01-16') { entity.techPoints = Math.min(15, entity.techPoints + 5); rec.tech += 5; return `+5技`; }
+        if (card.id === '01-21') { entity.vp += fLv; rec.deployVp += fLv; return `+${fLv}VP`; }
+        if (card.id === '01-23') { entity.faithPoints = Math.min(15, entity.faithPoints + 2); rec.faith += 2; return `+2信`; }
+        if (card.id === '01-24') { entity.faithPoints = Math.min(15, entity.faithPoints + 5); rec.faith += 5; return `+5信`; }
+        if (card.id === '01-08') { const n = entity.grid.filter(c => c && c.race === '人類').length; entity.vp += n; rec.deployVp += n; return `+${n}VP`; }
+        if (card.id === '01-32') { const n = entity.grid.filter(c => c && c.race === '哥布林').length; entity.vp += n; rec.deployVp += n; return `+${n}VP`; }
+        if (card.id === '01-34') { const n = new Set(entity.grid.filter(Boolean).map(c => c.class)).size; entity.gold += n; rec.deployGold += n; return `+${n}金`; }
+        if (card.id === '01-37') { const m = Math.max(entity.techPoints, entity.faithPoints); entity.techPoints = m; entity.faithPoints = m; return `雙軌${m}點`; }
+        if (card.id === '01-41') { const n = entity.grid.filter(c => c && c.race === '惡魔').length; entity.vp += n; rec.deployVp += n; return `+${n}VP`; }
+        return null;
+      }
+      checkLineBonuses(entity, isPlayer) {
+        const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8]];
+        const mult = entity.grid.some(c => c && c.id === '01-41') ? 2 : 1;
+        const rec = this.getRoundRecord(this.round)[isPlayer ? 'player' : 'ai'];
+        const gains = [];
+        lines.forEach((line, idx) => {
+          const [a,b,c] = line.map(i => entity.grid[i]);
+          if (!a || !b || !c) return;
+          const rKey = `line-${idx}-race-${a.race}`;
+          if (a.race === b.race && b.race === c.race && !entity.awardedLines.has(rKey)) {
+            entity.awardedLines.add(rKey); entity.stats.linesCount++;
+            if (a.race === '人類') { entity.vp += 5*mult; rec.deployVp += 5*mult; gains.push(`人類連線+${5*mult}VP`); }
+            else if (a.race === '矮人') { entity.techPoints = Math.min(15, entity.techPoints + 2*mult); rec.tech += 2*mult; gains.push(`矮人連線+${2*mult}技`); }
+            else if (a.race === '精靈') { entity.faithPoints = Math.min(15, entity.faithPoints + 2*mult); rec.faith += 2*mult; gains.push(`精靈連線+${2*mult}信`); }
+            else if (a.race === '哥布林') { entity.gold += 3*mult; rec.deployGold += 3*mult; gains.push(`哥布林連線+${3*mult}金`); }
+            else if (a.race === '魔像') { entity.techPoints = Math.min(15, entity.techPoints + 2*mult); entity.faithPoints = Math.min(15, entity.faithPoints + 2*mult); rec.tech += 2*mult; rec.faith += 2*mult; gains.push(`魔像連線+${2*mult}技/+${2*mult}信`); }
+            else if (a.race === '惡魔') { entity.vp += 7*mult; rec.deployVp += 7*mult; gains.push(`惡魔連線+${7*mult}VP`); }
+          }
+          const cKey = `line-${idx}-class-${a.class}`;
+          if (a.class === b.class && b.class === c.class && !entity.awardedLines.has(cKey)) {
+            entity.awardedLines.add(cKey); entity.stats.linesCount++;
+            if (a.class === '騎士') { entity.gold += 3*mult; rec.deployGold += 3*mult; gains.push(`騎士連線+${3*mult}金`); }
+            else if (a.class === '商人') { entity.vp += 3*mult; rec.deployVp += 3*mult; gains.push(`商人連線+${3*mult}VP`); }
+            else if (a.class === '工匠') { entity.techPoints = Math.min(15, entity.techPoints + 2*mult); rec.tech += 2*mult; gains.push(`工匠連線+${2*mult}技`); }
+            else if (a.class === '咒術師') { entity.gold += mult; entity.vp += 3*mult; rec.deployGold += mult; rec.deployVp += 3*mult; gains.push(`咒術連線+${mult}金/+${3*mult}VP`); }
+            else if (a.class === '聖職者') { entity.faithPoints = Math.min(15, entity.faithPoints + 2*mult); rec.faith += 2*mult; gains.push(`聖職連線+${2*mult}信`); }
+            else if (a.class === '君王') { entity.vp += 5*mult; rec.deployVp += 5*mult; gains.push(`君王連線+${5*mult}VP`); }
+          }
+        });
+        return gains;
+      }
+    }
+
+    let game = new MagnoliaGame();
+
+    /* =========================================================================
+       MODULE 4: ZERO-CONFIG PEERJS PVP MANAGER (FIXED PHASE SYNC)
+       ========================================================================= */
+    const PvPManager = {
+      isOnline: false, hasMatchStarted: false, role: 'host', roomId: '',
+      peer: null, conn: null, myPendingDeploy: [], opponentFacedownSlots: new Set(),
+      myReadyState: { draw: false, deploy: false, nextPhase: false, nextRound: false },
+      opponentReadyState: { draw: false, deploy: false, nextPhase: false, nextRound: false },
+
+      init() {
+        const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+        bind('btn-header-pvp', () => this.openLobby());
+        bind('btn-main-pvp', () => { closeTitleScreen(); this.openLobby(); });
+        bind('btn-popover-pvp', () => { closeOptionsMenu(); this.openLobby(); });
+        bind('btn-close-pvp-modal', () => this.closeLobby());
+        bind('btn-pvp-close-bottom', () => this.closeLobby());
+        bind('btn-pvp-create', () => this.createRoom());
+        bind('btn-pvp-copy-link', () => this.copyInviteLink());
+        bind('btn-pvp-join', () => {
+          const code = (document.getElementById('pvp-input-room-id')?.value || '').trim().toUpperCase();
+          if (!code) return showInPageToast('請先輸入 4 位房間代號！');
+          this.joinRoom(code);
+        });
+        bind('btn-pvp-leave-room', () => this.leaveRoom());
+        bind('btn-pvp-reconnect', () => this.reconnect());
+        bind('btn-pvp-restart-match', () => this.requestRematch());
+
+        const match = window.location.hash.match(/room=([A-Za-z0-9_-]+)/);
+        if (match) {
+          setTimeout(() => {
+            this.openLobby();
+            const inp = document.getElementById('pvp-input-room-id');
+            if (inp) inp.value = match[1].replace(/^MG-/i, '').toUpperCase();
+          }, 500);
+        }
+      },
+      openLobby() { Sound.click(); document.getElementById('pvp-modal')?.classList.remove('hidden'); this.updateLobbyUI(); },
+      closeLobby() { Sound.click(); document.getElementById('pvp-modal')?.classList.add('hidden'); },
+      updateLobbyUI() {
+        const dot = document.getElementById('pvp-status-dot'), text = document.getElementById('pvp-status-text');
+        const toggle = (id, show) => document.getElementById(id)?.classList.toggle('hidden', !show);
+        if (!this.isOnline) {
+          if (dot) dot.style.background = '#94a3b8';
+          if (text) text.textContent = '未進入房間 (單機 AI 練習模式)';
+          ['btn-pvp-leave-room','btn-pvp-reconnect','btn-pvp-restart-match','pvp-created-room-box','btn-pvp-copy-link'].forEach(id => toggle(id, false));
+        } else {
+          const open = this.conn && this.conn.open;
+          if (dot) dot.style.background = open ? '#34d399' : '#f59e0b';
+          if (text) text.textContent = open ? `🟢 房間: ${this.roomId} (${this.role === 'host' ? '房主' : '訪客'})` : `⚠️ 房間: ${this.roomId} (等待連線...)`;
+          toggle('btn-pvp-leave-room', true);
+          toggle('btn-pvp-reconnect', !open);
+          toggle('btn-pvp-restart-match', open);
+          toggle('pvp-created-room-box', true);
+          toggle('btn-pvp-copy-link', true);
+          const disp = document.getElementById('pvp-display-room-id'); if (disp) disp.textContent = this.roomId;
+        }
+      },
+      createRoom() {
+        if (!window.Peer) return showInPageToast('PeerJS 庫尚未載入完成（請檢查網絡連線）。');
+        Sound.click();
+        const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        this.roomId = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        this.role = 'host'; this.isOnline = true; this.hasMatchStarted = false;
+        if (this.peer) try { this.peer.destroy(); } catch (e) {}
+        this.peer = new Peer('MG-' + this.roomId);
+        this.peer.on('open', () => {
+          window.location.hash = `room=${this.roomId}`;
+          this.updateLobbyUI();
+        });
+        this.peer.on('connection', (c) => {
+          this.conn = c; this.setupConn();
+          if (this.hasMatchStarted && game.round >= 1 && game.phase !== 'END') this.sendSyncToGuest();
+          else { this.hasMatchStarted = true; this.hostStartMatch(); }
+        });
+      },
+      joinRoom(code) {
+        if (!window.Peer) return showInPageToast('PeerJS 庫尚未載入完成（請檢查網絡連線）。');
+        Sound.click();
+        this.roomId = code.replace(/^MG-/i, '').toUpperCase();
+        this.role = 'guest'; this.isOnline = true;
+        if (this.peer) try { this.peer.destroy(); } catch (e) {}
+        this.peer = new Peer();
+        this.peer.on('open', () => {
+          window.location.hash = `room=${this.roomId}`;
+          this.conn = this.peer.connect('MG-' + this.roomId, { reliable: true });
+          this.setupConn();
+        });
+      },
+      setupConn() {
+        if (!this.conn) return;
+        this.conn.on('open', () => {
+          this.updateLobbyUI(); this.closeLobby(); Sound.victory();
+          const lbl = document.getElementById('header-pvp-label'); if (lbl) lbl.textContent = `房:${this.roomId}`;
+          const aiName = document.getElementById('ai-lord-name'); if (aiName) aiName.textContent = this.role === 'host' ? '訪客' : '房主';
+          if (this.role === 'guest') this.send('REQ_SYNC', {});
+          else if (this.hasMatchStarted) this.sendSyncToGuest();
+        });
+        this.conn.on('data', (pkt) => this.handlePacket(pkt));
+        this.conn.on('close', () => { this.updateLobbyUI(); showInPageToast('⚠️ 與對手連線暫時中斷，可開啟雙人對戰大廳點擊「重連」。'); });
+      },
+      send(type, payload = {}) {
+        if (this.conn && this.conn.open) try { this.conn.send({ type, payload }); } catch (e) {}
+      },
+      broadcastMyState() {
+        if (!this.isOnline) return;
+        this.send('PLAYER_STATE', {
+          gold: game.player.gold, vp: game.player.vp, techPoints: game.player.techPoints,
+          faithPoints: game.player.faithPoints, power: game.player.power, handCount: game.player.hand.length
+        });
+      },
+      hostStartMatch() {
+        this.hasMatchStarted = true;
+        game = new MagnoliaGame();
+        this.resetReadyStates();
+        this.send('INIT_GAME', {
+          round: 1, phase: 'DRAW', guestHand: game.ai.hand,
+          hostHandCount: game.player.hand.length, deckCount: game.deck.length, discardPile: game.discardPile
+        });
+        updateUI(); this.broadcastMyState();
+      },
+      sendSyncToGuest() {
+        this.send('RESP_SYNC', {
+          round: game.round, phase: game.phase,
+          hostGrid: game.player.grid, guestGrid: game.ai.grid,
+          hostGold: game.player.gold, guestGold: game.ai.gold,
+          hostVp: game.player.vp, guestVp: game.ai.vp,
+          hostTech: game.player.techPoints, guestTech: game.ai.techPoints,
+          hostFaith: game.player.faithPoints, guestFaith: game.ai.faithPoints,
+          hostFacedown: [...game.player.facedownSlots], guestFacedown: [...game.ai.facedownSlots],
+          deckCount: game.deck.length, discardPile: game.discardPile
+        });
+      },
+      resetReadyStates() {
+        this.myReadyState = { draw: false, deploy: false, nextPhase: false, nextRound: false };
+        this.opponentReadyState = { draw: false, deploy: false, nextPhase: false, nextRound: false };
+      },
+      handlePacket({ type, payload }) {
+        switch (type) {
+          case 'INIT_GAME':
+            this.hasMatchStarted = true; game = new MagnoliaGame();
+            game.player.hand = payload.guestHand;
+            game.ai.hand = Array(payload.hostHandCount || 5).fill({ name: '對手手牌' });
+            game.deck = Array(payload.deckCount || 82).fill({ name: '牌庫' });
+            game.discardPile = payload.discardPile || [];
+            this.resetReadyStates(); updateUI(); this.broadcastMyState();
+            break;
+          case 'PLAYER_STATE':
+            Object.assign(game.ai, { gold: payload.gold, vp: payload.vp, techPoints: payload.techPoints, faithPoints: payload.faithPoints, power: payload.power });
+            game.ai.hand = Array(payload.handCount || 0).fill({ name: '對手手牌' });
+            updateUI();
+            break;
+          case 'DRAW_READY':
+            this.opponentReadyState.draw = true;
+            if (payload.discardPile) game.discardPile = payload.discardPile;
+            if (payload.deckCount !== undefined) game.deck = Array(payload.deckCount).fill({ name: '牌庫' });
+            this.checkDrawBarrier(); updateUI();
+            break;
+          case 'GUEST_DRAW_REQUEST':
+            if (this.role === 'host') {
+              if (payload.discardedCards?.length) game.discardPile.push(...payload.discardedCards);
+              const newCards = game.drawCards(payload.needCount || 0);
+              this.send('HOST_DRAW_REFILL', { newCards, deckCount: game.deck.length, discardPile: game.discardPile });
+              this.opponentReadyState.draw = true; this.checkDrawBarrier(); updateUI();
+            }
+            break;
+          case 'HOST_DRAW_REFILL':
+            if (this.role === 'guest') {
+              game.player.hand.push(...(payload.newCards || []));
+              game.discardPile = payload.discardPile || [];
+              game.deck = Array(payload.deckCount || 0).fill({ name: '牌庫' });
+              this.myReadyState.draw = true;
+              this.send('DRAW_READY', { handCount: game.player.hand.length });
+              this.checkDrawBarrier(); updateUI();
+            }
+            break;
+          case 'DEPLOY_COMMIT':
+            this.opponentReadyState.deploy = true;
+            this.opponentFacedownSlots = new Set(payload.placedSlots || []);
+            this.opponentFacedownSlots.forEach(s => { game.ai.grid[s] = { name: '暗置部隊', facedown: true }; game.ai.facedownSlots.add(s); });
+            this.checkDeployBarrier(); updateUI();
+            break;
+          case 'DEPLOY_REVEAL':
+            (payload.cards || []).forEach(({ slot, card }) => { game.ai.grid[slot] = card; });
+            game.ai.facedownSlots.clear();
+            this.executeSimultaneousReveal();
+            break;
+          case 'PHASE_ADVANCE':
+            // Synchronized phase progression from peer
+            this.applyRemotePhaseAdvance(payload.targetPhase, payload.round);
+            break;
+          case 'ROUND_READY':
+            this.opponentReadyState.nextRound = true;
+            this.checkNextRoundBarrier(); updateUI();
+            break;
+          case 'REQ_SYNC':
+            if (this.role === 'host') this.sendSyncToGuest();
+            break;
+          case 'RESP_SYNC':
+            if (this.role === 'guest') {
+              game.round = payload.round; game.phase = payload.phase;
+              game.player.grid = payload.guestGrid; game.ai.grid = payload.hostGrid;
+              game.player.gold = payload.guestGold; game.ai.gold = payload.hostGold;
+              game.player.vp = payload.guestVp; game.ai.vp = payload.hostVp;
+              game.player.techPoints = payload.guestTech; game.ai.techPoints = payload.hostTech;
+              game.player.faithPoints = payload.guestFaith; game.ai.faithPoints = payload.hostFaith;
+              game.player.facedownSlots = new Set(payload.guestFacedown || []);
+              game.ai.facedownSlots = new Set(payload.hostFacedown || []);
+              updateUI(); this.broadcastMyState();
+            }
+            break;
+          case 'RESTART_MATCH_REQUEST':
+            if (this.role === 'host') this.hostStartMatch();
+            break;
+        }
+      },
+      checkDrawBarrier() {
+        if (this.myReadyState.draw && this.opponentReadyState.draw) {
+          this.myReadyState.draw = false; this.opponentReadyState.draw = false;
+          game.phase = 'DEPLOY'; game.playerDeploymentsThisRound = 0;
+          updateUI();
+        }
+      },
+      checkDeployBarrier() {
+        if (this.myReadyState.deploy && this.opponentReadyState.deploy) {
+          this.send('DEPLOY_REVEAL', { cards: this.myPendingDeploy });
+          if (this.role === 'host') this.executeSimultaneousReveal();
+        }
+      },
+      executeSimultaneousReveal() {
+        game.phase = 'REVEAL';
+        this.myReadyState.deploy = false; this.opponentReadyState.deploy = false;
+        this.myPendingDeploy.forEach(({ slot, card }) => { game.player.grid[slot] = card; });
+        this.myPendingDeploy = [];
+        game.player.facedownSlots.clear(); game.ai.facedownSlots.clear();
+        Sound.flip();
+        const pGains = [], aGains = [];
+        game.player.grid.forEach((c, idx) => { if (c) { const g = game.triggerDeployEffects(game.player, c, true, idx); if (g) pGains.push(g); } });
+        pGains.push(...game.checkLineBonuses(game.player, true));
+        game.ai.grid.forEach((c, idx) => { if (c) { const g = game.triggerDeployEffects(game.ai, c, false, idx); if (g) aGains.push(g); } });
+        aGains.push(...game.checkLineBonuses(game.ai, false));
+        game.phaseGains = { player: pGains.join('、') || '部隊進駐', ai: aGains.join('、') || '部隊進駐' };
+        this.broadcastMyState(); updateUI();
+      },
+      applyRemotePhaseAdvance(targetPhase, round) {
+        if (targetPhase === 'WAR' && game.phase === 'REVEAL') { game.phase = 'WAR'; resolveWarPhase(true); }
+        else if (targetPhase === 'DEVELOP' && game.phase === 'WAR') { game.phase = 'DEVELOP'; resolveDevelopPhase(true); }
+        else if (targetPhase === 'INCOME' && game.phase === 'DEVELOP') { game.phase = 'INCOME'; resolveIncomePhase(true); }
+        else if (targetPhase === 'VP' && game.phase === 'INCOME') { game.phase = 'VP'; resolveVPPhase(true); }
+        else if (targetPhase === 'SUMMARY' && game.phase === 'VP') {
+          if (checkGameEnd()) { game.phase = 'END'; triggerGameOver(); }
+          else { showRoundSummaryModal(); }
+        }
+      },
+      checkNextRoundBarrier() {
+        if (this.myReadyState.nextRound && this.opponentReadyState.nextRound) {
+          this.myReadyState.nextRound = false; this.opponentReadyState.nextRound = false;
+          game.round++; game.phase = 'DRAW'; updateUI();
+        }
+      },
+      requestRematch() {
+        if (this.role === 'host') this.hostStartMatch();
+        else { this.send('RESTART_MATCH_REQUEST', {}); showInPageToast('⏳ 已向房主發送再戰請求...'); }
+      },
+      copyInviteLink() {
+        const url = window.location.origin + window.location.pathname + '#room=' + this.roomId;
+        navigator.clipboard?.writeText(url).then(() => showInPageToast(`📋 邀請連結已複製：\n${url}`)).catch(() => showInPageToast(`請複製連結：\n${url}`));
+      },
+      reconnect() {
+        if (this.role === 'guest') this.joinRoom(this.roomId);
+        else { this.peer?.destroy(); this.peer = new Peer('MG-' + this.roomId); }
+      },
+      leaveRoom() {
+        document.getElementById('pvp-confirm-modal')?.classList.remove('hidden');
+      },
+      executeLeaveRoom() {
+        try { this.conn?.close(); this.peer?.destroy(); } catch (e) {}
+        this.isOnline = false; this.hasMatchStarted = false; this.roomId = '';
+        history.replaceState(null, '', window.location.pathname);
+        const lbl = document.getElementById('header-pvp-label'); if (lbl) lbl.textContent = '雙人對戰';
+        this.updateLobbyUI(); resetGame();
+      }
+    };
+
+    /* =========================================================================
+       MODULE 5: PHASE RESOLUTION & RENDERING (FIXED SYNC & CLEAN DOM)
+       ========================================================================= */
+    function initLadderCells() {
+      ['p-tech-cells', 'p-faith-cells', 'ai-tech-cells', 'ai-faith-cells'].forEach(id => {
+        const wrap = document.getElementById(id);
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        for (let i = 1; i <= 15; i++) {
+          const d = document.createElement('div');
+          d.className = 'm-ladder-cell' + ([1,3,7,15].includes(i) ? ' cell-milestone' : '');
+          d.id = `${id.replace('-cells', '')}-cell-${i}`;
+          if (i === 1) d.textContent = '1';
+          else if (i === 3) d.textContent = '2';
+          else if (i === 7) d.textContent = '3';
+          else if (i === 15) d.textContent = '4';
+          wrap.appendChild(d);
+        }
+      });
+    }
+
+    function updateMeters() {
+      const hideFacedown = (game.phase === 'DRAW' || game.phase === 'DEPLOY');
+      game.calculatePower(game.player, !hideFacedown);
+      game.calculatePower(game.ai, !hideFacedown);
+
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt('p-power', game.player.power); setTxt('ai-power', game.ai.power);
+      setTxt('p-gold', game.player.gold); setTxt('ai-gold', game.ai.gold);
+      setTxt('p-vp-num', game.player.vp); setTxt('ai-vp-num', game.ai.vp);
+      setTxt('hdr-p-vp', game.player.vp); setTxt('hdr-a-vp', game.ai.vp);
+      setTxt('hdr-p-pow', game.player.power); setTxt('hdr-a-pow', game.ai.power);
+
+      const updateLadder = (prefix, pts, cls) => {
+        setTxt(`${prefix}-badge`, `Lv${getLevel(pts)}`);
+        for (let i = 1; i <= 15; i++) {
+          const cell = document.getElementById(`${prefix}-cell-${i}`);
+          if (cell) cell.classList.toggle(cls, i <= pts);
+        }
+      };
+      updateLadder('p-tech', game.player.techPoints, 'cell-tech-active');
+      updateLadder('p-faith', game.player.faithPoints, 'cell-faith-active');
+      updateLadder('ai-tech', game.ai.techPoints, 'cell-tech-active');
+      updateLadder('ai-faith', game.ai.faithPoints, 'cell-faith-active');
+    }
+
+    function renderCardInner(card, isFrontline = false) {
+      const rConf = RACE_CONFIG[card.race] || RACE_CONFIG['人類'];
+      const cConf = CLASS_CONFIG[card.class] || CLASS_CONFIG['騎士'];
+      const effs = [card.effects?.[0] || null, card.effects?.[1] || null].map(e => {
+        const c = getCardCompactEffect(e);
+        if (!c) return `<div class="grid-eff-pill pill-empty">-</div>`;
+        return `<div class="grid-eff-pill" style="color:${c.color}; border-left:2.5px solid ${c.borderColor};">${c.icon} ${c.short}</div>`;
+      }).join('');
+      return `
+        <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+          <span class="card-badge-cost">💰${card.cost}</span>
+          <span class="card-top-name">${card.name}</span>
+          <span class="card-badge-power ${isFrontline ? 'clash-frontline' : ''}">⚔️${card.power}</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:1px; margin:1px 0;">${effs}</div>
+        <div class="grid-card-bottom-strip">
+          <span>${rConf.icon}${card.race}:<strong style="color:#fbbf24;">${formatBonusValue(card.line_bonuses?.race)}</strong></span>
+          <span style="color:#475569;">|</span>
+          <span>${cConf.icon}${card.class}:<strong style="color:#38bdf8;">${formatBonusValue(card.line_bonuses?.class)}</strong></span>
+        </div>`;
+    }
+
+    function isCellFrontline(grid, idx) {
+      const col = idx % 3, row = Math.floor(idx / 3);
+      for (let r = 0; r < row; r++) if (grid[r * 3 + col] !== null) return false;
+      return grid[idx] !== null;
+    }
+
+    function renderGrids() {
+      const pGrid = document.getElementById('player-grid'), aGrid = document.getElementById('ai-grid');
+      if (!pGrid || !aGrid) return;
+      pGrid.innerHTML = ''; aGrid.innerHTML = '';
+
+      const canDeploy = game.phase === 'DEPLOY' && game.selectedHandIdx !== null && game.player.facedownSlots.size < 2;
+      const validSlots = canDeploy ? game.getValidSlots(game.player.grid) : [];
+
+      for (let i = 0; i < 9; i++) {
+        const card = game.player.grid[i];
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        if (card) {
+          const rConf = RACE_CONFIG[card.race] || RACE_CONFIG['人類'];
+          cell.classList.add(rConf.border, `card-theme-${card.race === '人類' ? 'human' : card.race === '矮人' ? 'dwarf' : card.race === '精靈' ? 'elf' : card.race === '哥布林' ? 'goblin' : card.race === '魔像' ? 'golem' : 'demon'}`);
+          const isFd = game.player.facedownSlots.has(i);
+          if (isFd) {
+            cell.classList.add('card-pending-deploy');
+            cell.innerHTML = `<button class="pending-cancel-cross">✕</button>` + renderCardInner(card, false);
+            cell.onclick = (e) => {
+              if (e.target.closest('.pending-cancel-cross')) { e.stopPropagation(); handleUndoPlaceCard(i); }
+              else openCenterCardModal(card, { slotIdx: i, isFacedown: true });
+            };
+          } else {
+            const front = isCellFrontline(game.player.grid, i);
+            if (game.phase === 'WAR') cell.classList.add((front || card.id === '01-17') ? 'clash-frontline' : 'support-dimmed');
+            cell.innerHTML = renderCardInner(card, front);
+            cell.onclick = () => openCenterCardModal(card);
+          }
+        } else if (validSlots.includes(i)) {
+          cell.classList.add('valid-target');
+          cell.innerHTML = `<div style="margin:auto; text-align:center; color:#fcd34d; font-size:9px; font-weight:800;">＋<br>點擊暗置</div>`;
+          cell.onclick = () => handlePlaceCard(i);
+        } else {
+          cell.innerHTML = `<div style="margin:auto; color:#475569; font-size:9px; opacity:0.4;">#${i+1}</div>`;
+        }
+        pGrid.appendChild(cell);
+
+        // AI Grid
+        const aCard = game.ai.grid[i];
+        const aCell = document.createElement('div');
+        aCell.className = 'grid-cell';
+        if (aCard) {
+          if (game.ai.facedownSlots.has(i)) {
+            aCell.classList.add('card-facedown');
+            aCell.innerHTML = `<div style="font-size:8px; color:#f87171;">🤖 敵軍</div><div class="facedown-emblem">🤖</div><div style="font-size:8px; color:#94a3b8;">暗置部隊</div>`;
+          } else {
+            const rConf = RACE_CONFIG[aCard.race] || RACE_CONFIG['人類'];
+            aCell.classList.add(rConf.border, `card-theme-${aCard.race === '人類' ? 'human' : aCard.race === '矮人' ? 'dwarf' : aCard.race === '精靈' ? 'elf' : aCard.race === '哥布林' ? 'goblin' : aCard.race === '魔像' ? 'golem' : 'demon'}`);
+            const front = isCellFrontline(game.ai.grid, i);
+            if (game.phase === 'WAR') aCell.classList.add((front || aCard.id === '01-17') ? 'clash-frontline' : 'support-dimmed');
+            aCell.innerHTML = renderCardInner(aCard, front);
+            aCell.onclick = () => openCenterCardModal(aCard);
+          }
+        } else {
+          aCell.innerHTML = `<div style="margin:auto; color:#334155; font-size:9px; opacity:0.35;">#${i+1}</div>`;
+        }
+        aGrid.appendChild(aCell);
+      }
+    }
+
+    function renderHand() {
+      const hGrid = document.getElementById('hand-grid');
+      if (!hGrid) return;
+      hGrid.innerHTML = '';
+      document.getElementById('hand-count').textContent = `${game.player.hand.length}/5`;
+      document.getElementById('header-deck-count').textContent = game.deck.length;
+
+      game.player.hand.forEach((card, idx) => {
+        const rConf = RACE_CONFIG[card.race] || RACE_CONFIG['人類'];
+        const cConf = CLASS_CONFIG[card.class] || CLASS_CONFIG['騎士'];
+        const isSel = game.selectedHandIdx === idx;
+        const isDisc = game.discardSelections.has(idx);
+        const unafford = game.phase === 'DEPLOY' && card.cost > game.player.gold;
+
+        const el = document.createElement('div');
+        el.className = `hand-card ${rConf.border} ${isSel ? 'selected' : ''} ${isDisc ? 'marked-discard' : ''} ${unafford ? 'unaffordable' : ''}`;
+        const effs = [card.effects?.[0] || null, card.effects?.[1] || null].map(e => {
+          const c = getCardCompactEffect(e);
+          if (!c) return `<div class="mini-row-eff-line eff-empty">-</div>`;
+          return `<div class="mini-row-eff-line" style="border-left:2px solid ${c.borderColor};"><span class="mini-eff-desc" style="color:${c.color};">${c.icon}${c.short}</span></div>`;
+        }).join('');
+
+        el.innerHTML = `
+          <div class="mini-row-top">
+            <div class="mini-top-cell cell-cost">💰${card.cost}</div>
+            <div class="mini-top-name">${card.name}</div>
+            <div class="mini-top-cell cell-power">⚔️${card.power}</div>
+          </div>
+          <div class="mini-row-name">${card.name}</div>
+          <div class="mini-hand-skills-container">${effs}</div>
+          <div class="mini-row-bottom">
+            <div class="mini-bot-cell cell-race ${rConf.badge}">${rConf.icon}${card.race}</div>
+            <div class="mini-bot-cell ${cConf.badge}">${cConf.icon}${card.class}</div>
+          </div>
+          ${isDisc ? `<div class="hand-mini-discard-overlay"><span style="font-size:18px;">🗑️</span><span style="font-size:8px; font-weight:800;">棄牌預定</span></div>` : ''}`;
+
+        el.onclick = () => openCenterCardModal(card, { handIdx: idx });
+        hGrid.appendChild(el);
+      });
+    }
+
+    function renderBanner() {
+      const order = ['DRAW', 'DEPLOY', 'WAR', 'DEVELOP', 'INCOME', 'VP'];
+      const curIdx = order.indexOf(game.phase === 'REVEAL' ? 'DEPLOY' : game.phase);
+      document.querySelectorAll('#phase-stepper-hud .phase-step-pill').forEach(p => {
+        const idx = order.indexOf(p.dataset.step);
+        p.classList.toggle('step-active', idx === curIdx);
+        p.classList.toggle('step-done', idx < curIdx || game.phase === 'END');
+      });
+
+      document.getElementById('round-indicator').textContent = `第 ${game.round} 輪`;
+      document.getElementById('banner-round-text').textContent = `第 ${game.round} 輪`;
+      const actions = document.getElementById('banner-actions');
+      actions.innerHTML = '';
+
+      const setInfo = (icon, pName, pTxt, aTxt) => {
+        document.getElementById('banner-icon').textContent = icon;
+        document.getElementById('banner-phase-text').textContent = pName;
+        document.getElementById('banner-msg').innerHTML = `
+          <div class="banner-line-ai"><span class="banner-tag-ai">對手：</span><span class="banner-val-text">${aTxt}</span></div>
+          <div class="banner-line-player"><span class="banner-tag-player">你：</span><span class="banner-val-text">${pTxt}</span></div>`;
+      };
+
+      const addBtn = (cls, top, sub, fn, disabled = false) => {
+        const b = document.createElement('button');
+        b.className = `btn ${cls}`; b.disabled = disabled;
+        b.innerHTML = `<span>${top}</span><span style="font-size:8px; opacity:0.9;">${sub}</span>`;
+        b.onclick = (e) => { e.stopPropagation(); fn(); };
+        actions.appendChild(b);
+      };
+
+      if (game.phase === 'DRAW') {
+        if (PvPManager.isOnline && PvPManager.myReadyState.draw) {
+          setInfo('🃏', '抽牌階段', '✅ 已確認抽牌，等待對手...', '思考換牌中...');
+          addBtn('btn-slate', '⏳ 等待對手', '對手抽牌中', () => {}, true);
+          return;
+        }
+        const cnt = game.discardSelections.size;
+        setInfo('🃏', '抽牌階段', cnt > 0 ? `換 ${cnt} 張手牌` : '保留 5 張手牌', `手牌備妥 (${game.ai.hand.length}/5)`);
+        addBtn('btn-gold', cnt > 0 ? `確認棄牌(${cnt})` : '保留手牌', '進入部署 ➔', handleConfirmDraw);
+      } else if (game.phase === 'DEPLOY') {
+        if (PvPManager.isOnline && PvPManager.myReadyState.deploy) {
+          setInfo('🏰', '部署階段', '✅ 已鎖定部署，等待對手...', '排兵佈陣中...');
+          addBtn('btn-slate', '⏳ 等待對手', '等待同時開牌', () => {}, true);
+          return;
+        }
+        const n = game.player.facedownSlots.size;
+        setInfo('🏰', '部署階段', n === 0 ? '未部署 (+2金補償)' : `已暗置 ${n}/2 張`, '已暗置部隊');
+        addBtn('btn-emerald', n === 0 ? '不部署(+2金)' : '同時開牌', '確認部署 ➔', handleFinishDeploy);
+      } else if (game.phase === 'REVEAL') {
+        setInfo('⚡', '部署揭曉', game.phaseGains?.player || '進駐就位', game.phaseGains?.ai || '進駐就位');
+        addBtn('btn-gold', '進入戰爭', '⚔️ 兩軍交鋒 ➔', handleAdvanceToNextPhase);
+      } else if (game.phase === 'WAR') {
+        setInfo('⚔️', '戰爭階段', game.phaseGains?.player || '+0VP', game.phaseGains?.ai || '+0VP');
+        addBtn('btn-gold', '進入發展', '⚙️ 文明提升 ➔', handleAdvanceToNextPhase);
+      } else if (game.phase === 'DEVELOP') {
+        setInfo('⚙️', '發展階段', game.phaseGains?.player || '+0點', game.phaseGains?.ai || '+0點');
+        addBtn('btn-gold', '進入收入', '💰 領取稅收 ➔', handleAdvanceToNextPhase);
+      } else if (game.phase === 'INCOME') {
+        setInfo('💰', '收入階段', game.phaseGains?.player || '+3金', game.phaseGains?.ai || '+3金');
+        addBtn('btn-gold', '進入計分', '👑 結算分數 ➔', handleAdvanceToNextPhase);
+      } else if (game.phase === 'VP') {
+        setInfo('👑', '計分階段', game.phaseGains?.player || '+0VP', game.phaseGains?.ai || '+0VP');
+        addBtn('btn-gold', '回合總結', `🔔 第 ${game.round} 輪完 ➔`, handleAdvanceToNextPhase);
+      } else if (game.phase === 'END') {
+        setInfo('🏆', '終局覆盤', `最終 ${game.player.vp} VP`, `最終 ${game.ai.vp} VP`);
+        addBtn('btn-gold', '🔄 再來一局', '重新洗牌', resetGame);
+      }
+    }
+
+    function updateUI() {
+      updateMeters();
+      renderGrids();
+      renderHand();
+      renderBanner();
+      GameSave.save(game);
+      const badge = document.getElementById('title-status-text');
+      if (badge) badge.textContent = `⚔️ 當前戰局：第 ${game.round} 輪 (${game.phase})`;
+    }
+
+    /* === User Actions === */
+    function handleConfirmDraw() {
+      Sound.click();
+      const kept = [], disc = [];
+      game.player.hand.forEach((c, i) => game.discardSelections.has(i) ? disc.push(c) : kept.push(c));
+      game.player.hand = kept; game.discardSelections.clear();
+      const need = 5 - game.player.hand.length;
+
+      if (PvPManager.isOnline) {
+        if (PvPManager.role === 'host') {
+          game.discardPile.push(...disc);
+          game.player.hand.push(...game.drawCards(need));
+          PvPManager.myReadyState.draw = true;
+          PvPManager.send('DRAW_READY', { deckCount: game.deck.length, discardPile: game.discardPile, handCount: game.player.hand.length });
+          PvPManager.checkDrawBarrier();
+        } else {
+          PvPManager.myReadyState.draw = true;
+          PvPManager.send('GUEST_DRAW_REQUEST', { needCount: need, discardedCards: disc });
+        }
+        updateUI(); return;
+      }
+
+      game.discardPile.push(...disc);
+      game.player.hand.push(...game.drawCards(need));
+      // Simple AI Draw
+      const aiKept = game.ai.hand.filter(c => c.cost <= game.ai.gold + 4).slice(0, 3);
+      game.discardPile.push(...game.ai.hand.filter(c => !aiKept.includes(c)));
+      game.ai.hand = [...aiKept, ...game.drawCards(5 - aiKept.length)];
+
+      game.phase = 'DEPLOY'; game.playerDeploymentsThisRound = 0;
+      aiPreDeploy();
+      updateUI();
+    }
+
+    function handlePlaceCard(slotIdx) {
+      if (game.phase !== 'DEPLOY' || game.selectedHandIdx === null) return;
+      const card = game.player.hand[game.selectedHandIdx];
+      if (!card || card.cost > game.player.gold) return;
+      game.player.gold -= card.cost;
+      game.player.hand.splice(game.selectedHandIdx, 1);
+      game.selectedHandIdx = null;
+      game.player.grid[slotIdx] = card;
+      game.player.facedownSlots.add(slotIdx);
+      Sound.place();
+      if (PvPManager.isOnline) PvPManager.broadcastMyState();
+      updateUI();
+    }
+
+    function handleUndoPlaceCard(slotIdx) {
+      if (game.phase !== 'DEPLOY' || !game.player.facedownSlots.has(slotIdx)) return;
+      const card = game.player.grid[slotIdx];
+      game.player.gold += card.cost;
+      game.player.hand.push(card);
+      game.player.grid[slotIdx] = null;
+      game.player.facedownSlots.delete(slotIdx);
+      Sound.click();
+      if (PvPManager.isOnline) PvPManager.broadcastMyState();
+      updateUI();
+    }
+
+    function aiPreDeploy() {
+      game.ai.facedownSlots.clear(); game.ai.pendingCompensation = 2;
+      let valid = game.getValidSlots(game.ai.grid);
+      let placed = 0;
+      for (let k = 0; k < 2 && valid.length > 0; k++) {
+        const affordable = game.ai.hand.filter(c => c.cost <= game.ai.gold).sort((a, b) => b.power - a.power);
+        if (!affordable.length) break;
+        const pick = affordable[0];
+        const slot = valid[Math.floor(Math.random() * valid.length)];
+        game.ai.gold -= pick.cost;
+        game.ai.hand.splice(game.ai.hand.indexOf(pick), 1);
+        game.ai.grid[slot] = pick;
+        game.ai.facedownSlots.add(slot);
+        placed++;
+        valid = game.getValidSlots(game.ai.grid);
+      }
+      game.ai.pendingCompensation = 2 - placed;
+    }
+
+    function handleFinishDeploy() {
+      const placedSlots = [...game.player.facedownSlots];
+      if (placedSlots.length === 0) game.player.gold += 2;
+      else if (placedSlots.length === 1) game.player.gold += 1;
+
+      if (PvPManager.isOnline) {
+        PvPManager.myPendingDeploy = placedSlots.map(s => ({ slot: s, card: game.player.grid[s] }));
+        PvPManager.myReadyState.deploy = true;
+        PvPManager.send('DEPLOY_COMMIT', { placedSlots });
+        PvPManager.broadcastMyState();
+        PvPManager.checkDeployBarrier();
+        updateUI(); return;
+      }
+
+      game.ai.gold += game.ai.pendingCompensation;
+      game.phase = 'REVEAL'; game.selectedHandIdx = null;
+      game.player.facedownSlots.clear(); game.ai.facedownSlots.clear();
+      Sound.flip();
+
+      const pGains = [], aGains = [];
+      placedSlots.forEach(s => { const g = game.triggerDeployEffects(game.player, game.player.grid[s], true, s); if (g) pGains.push(g); });
+      pGains.push(...game.checkLineBonuses(game.player, true));
+      game.ai.grid.forEach((c, s) => { if (c) { const g = game.triggerDeployEffects(game.ai, c, false, s); if (g) aGains.push(g); } });
+      aGains.push(...game.checkLineBonuses(game.ai, false));
+
+      game.phaseGains = { player: pGains.join('、') || '部隊進駐', ai: aGains.join('、') || '部隊進駐' };
+      updateUI();
+    }
+
+    function resolveWarPhase(fromRemote = false) {
+      Sound.war();
+      const pPow = game.calculatePower(game.player, true), aPow = game.calculatePower(game.ai, true);
+      let pVp = pPow > aPow ? 4 : (pPow === aPow ? 2 : 0);
+      let aVp = aPow > pPow ? 4 : (pPow === aPow ? 2 : 0);
+      const bonusVp = (ent, won) => {
+        let extra = 0;
+        ent.grid.forEach(c => {
+          if (!c) return;
+          if (won) {
+            if (['01-01','01-25','01-26','01-27','01-38'].includes(c.id)) extra += 1;
+            if (c.id === '01-30') extra += 2;
+            if (c.id === '01-22') extra += getLevel(ent.faithPoints);
+          } else if (c.id === '01-07') extra += 3;
+        });
+        return extra;
+      };
+      pVp += bonusVp(game.player, pVp > 0);
+      aVp += bonusVp(game.ai, aVp > 0);
+      game.player.vp += pVp; game.ai.vp += aVp;
+      const rec = game.getRoundRecord(game.round);
+      rec.player.warVp += pVp; rec.ai.warVp += aVp;
+      game.phaseGains = { player: `+${pVp}VP (戰力${pPow})`, ai: `+${aVp}VP (戰力${aPow})` };
+      if (PvPManager.isOnline && !fromRemote) PvPManager.send('PHASE_ADVANCE', { targetPhase: 'WAR', round: game.round });
+      updateUI();
+    }
+
+    function resolveDevelopPhase(fromRemote = false) {
+      Sound.fanfare();
+      const applyDev = (ent, rObj) => {
+        let t = 0, f = 0;
+        ent.grid.forEach(c => {
+          if (!c) return;
+          if (['01-05','01-21','01-29'].includes(c.id)) f += 1;
+          if (c.id === '01-11') t += 1;
+          if (c.id === '01-13') { t += 1; f += 1; }
+        });
+        ent.techPoints = Math.min(15, ent.techPoints + t);
+        ent.faithPoints = Math.min(15, ent.faithPoints + f);
+        rObj.tech += t; rObj.faith += f;
+        return `+${t}技/+${f}信`;
+      };
+      const rec = game.getRoundRecord(game.round);
+      game.phaseGains = { player: applyDev(game.player, rec.player), ai: applyDev(game.ai, rec.ai) };
+      if (PvPManager.isOnline && !fromRemote) PvPManager.send('PHASE_ADVANCE', { targetPhase: 'DEVELOP', round: game.round });
+      updateUI();
+    }
+
+    function resolveIncomePhase(fromRemote = false) {
+      Sound.coin();
+      const applyInc = (ent, rObj) => {
+        let g = 3; const tLv = getLevel(ent.techPoints);
+        ent.grid.forEach(c => {
+          if (!c) return;
+          if (['01-02','01-12','01-15','01-18','01-26'].includes(c.id)) g += 1;
+          if (['01-06','01-39'].includes(c.id)) g += 2;
+          if (c.id === '01-10') g += tLv;
+          if (c.id === '01-35') g += 2 * tLv;
+        });
+        ent.gold += g; rObj.incomeGold += g;
+        return `+${g}金`;
+      };
+      const rec = game.getRoundRecord(game.round);
+      game.phaseGains = { player: applyInc(game.player, rec.player), ai: applyInc(game.ai, rec.ai) };
+      if (PvPManager.isOnline && !fromRemote) PvPManager.send('PHASE_ADVANCE', { targetPhase: 'INCOME', round: game.round });
+      updateUI();
+    }
+
+    function resolveVPPhase(fromRemote = false) {
+      Sound.fanfare();
+      const applyVp = (ent, rObj) => {
+        let v = 0; const tLv = getLevel(ent.techPoints), fLv = getLevel(ent.faithPoints);
+        ent.grid.forEach(c => {
+          if (!c) return;
+          if (c.id === '01-03' || c.id === '01-19') v += 2 * tLv;
+          if (['01-05','01-23','01-29'].includes(c.id)) v += fLv;
+          if (c.id === '01-11') v += tLv;
+          if (c.id === '01-14') v += 3 * tLv;
+          if (c.id === '01-15') v += ent.grid.filter(x => x && x.cost >= 4).length;
+          if (c.id === '01-16') v += ent.grid.filter(x => x && x.race === '矮人').length;
+          if (c.id === '01-24') v += ent.grid.filter(x => x && x.race === '精靈').length;
+          if (c.id === '01-31') v += ent.grid.filter(x => x && x.power >= 4).length;
+          if (c.id === '01-32') v += ent.grid.filter(x => x && x.cost <= 2).length;
+          if (c.id === '01-36') v += 2 * tLv + 2 * fLv;
+          if (c.id === '01-37') v += ent.grid.filter(x => x && x.race === '魔像').length;
+          if (c.id === '01-40') v += 4;
+        });
+        ent.vp += v; rObj.scoreVp += v;
+        return `+${v}VP`;
+      };
+      const rec = game.getRoundRecord(game.round);
+      game.phaseGains = { player: applyVp(game.player, rec.player), ai: applyVp(game.ai, rec.ai) };
+      if (PvPManager.isOnline && !fromRemote) PvPManager.send('PHASE_ADVANCE', { targetPhase: 'VP', round: game.round });
+      updateUI();
+    }
+
+    function handleAdvanceToNextPhase() {
+      Sound.click();
+      if (game.phase === 'REVEAL') { game.phase = 'WAR'; resolveWarPhase(); }
+      else if (game.phase === 'WAR') { game.phase = 'DEVELOP'; resolveDevelopPhase(); }
+      else if (game.phase === 'DEVELOP') { game.phase = 'INCOME'; resolveIncomePhase(); }
+      else if (game.phase === 'INCOME') { game.phase = 'VP'; resolveVPPhase(); }
+      else if (game.phase === 'VP') {
+        if (PvPManager.isOnline) PvPManager.send('PHASE_ADVANCE', { targetPhase: 'SUMMARY', round: game.round });
+        if (checkGameEnd()) { game.phase = 'END'; triggerGameOver(); }
+        else showRoundSummaryModal();
+      }
+    }
+
+    function checkGameEnd() {
+      return game.player.vp >= 40 || game.ai.vp >= 40 ||
+        game.player.grid.filter(Boolean).length >= 9 || game.ai.grid.filter(Boolean).length >= 9;
+    }
+
+    function showRoundSummaryModal() {
+      document.getElementById('round-summary-title').textContent = `🔔 第 ${game.round} 輪結束 · 王國巡禮總結`;
+      document.getElementById('round-sum-p-vp').textContent = `${game.player.vp} VP`;
+      document.getElementById('round-sum-a-vp').textContent = `${game.ai.vp} VP`;
+      document.getElementById('round-sum-p-gold').textContent = game.player.gold;
+      document.getElementById('round-sum-a-gold').textContent = game.ai.gold;
+      document.getElementById('round-sum-p-power').textContent = game.player.power;
+      document.getElementById('round-sum-a-power').textContent = game.ai.power;
+      document.getElementById('round-sum-btn-num').textContent = game.round + 1;
+      const rec = game.getRoundRecord(game.round);
+      document.getElementById('round-summary-table-tbody').innerHTML = `
+        <tr><td style="padding:6px; text-align:center;">第 ${game.round} 輪</td>
+        <td style="padding:6px; color:#fbbf24;">+${rec.player.deployVp + rec.player.warVp + rec.player.scoreVp}VP / +${rec.player.deployGold + rec.player.incomeGold}金</td>
+        <td style="padding:6px; color:#f87171;">+${rec.ai.deployVp + rec.ai.warVp + rec.ai.scoreVp}VP / +${rec.ai.deployGold + rec.ai.incomeGold}金</td></tr>`;
+      document.getElementById('round-summary-modal').classList.remove('hidden');
+    }
+
+    function triggerGameOver() {
+      const pMult = game.player.grid.some(c => c && c.id === '01-08') ? 2 : 1;
+      const aMult = game.ai.grid.some(c => c && c.id === '01-08') ? 2 : 1;
+      const pTotal = game.player.vp + Math.floor(game.player.gold / 3) * pMult;
+      const aTotal = game.ai.vp + Math.floor(game.ai.gold / 3) * aMult;
+      const won = pTotal > aTotal;
+      CareerStore.recordMatch(pTotal, won);
+      document.getElementById('end-title').textContent = won ? '👑 王國大捷！你贏得了遊戲！' : '💀 戰局結束！';
+      document.getElementById('end-subtitle').textContent = `你 ${pTotal} VP vs 對手 ${aTotal} VP`;
+      document.getElementById('end-breakdown-tbody').innerHTML = game.roundScores.map(r => `
+        <tr><td style="padding:5px; text-align:center;">第 ${r.round} 輪</td>
+        <td style="padding:5px; color:#fbbf24;">+${r.player.deployVp + r.player.warVp + r.player.scoreVp} VP</td>
+        <td style="padding:5px; color:#f87171;">+${r.ai.deployVp + r.ai.warVp + r.ai.scoreVp} VP</td></tr>`).join('') +
+        `<tr style="font-weight:900; background:rgba(245,158,11,0.2);"><td style="padding:6px; text-align:center;">最終總分</td><td style="padding:6px; color:#fde047;">${pTotal} VP</td><td style="padding:6px; color:#fca5a5;">${aTotal} VP</td></tr>`;
+      document.getElementById('game-over-modal').classList.remove('hidden');
+      updateUI();
+    }
+
+    function openCenterCardModal(card, opts = {}) {
+      const modal = document.getElementById('center-card-modal'), bg = document.getElementById('center-card-backdrop');
+      const box = document.getElementById('center-card-render-box'), act = document.getElementById('center-card-actions');
+      const rConf = RACE_CONFIG[card.race] || RACE_CONFIG['人類'], cConf = CLASS_CONFIG[card.class] || CLASS_CONFIG['騎士'];
+      box.innerHTML = `
+        <div class="tcg-card-frame">
+          <div class="tcg-header-row">
+            <span class="tcg-gem-cost">💰${card.cost}</span>
+            <span class="tcg-name-plate">${card.name}</span>
+            <span class="tcg-gem-power">⚔️${card.power}</span>
+          </div>
+          <div class="tcg-oracle-box">
+            ${(card.effects || []).map(e => `<div style="font-size:11px;"><strong style="color:#fbbf24;">[${e.timing_name}]</strong> ${e.description}</div>`).join('') || '<div style="color:#94a3b8; font-size:11px;">無特殊技能</div>'}
+          </div>
+          <div class="tcg-bottom-dual-container">
+            <div class="tcg-synergy-capsule ${rConf.badge}">${rConf.icon} ${card.race}<br>${formatBonusValue(card.line_bonuses?.race)}</div>
+            <div class="tcg-synergy-capsule ${cConf.badge}">${cConf.icon} ${card.class}<br>${formatBonusValue(card.line_bonuses?.class)}</div>
+          </div>
+        </div>`;
+      act.innerHTML = '';
+      if (opts.handIdx !== undefined && game.phase === 'DRAW') {
+        const isDisc = game.discardSelections.has(opts.handIdx);
+        const b = document.createElement('button');
+        b.className = isDisc ? 'btn btn-slate' : 'btn btn-red';
+        b.textContent = isDisc ? '↩️ 保留此牌' : '🗑️ 標記棄牌';
+        b.onclick = () => {
+          isDisc ? game.discardSelections.delete(opts.handIdx) : game.discardSelections.add(opts.handIdx);
+          closeCenterCardModal(); updateUI();
+        };
+        act.appendChild(b);
+      } else if (opts.handIdx !== undefined && game.phase === 'DEPLOY') {
+        const b = document.createElement('button');
+        b.className = 'btn btn-gold';
+        b.textContent = `✨ 選擇部署 (💰${card.cost})`;
+        b.disabled = card.cost > game.player.gold || game.player.facedownSlots.size >= 2;
+        b.onclick = () => { game.selectedHandIdx = opts.handIdx; closeCenterCardModal(); updateUI(); };
+        act.appendChild(b);
+      } else if (opts.isFacedown && game.phase === 'DEPLOY') {
+        const b = document.createElement('button');
+        b.className = 'btn btn-gold';
+        b.textContent = `↩️ 撤回卡牌 (+${card.cost}金)`;
+        b.onclick = () => { closeCenterCardModal(); handleUndoPlaceCard(opts.slotIdx); };
+        act.appendChild(b);
+      }
+      const closeB = document.createElement('button'); closeB.className = 'btn btn-slate'; closeB.textContent = '關閉 ✕';
+      closeB.onclick = closeCenterCardModal; act.appendChild(closeB);
+      modal.classList.remove('hidden'); bg.classList.remove('hidden');
+    }
+
+    function closeCenterCardModal() {
+      document.getElementById('center-card-modal')?.classList.add('hidden');
+      document.getElementById('center-card-backdrop')?.classList.add('hidden');
+    }
+
+    function closeTitleScreen() { document.getElementById('title-screen-modal')?.classList.add('hidden'); }
+    function closeOptionsMenu() { document.getElementById('header-options-popover')?.classList.add('hidden'); }
+
+    function resetGame() {
+      if (PvPManager.isOnline) { PvPManager.requestRematch(); return; }
+      const diff = game.aiDifficulty;
+      game = new MagnoliaGame(); game.aiDifficulty = diff;
+      document.getElementById('game-over-modal')?.classList.add('hidden');
+      updateUI();
+    }
+
+    /* =========================================================================
+       MODULE 6: INITIALIZATION & EVENT BINDINGS
+       ========================================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      initLadderCells();
+      PvPManager.init();
+      CareerStore.render();
+
+      const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+      bind('btn-header-home', () => document.getElementById('title-screen-modal').classList.remove('hidden'));
+      bind('btn-title-menu', () => { closeOptionsMenu(); document.getElementById('title-screen-modal').classList.remove('hidden'); });
+      bind('btn-options-menu', (e) => { e.stopPropagation(); document.getElementById('header-options-popover').classList.toggle('hidden'); });
+      bind('btn-main-start', () => document.getElementById('difficulty-modal').classList.remove('hidden'));
+      bind('btn-close-diff-modal', () => document.getElementById('difficulty-modal').classList.add('hidden'));
+      bind('btn-confirm-start-game', () => {
+        document.getElementById('difficulty-modal').classList.add('hidden');
+        closeTitleScreen(); resetGame();
+      });
+      bind('btn-main-continue', closeTitleScreen);
+      bind('btn-main-rules', () => document.getElementById('rules-modal').classList.remove('hidden'));
+      bind('btn-title-rules', () => document.getElementById('rules-modal').classList.remove('hidden'));
+      bind('btn-rules', () => { closeOptionsMenu(); document.getElementById('rules-modal').classList.remove('hidden'); });
+      bind('btn-close-rules', () => document.getElementById('rules-modal').classList.add('hidden'));
+      bind('btn-confirm-rules', () => document.getElementById('rules-modal').classList.add('hidden'));
+      bind('btn-main-career', () => document.getElementById('career-modal').classList.remove('hidden'));
+      bind('btn-popover-career', () => { closeOptionsMenu(); document.getElementById('career-modal').classList.remove('hidden'); });
+      bind('btn-close-career', () => document.getElementById('career-modal').classList.add('hidden'));
+      bind('btn-close-career-bottom', () => document.getElementById('career-modal').classList.add('hidden'));
+      bind('btn-main-compendium', () => { renderCompendium(); document.getElementById('compendium-modal').classList.remove('hidden'); });
+      bind('btn-popover-compendium', () => { closeOptionsMenu(); renderCompendium(); document.getElementById('compendium-modal').classList.remove('hidden'); });
+      bind('btn-close-compendium', () => document.getElementById('compendium-modal').classList.add('hidden'));
+      bind('btn-close-compendium-bottom', () => document.getElementById('compendium-modal').classList.add('hidden'));
+      bind('btn-bgm', () => BGM.toggle());
+      bind('btn-title-bgm', () => BGM.toggle());
+      bind('btn-close-center-card', closeCenterCardModal);
+      bind('center-card-backdrop', closeCenterCardModal);
+      bind('btn-pvp-toast-ok', () => document.getElementById('pvp-toast-notice').classList.add('hidden'));
+      bind('btn-pvp-confirm-cancel', () => document.getElementById('pvp-confirm-modal').classList.add('hidden'));
+      bind('btn-pvp-confirm-leave', () => { document.getElementById('pvp-confirm-modal').classList.add('hidden'); PvPManager.executeLeaveRoom(); });
+      bind('btn-restart', () => { closeOptionsMenu(); document.getElementById('restart-confirm-modal').classList.remove('hidden'); });
+      bind('btn-cancel-restart', () => document.getElementById('restart-confirm-modal').classList.add('hidden'));
+      bind('btn-confirm-restart', () => { document.getElementById('restart-confirm-modal').classList.add('hidden'); resetGame(); });
+      bind('btn-review-board', () => document.getElementById('game-over-modal').classList.add('hidden'));
+      bind('btn-close-game-over', () => document.getElementById('game-over-modal').classList.add('hidden'));
+      bind('btn-play-again', resetGame);
+      bind('btn-confirm-next-round', () => {
+        document.getElementById('round-summary-modal').classList.add('hidden');
+        if (PvPManager.isOnline) {
+          PvPManager.myReadyState.nextRound = true;
+          PvPManager.send('ROUND_READY', {});
+          PvPManager.checkNextRoundBarrier();
+          updateUI(); return;
+        }
+        game.round++; game.phase = 'DRAW'; updateUI();
+      });
+
+      document.querySelectorAll('.lord-select-card').forEach(c => {
+        c.onclick = () => {
+          document.querySelectorAll('.lord-select-card').forEach(x => x.classList.remove('active-lord'));
+          c.classList.add('active-lord');
+          game.aiDifficulty = c.dataset.diff;
+        };
+      });
+
+      function renderCompendium() {
+        const box = document.getElementById('compendium-cards-container');
+        if (!box) return;
+        box.innerHTML = CARD_DB.map(c => `
+          <div class="comp-card-row" onclick="openCenterCardModal(CARD_DB.find(x=>x.id==='${c.id}'))">
+            <div style="display:flex; justify-content:space-between; font-weight:800;">
+              <span>${RACE_CONFIG[c.race]?.icon || ''} ${c.name} (${c.race}·${c.class})</span>
+              <span style="color:#fbbf24;">💰${c.cost} ⚔️${c.power}</span>
+            </div>
+            <div style="font-size:9.5px; color:#94a3b8;">${(c.effects || []).map(e => `[${e.timing_name}] ${e.description}`).join(' ｜ ') || '無特殊技能'}</div>
+          </div>`).join('');
+      }
+
+      // Restore single-player save if not joining a PvP room
+      if (!window.location.hash.includes('room=')) {
+        const saved = GameSave.load();
+        if (saved && saved.round) {
+          Object.assign(game, { round: saved.round, phase: saved.phase, aiDifficulty: saved.aiDifficulty || 'balanced', deck: saved.deck, discardPile: saved.discardPile, roundScores: saved.roundScores || [], phaseGains: saved.phaseGains });
+          Object.assign(game.player, saved.player, { awardedLines: new Set(saved.player.awardedLines), facedownSlots: new Set(saved.player.facedownSlots) });
+          Object.assign(game.ai, saved.ai, { awardedLines: new Set(saved.ai.awardedLines), facedownSlots: new Set(saved.ai.facedownSlots) });
+        }
+      }
+      updateUI();
+    });
+  </script>
+</body>
+</html>
